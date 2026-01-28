@@ -1,0 +1,426 @@
+<!DOCTYPE html> 
+<html> 
+    <head lang = "en">
+        <title>Traceability Matrix</title>
+        <link rel = "stylesheet" href = "matrix.css">
+    </head>
+<body> 
+
+    <table>
+
+       
+            <tr>
+                <th colspan = 2>Core Feature ID</th>
+                <th colspan = 2>Function Requirement ID(s)</th>
+                <th colspan = 2>User Story ID(s)</th>
+            </tr>
+
+            <tr class = "one"> 
+                <td rowspan = 8>Feat 1</td>
+                <td rowspan = 8><strong>Core Feature 1:</strong> The system will 
+                    allow users and restaurant owners/managers to create accounts 
+                    and log in. It will handle user authentication (login), 
+                    authorization (what each user is allowed to do), and basic 
+                    user identity management. Different roles such as regular users 
+                    and restaurant owners/managers will be supported.
+                </td>
+                <td rowspan = 2>Feat1-FR1</td>
+                <td rowspan = 2>The system shall allow customers, restaurant owners/managers, 
+                    and couriers to create and maintain personal profile accounts. </td>
+                <td rowspan = 1>Feat1-US1</td>
+                <td rowspan = 1>As a customer, I want to create an account so that I can place an order.  <br><br>
+            </tr>
+
+            <tr class = "one">
+                <td rowspan = 1>Feat1-US2</td>
+                <td rowspan = 1>As a restaurant owner, I want to create an account so that I can sell items.</td>
+            </tr>
+
+            <tr class = "one">
+                <td rowspan = 1>Feat1-FR2</td>
+                <td rowspan = 1>The system shall validate input when users create an account.</td>
+                <td rowspan = 1>Feat1-US3</td>
+                <td rowspan = 1>As a user, I want to log into my account so I can access the app services.</td>
+            </tr>
+
+            <tr class = "one">
+                <td>Feat1-FR3</td>
+                <td>The system shall authenticate users using email and password credentials</td>
+                <td>Feat1-US4</td>
+                <td>As a restaurant owner, I want to be able to add/remove manager access to other managers 
+                    so they can sell items too </td>
+            </tr>
+
+            <tr class = "one">
+               <td>Feat1-FR4</td>
+                <td>The system shall authorize access to app content based on user roles</td>
+                <td>Feat1-US5</td>
+                <td>As a user I want to log out of my account to protect its security.</td>
+            </tr>
+
+            <tr class = "one">
+                <td>Feat1-FR5</td>
+                <td>The system shall allow restaurant owners to assign and revoke restaurant 
+                    manager and courier privileges </td>
+                <td>Feat1-US6</td>
+                <td>As a user I want to be able to change my password to protect my accounts security.</td>
+            </tr>
+
+            <tr class = "one">
+                <td rowspan = 2>Feat1-FR6</td>
+                <td rowspan = 2>The system shall create and maintain a session while a user is logged in</td>
+                <td>Feat1-US7</td>
+                <td>As a courier, I want to create an account so I can receive and deliver orders.</td>
+            </tr>
+
+            <tr class = "one">
+                <td>Feat1-US8</td>
+                <td>As a restaurant owner, I want to be able to add/remove courier access to users 
+                    so I can assign them deliveries.</td>
+            </tr>
+
+    
+
+              
+             <tr> 
+                <td rowspan = 7>Feat 2 </td>
+                <td rowspan = 7><strong>Core Feature 2:</strong> The system will store information about restaurants and their menus. 
+                    It will ensure that data is valid, properly connected (for example, menu items must 
+                    belong to a restaurant), and that basic constraints are enforced, such as preventing 
+                    invalid or missing values. </td>
+                <td rowspan = 1>Feat2-FR1</td>
+                <td rowspan = 1>The system shall store information about restaurants. </td>
+                <td rowspan = 1>Feat2-US1</td>
+                <td>As a restaurant owner, I want to add a menu so I can sell my items to customers </td>
+            </tr>
+
+             <tr>
+               
+                <td rowspan = 1>Feat2-FR2</td>
+                <td>The system shall store inventory quantities of food items</td>
+                <td rowspan =1>Feat2-US2</td>
+                <td>As a restaurant owner, I want to add and delete items from my restaurant listing 
+                    so it is up to date with my restaurant offerings</td>
+            </tr>
+
+            <tr>
+                
+                <td rowspan = 1>Feat2-FR3</td>
+                <td>The system shall store information about food items.</td>
+                <td rowspan =1>Feat2-US3</td>
+                <td>As a restaurant owner or restaurant manager, I want to track inventory 
+                    so I can prevent orders with unavailable inventory.</td>
+            </tr>
+
+            <tr>
+               
+                <td rowspan = 1>Feat2-FR4</td>
+                <td>The system shall allow restaurant owners to create, update, and delete restaurant listings.</td>
+                <td rowspan =1>Feat2-US4</td>
+                <td>As a restaurant owner, I want to set business hours so I only receive orders 
+                    when my restaurant is open.</td>
+            </tr>
+
+            <tr>
+                <td rowspan = 1>Feat2-FR5</td>
+                <td>The system shall validate restaurant and food items to prevent missing or invalid entries.</td>
+                <td rowspan =1>Feat2-US5</td>
+                <td rowspan = 3>As a restaurant owner I want to be able to mark my restaurant as inactive so I wont receive orders 
+                    if my restaurant closes or no longer uses the system.</td>
+            </tr>
+
+             <tr>
+                
+                <td rowspan = 1>Feat2-FR6</td>
+                <td>The system must prevent customers from ordering food items with insufficient inventory.</td>
+                <td rowspan =1>Feat2-US6</td>
+            </tr>
+
+               <tr>
+               
+                <td rowspan = 1>Feat2-FR7</td>
+                <td>The system must allow restaurant owners and managers to define business hours.</td>
+                <td rowspan =1>Feat2-US7</td>
+            </tr>
+
+    
+           <tr class = "one"> 
+                <td rowspan = 8>Feat 3 </td>
+                <td rowspan = 8><strong>Core Feature 3:</strong> The system will allow users to browse restaurant menus and search for 
+                    items or restaurants. Backend logic will handle filtering, searching, and returning 
+                    paginated results.</td>
+                <td rowspan = 1>Feat3-FR1</td>
+                <td rowspan = 1>The system shall allow users to browse a list of restaurants.</td>
+                <td rowspan = 4>Feat3-US1</td> 
+                <td rowspan = 4> As a customer I want to be able to explore the menu and search for 
+                    items and restaurants so that I will be able to choose what and where to eat.</td>
+            </tr>
+
+             <tr class = "one">
+                <td>Feat3-FR2</td>
+                <td>The system shall allow users to view restaurant pages for active restaurants.</td>
+            </tr>
+
+            <tr class = "one">
+                <td>Feat3-FR3</td>
+                <td>The system shall allow users to search and filter restaurant listings by name or keyword.</td>
+            </tr>
+
+             <tr class = "one">
+                <td>Feat3-FR4</td>
+                <td>The system shall allow users to search and filter food items within a restaurant listing by name or keyword.</td>
+            </tr>
+
+             <tr class = "one">
+                <td>Feat3-FR5</td>
+                <td>The system shall display restaurant listings to the user in a paginated format.</td>
+                <td rowspan = 4>Feat3-US2</td> 
+                <td rowspan = 4>As a customer, I want my most common restaurants and food choices 
+                    to be readily available so I can access these quickly</td>
+            </tr>
+
+             <tr class = "one">
+                <td>Feat3-FR6</td>
+                <td>The system shall use the user location to prioritize restaurant listings that 
+                    are near to the user.</td>
+            </tr>
+
+             <tr class = "one">
+                <td>Feat3-FR7</td>
+                <td>The system shall prioritize restaurant listings if the user has previously 
+                    ordered from that restaurant.</td>
+            </tr>
+
+             <tr class = "one">
+                <td>Feat3-FR8</td>
+                <td>The system will only show active restaurant listings.</td>
+            </tr>
+
+
+            <tr> 
+                <td rowspan = 6>Feat 4 </td>
+                <td rowspan = 6><strong>Core Feature 4:</strong> The system will allow users to create and manage food orders. It will 
+                    ensure that orders are consistent, correctly stored, and follow business logic for the 
+                    domain (for example, an order cannot be modified after it is completed).</td>
+                <td rowspan = 1>Feat4-FR1</td>
+                <td rowspan = 1> The system shall allow customers to add and remove food items to a shopping card.</td>
+                <td rowspan = 1>Feat4-US1</td>
+                <td>As a customer I want to add food items to my cart so that I can make an order.</td>
+             </tr>
+
+            <tr>
+                <td>Feat4-FR2</td>
+                <td>The system shall allow customers to modify or cancel an order before it is approved 
+                    by the restaurant.</td>
+                <td rowspan = 1>Feat4-US2</td>
+                <td>As a customer, I want to be able to modify or cancel orders before they have been approved by 
+                    the restaurant so that I can add items or correct mistakes.  </td>
+            </tr>
+
+            <tr>
+                <td>Feat4-FR3</td>
+                <td>The system shall prevent the modification of orders after an order has been approved 
+                    by the restaurant.</td>
+                <td rowspan = 1>Feat4-US3</td>
+                <td>As a customer I want to be able to bookmark common orders, so that I can easily
+                     navigate and order these</td>
+            </tr>
+
+            <tr>
+                <td>Feat4-FR4</td>
+                <td>The system shall allow customers to save/bookmark previous orders.</td>
+                <td rowspan = 1>Feat4-US4</td>
+                <td>As a restaurant manager, I want to review incoming orders before I approve them to 
+                    make sure I can fulfill them. </td>
+            </tr>
+
+            <tr>
+                <td>Feat4-FR5</td>
+                <td>The system shall store the order status (Pending, Approved, Canceled, In Preparation, 
+                Out for Delivery, Completed)</td>
+                <td rowspan = 2>Feat4-US5</td>
+                <td rowspan = 2>As a restaurant manager, I want to cancel orders that I cannot fulfill.</td>
+            </tr>
+            
+              <tr>
+                <td>Feat4-FR6</td>
+                <td>The system shall allow restaurant managers to view, approve, and cancel orders.</td>
+            </tr>
+
+
+            <tr class = "one"> 
+                <td rowspan = 9>Feat 5 </td>
+                <td rowspan = 9><strong>Core Feature 5:</strong> The system will manage delivery-related information. It will support 
+                    assigning deliveries and tracking basic delivery status as part of the backend logic.</td>
+                <td rowspan = 1>Feat5-FR1</td>
+                <td rowspan = 1>The system shall store and manage delivery information for orders.</td>
+                <td rowspan = 1>Feat5-US1</td>
+                <td> As a customer, I want to be able to edit my delivery information to be able to receive my order even 
+                    if I am in a different location.</td>
+            </tr>
+
+            <tr class = "one">
+                <td>Feat5-FR2</td>
+                <td>The system shall track and display delivery status updates for orders. </td>
+                <td rowspan = 1>Feat5-US2</td>
+                <td>As a customer, I want the system to save my addresses so that I dont have to 
+                    enter them every time I order.</td>
+            </tr>
+
+              <tr class = "one">
+                <td>Feat5-FR3</td>
+                <td>The system shall store delivery status history and display it in</td>
+                <td rowspan = 1>Feat5-US3</td>
+                <td>As a restaurant manager, I want to assign deliveries to couriers so 
+                    they can make the deliveries.</td>
+            </tr>
+
+              <tr class = "one">
+                <td>Feat5-FR4</td>
+                <td>The system shall allow orders to be assigned to couriers.</td>
+                <td rowspan = 1>Feat5-US4</td>
+                <td>As a restaurant manager, I want to remove an order from a couriers 
+                    account so I can assign it to a different courier.</td>
+            </tr>
+
+            <tr class = "one">
+                <td>Feat5-FR5</td>
+                <td>The system shall prevent orders from being assigned to couriers who 
+                    are not authenticated.</td>
+                <td rowspan = 1>Feat5-US5</td>
+                <td>As a courier, I want to see the order number and address of an order 
+                    assigned to me so that I can deliver it.</td>
+            </tr>
+
+             <tr class = "one">
+                <td>Feat5-FR6</td>
+                <td>The system shall allow orders to be removed from couriers.</td>
+                <td rowspan = 1>Feat5-US6</td>
+                <td rowspan = 4>As a courier, I want to be able to let the customer know that I have 
+                    successfully delivered their order.</td>
+            </tr>
+
+             <tr class = "one">
+                <td>Feat5-FR7</td>
+                <td>The system shall allow couriers to view orders assigned to them.</td>
+                <td rowspan = 1>Feat5-US7</td>
+                
+            </tr>
+
+            <tr class = "one">
+                <td>Feat5-FR8</td>
+                <td>The system shall allow couriers to see delivery information for 
+                    orders assigned to them.</td>
+                <td rowspan = 1>Feat5-US8</td>
+            </tr>
+
+            <tr class = "one">
+                <td>Feat5-FR9</td>
+                <td>The system shall allow couriers to update the delivery status of 
+                    a delivery.</td>
+                <td rowspan = 1>Feat5-US9</td>
+            </tr>
+
+
+            <tr> 
+                <td rowspan = 3>Feat 6 </td>
+                <td rowspan = 3><strong>Core Feature 6:</strong> The system will calculate the total cost of an order, 
+                    including item prices, delivery fees, and taxes. These calculations will 
+                    follow predefined business rules implemented 
+                    in the backend.</td>
+                <td rowspan = 1>Feat6-FR1</td>
+                <td rowspan = 1>The system shall calculate the cost of items, fees, and taxes for an order.</td>
+                <td rowspan = 1>Feat6-US1</td>
+                <td>As a customer, I want to be able to see the total cost of my order, including any delivery 
+                    fees and taxes, so that I will know exactly how much my order will be.</td>
+             </tr>
+
+            <tr>
+                <td rowspan = 1>Feat6-FR2</td>
+                <td>The system shall calculate taxes based on predefined rules (laws governing location of order). </td>
+                <td rowspan = 2>Feat6-US2</td>
+                <td rowspan = 2>As a restaurant owner or restaurant manager, I want taxes and fees to be added to the
+                     cost of orders so pricing is accurate and compliant with local laws</td>
+             </tr>
+
+             <tr>
+                <td rowspan = 1>Feat6-FR3</td>
+                <td rowspan = 1>The system shall display the final cost of an order to a customer before payment.</td>
+             </tr>
+
+
+            <tr class = "one"> 
+                <td rowspan = 4>Feat 7</td>
+                <td rowspan = 4><strong>Core Feature 7:</strong> The system will simulate payment processing. 
+                    No real payment gateway will be used, but the system will follow the correct workflow for
+                    accepting or rejecting a payment and updating the order status.</td>
+                <td>Feat7-FR1</td>
+                <td>The system shall send the payment amount to the payment gateway.</td>
+                <td rowspan = 4>Feat7-US1</td>
+                <td rowspan = 4>As a user, I want the system to properly process my payment so I can 
+                    see whether it accepts or rejects it.</td>
+            </tr>
+            
+            <tr class = "one"> 
+                <td>Feat7-FR2</td>
+                <td>The system shall receive the outcome of the payment</td>
+            </tr>
+
+            <tr class = "one"> 
+                <td>Feat7-FR3</td>
+                <td>The system shall notify the customer of the payment outcome</td>
+            </tr>
+
+            <tr class = "one"> 
+                <td>Feat7-FR4</td>
+                <td>The system shall update the status of the order after receiving payment outcome. </td>
+            </tr>
+
+
+            <tr> 
+                <td rowspan = 6>Feat 8</td>
+                <td rowspan = 6><strong>Core Feature 8:</strong> The system will generate notifications or events 
+                    when important actions occur, such as order creation or status changes. </td>
+                <td>Feature8-FR1</td>
+                <td>The system shall notify restaurant owners when an order is placed for their restaurant.</td>
+                <td rowspan = 2>Feat8-US1</td>
+                <td rowspan = 2>As a customer I want to know when my order has been approved, left the restaurant 
+                    and arrived at my location.</td>
+            </tr>
+
+            <tr>
+                <td>Feat8-FR2</td>
+                <td>The system shall notify customers when a restaurant owner approves or cancels their order.</td>
+            </tr>
+
+            <tr>
+                <td>Feat8-FR3</td>
+                <td>The system shall notify the customer when the delivery leaves the restaurant.</td>
+                <td rowspan = 2>Feat8-US2</td>
+                <td rowspan = 2>As a restaurant owner, I want to be notified when I receive an order request so that I can 
+                    prepare the food.</td>
+            </tr>
+
+            <tr>
+                <td>Feat8-FR4</td>
+                <td>The system shall notify the customer when the delivery is at the destination.</td>
+            </tr>
+
+            <tr>
+                <td>Feat8-FR5</td>
+                <td>The system shall update the status of an order when the delivery is complete.</td>
+                 <td rowspan = 2>Feat8-US3</td>
+                <td rowspan = 2>As a courier, I want to be notified when I am assigned a delivery so I can make 
+                    the delivery.</td>
+            </tr>
+
+            <tr>
+                <td>Feat8-FR6</td>
+                <td>The system shall notify the courier when they are assigned a delivery.</td>
+            </tr>
+
+
+    </table>
+
+
+</body>
