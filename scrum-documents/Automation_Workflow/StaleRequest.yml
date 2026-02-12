@@ -1,0 +1,27 @@
+# This automated workflow warns when PRs haven't had activity for a specified amount of time.
+
+name: Mark stale pull requests
+
+on:
+  schedule:
+  #runs at 11 am every day UTC time (or 3 am PST time)
+  # * * * is letting the workflow run every day of the month, every month, and every day of the week.
+  - cron: '0 11 * * *'
+
+jobs:
+  stale:
+
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+    - uses: actions/stale@v5
+      with:
+      # GITHUB_TOKEN is needed to authenticate with Github API and perform actions like adding the messages and labels to the PRs.
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-pr-message: 'Stale pull request! Friendly nudge to update or close this PR.'
+        stale-pr-label: 'no-pr-activity'
+        days-before-pr-stale: 4
+        # -1 to disable the closing feature 
+        days-before-pr-close: -1
