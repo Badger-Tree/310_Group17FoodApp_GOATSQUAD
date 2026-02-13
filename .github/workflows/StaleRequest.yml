@@ -25,5 +25,5 @@ jobs:
         stale-pr-message: 'Stale pull request! Friendly nudge to update or close this PR.'
         stale-pr-label: 'no-pr-activity'
         days-before-pr-stale: 0
-        # -1 to disable the closing feature 
+        # -1 to disable the closing feature  
         days-before-pr-close: -1
