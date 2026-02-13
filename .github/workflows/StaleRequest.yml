@@ -7,9 +7,6 @@ on:
   #runs at 11 am every day UTC time (or 3 am PST time)
     - cron: '0 11 * * *'
   workflow_dispatch:
-  push:
-    branches:
-      - Automation
 
 jobs:
   stale:
@@ -17,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
 
     steps:
     - uses: actions/stale@v5
@@ -24,6 +22,6 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-pr-message: 'Stale pull request! Friendly nudge to update or close this PR.'
         stale-pr-label: 'no-pr-activity'
-        days-before-pr-stale: 0
+        days-before-pr-stale: 4
         # -1 to disable the closing feature  
         days-before-pr-close: -1
