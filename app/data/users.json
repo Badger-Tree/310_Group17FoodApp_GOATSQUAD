@@ -1,0 +1,112 @@
+[
+  {
+    "id": "1",
+    "email": "jane.doe@example.com",
+    "first_name": "xxxxxxstring",
+    "last_name": "string",
+    "password": "string",
+    "role": [
+      "CUSTOMER"
+    ],
+    "saved_addresses": [],
+    "created_date": "2026-02-20T12:34:56"
+  },
+  {
+    "id": "2",
+    "email": "mark.smith@example.com",
+    "first_name": "Mark",
+    "last_name": "Smith",
+    "password": "password123",
+    "role": [
+      "CUSTOMER"
+    ],
+    "saved_addresses": [],
+    "created_date": "2026-02-20T12:35:10"
+  },
+  {
+    "id": "3",
+    "email": "alice.jones@example.com",
+    "first_name": "Alice",
+    "last_name": "Jones",
+    "password": "password123",
+    "role": [
+      "CUSTOMER"
+    ],
+    "saved_addresses": [],
+    "created_date": "2026-02-20T12:36:00"
+  },
+  {
+    "id": "4",
+    "email": "john.smith@example.com",
+    "first_name": "John",
+    "last_name": "Smith",
+    "password": "password123",
+    "role": [
+      "MANAGER",
+      "OWNER"
+    ],
+    "saved_addresses": [],
+    "created_date": "2026-02-20T13:00:00"
+  },
+  {
+    "id": "5",
+    "email": "mary.brown@example.com",
+    "first_name": "Mary",
+    "last_name": "Brown",
+    "password": "password123",
+    "role": [
+      "MANAGER",
+      "COURIER"
+    ],
+    "saved_addresses": [],
+    "created_date": "2026-02-20T13:05:00"
+  },
+  {
+    "id": "6",
+    "email": "peter.wilson@example.com",
+    "first_name": "Peter",
+    "last_name": "Wilson",
+    "password": "password123",
+    "role": [
+      "COURIER"
+    ],
+    "saved_addresses": [],
+    "created_date": "2026-02-20T13:10:00"
+  },
+  {
+    "id": "7",
+    "email": "susan.miller@example.com",
+    "first_name": "Susan",
+    "last_name": "Miller",
+    "password": "password123",
+    "role": [
+      "CUSTOMER"
+    ],
+    "saved_addresses": [],
+    "created_date": "2026-02-20T12:37:20"
+  },
+  {
+    "id": "8",
+    "email": "kevin.taylor@example.com",
+    "first_name": "Kevin",
+    "last_name": "Taylor",
+    "password": "password123",
+    "role": [
+      "CUSTOMER"
+    ],
+    "saved_addresses": [],
+    "created_date": "2026-02-20T12:38:00"
+  },
+  {
+    "id": "2e60c0e0-6c51-4904-a82c-8859749a373e",
+    "email": "dddstring",
+    "first_name": "string",
+    "last_name": "string",
+    "password": "string",
+    "role": [
+      "CUSTOMER"
+    ],
+    "saved_addresses": [],
+    "created_date": "2026-02-20T21:20:03.613740"
+  }
+]
