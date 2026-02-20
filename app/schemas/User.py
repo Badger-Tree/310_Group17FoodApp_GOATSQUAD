@@ -12,6 +12,11 @@ class UserBase(BaseModel):
     first_name: str
     last_name: str
     
+class UserResponse(UserBase):
+    id: str
+    role: List[str]
+    created_date: datetime
+    
 class CustomerBase(UserBase):
     saved_addresses: List[AddressResponse] = Field(default_factory=list)
     
@@ -26,10 +31,7 @@ class CustomerUpdate(BaseModel):
     role: Optional[List[str]] = None
     saved_addresses: Optional[List[Address]] = None
     
-class CustomerResponse(CustomerBase):
-    id: str
-    role: List[str]
-    created_date: datetime  
+class CustomerResponse(UserResponse, CustomerBase):  
     saved_addresses: List[AddressResponse] = []
     
     
@@ -48,7 +50,5 @@ class StaffUpdate(BaseModel):
     password: Optional[str] = None
     role: Optional[List[str]] = None
 
-class StaffResponse(StaffBase):
-    id: str
-    created_date: datetime  
+class StaffResponse(StaffBase, UserResponse):
     pass

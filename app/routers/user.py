@@ -1,7 +1,8 @@
 from fastapi import APIRouter, status
 from typing import List
-from app.schemas.User import CustomerResponse, CustomerCreate, CustomerUpdate
-from app.services.user_service import list_customers, get_customer_by_id_service, get_customer_by_email_service, register_customer_service, update_customer_service
+from app.schemas.User import CustomerCreate, CustomerUpdate, CustomerResponse, UserResponse, StaffResponse, StaffCreate, StaffUpdate
+from app.services.user_service import list_users, get_user_by_id_service, get_user_by_email_service, register_customer_service, update_customer_service, update_staff_service, register_staff_service
+
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -11,22 +12,30 @@ router = APIRouter(prefix="/users", tags=["users"])
 # the actual project architecture
 #further note that all methods / data relating to Roles needs to be updated after Role is built as a class
 @router.get("", response_model=List[CustomerResponse], status_code=status.HTTP_200_OK)
-def get_customers():
-    customers = list_customers()
+def get_users():
+    customers = list_users()
     return customers
 
-@router.get("/{customer_id}", response_model=CustomerResponse)
-def get_customer_by_id(customer_id: str):
-    return get_customer_by_id_service(customer_id)
+@router.get("/{userid}", response_model=CustomerResponse)
+def get_user_by_id(userid: str):
+    return get_user_by_id_service(userid)
 
 @router.get("/by-email/{email}", response_model=CustomerResponse)
-def get_customer_by_email(email: str):
-    return get_customer_by_email_service(email)
+def get_user_by_email(email: str):
+    return get_user_by_email_service(email)
 
-@router.post("", response_model=CustomerResponse, status_code=201)
-def register_user(payload: CustomerCreate):
+@router.post("/new-customer", response_model=CustomerResponse, status_code=201)
+def register_customer(payload: CustomerCreate):
     return register_customer_service(payload)
 
-@router.put("/update/{userid}", response_model=CustomerResponse)
+@router.put("/update-customer/{userid}", response_model=CustomerResponse)
 def update_user(userid: str, payload: CustomerUpdate):
     return update_customer_service(userid, payload)
+
+@router.post("/new-staff", response_model=StaffResponse, status_code=201)
+def register_staff(payload: StaffCreate):
+    return register_staff_service(payload)
+
+@router.put("/update-staff/{userid}", response_model=StaffResponse)
+def update_user(userid: str, payload: StaffUpdate):
+    return update_staff_service(userid, payload)

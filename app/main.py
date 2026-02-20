@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers.customer import router as customers_router
+from app.routers.user import router as user_router
 from app.routers.address import router as address_router
 
 app = FastAPI()
@@ -8,5 +8,5 @@ app = FastAPI()
 def health():
     return {"status": "ok"}
 
-app.include_router(customers_router)
+app.include_router(user_router)
 app.include_router(address_router)

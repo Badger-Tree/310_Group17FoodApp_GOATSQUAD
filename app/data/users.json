@@ -43,6 +43,7 @@
     "password": "password123",
     "role": [
       "MANAGER",
+      "STAFF",
       "OWNER"
     ],
     "saved_addresses": [],
@@ -56,6 +57,7 @@
     "password": "password123",
     "role": [
       "MANAGER",
+      "STAFF",
       "COURIER"
     ],
     "saved_addresses": [],
@@ -64,13 +66,13 @@
   {
     "id": "6",
     "email": "peter.wilson@example.com",
-    "first_name": "Peter",
-    "last_name": "Wilson",
-    "password": "password123",
+    "first_name": "Testtttstring",
+    "last_name": "string",
+    "password": "string",
     "role": [
-      "COURIER"
+      "COURIER",
+      "STAFF"
     ],
-    "saved_addresses": [],
     "created_date": "2026-02-20T13:10:00"
   },
   {
@@ -100,7 +102,7 @@
   {
     "id": "2e60c0e0-6c51-4904-a82c-8859749a373e",
     "email": "dddstring",
-    "first_name": "string",
+    "first_name": "Christmas",
     "last_name": "string",
     "password": "string",
     "role": [
