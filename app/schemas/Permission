@@ -1,0 +1,7 @@
+from pydantic import BaseModel
+from typing import List
+
+
+class Permission(BaseModel):
+    permission_id: int
+    permission_name: str
