@@ -2,14 +2,12 @@
   {
     "id": "1",
     "email": "jane.doe@example.com",
-    "first_name": "xxxxxxstring",
+    "first_name": "pusheen",
     "last_name": "string",
     "password": "string",
-    "role": [
-      "CUSTOMER"
-    ],
-    "saved_addresses": [],
-    "created_date": "2026-02-20T12:34:56"
+    "role": "CUSTOMER",
+    "created_date": "2026-02-20T12:34:56",
+    "saved_addresses": []
   },
   {
     "id": "2",
@@ -17,9 +15,7 @@
     "first_name": "Mark",
     "last_name": "Smith",
     "password": "password123",
-    "role": [
-      "CUSTOMER"
-    ],
+    "role": "CUSTOMER",
     "saved_addresses": [],
     "created_date": "2026-02-20T12:35:10"
   },
@@ -29,86 +25,46 @@
     "first_name": "Alice",
     "last_name": "Jones",
     "password": "password123",
-    "role": [
-      "CUSTOMER"
-    ],
+    "role": "CUSTOMER",
     "saved_addresses": [],
     "created_date": "2026-02-20T12:36:00"
   },
   {
     "id": "4",
-    "email": "john.smith@example.com",
+    "email": "john.staff@example.com",
     "first_name": "John",
-    "last_name": "Smith",
-    "password": "password123",
-    "role": [
-      "MANAGER",
-      "STAFF",
-      "OWNER"
-    ],
+    "last_name": "Staff",
+    "password": "staffpass123",
+    "role": "STAFF",
     "saved_addresses": [],
     "created_date": "2026-02-20T13:00:00"
   },
   {
     "id": "5",
-    "email": "mary.brown@example.com",
+    "email": "mary.staff@example.com",
     "first_name": "Mary",
-    "last_name": "Brown",
-    "password": "password123",
-    "role": [
-      "MANAGER",
-      "STAFF",
-      "COURIER"
-    ],
+    "last_name": "Staff",
+    "password": "staffpass123",
+    "role": "STAFF",
     "saved_addresses": [],
     "created_date": "2026-02-20T13:05:00"
   },
   {
-    "id": "6",
-    "email": "peter.wilson@example.com",
-    "first_name": "Testtttstring",
+    "id": "a7474d0a-a187-418d-96bc-dfa4a214a61a",
+    "email": "string",
+    "first_name": "string",
     "last_name": "string",
     "password": "string",
-    "role": [
-      "COURIER",
-      "STAFF"
-    ],
-    "created_date": "2026-02-20T13:10:00"
+    "role": "STAFF",
+    "created_date": "2026-02-28T22:33:59.531113+00:00"
   },
   {
-    "id": "7",
-    "email": "susan.miller@example.com",
-    "first_name": "Susan",
-    "last_name": "Miller",
-    "password": "password123",
-    "role": [
-      "CUSTOMER"
-    ],
-    "saved_addresses": [],
-    "created_date": "2026-02-20T12:37:20"
-  },
-  {
-    "id": "8",
-    "email": "kevin.taylor@example.com",
-    "first_name": "Kevin",
-    "last_name": "Taylor",
-    "password": "password123",
-    "role": [
-      "CUSTOMER"
-    ],
-    "saved_addresses": [],
-    "created_date": "2026-02-20T12:38:00"
-  },
-  {
-    "id": "2e60c0e0-6c51-4904-a82c-8859749a373e",
-    "email": "dddstring",
-    "first_name": "Christmas",
-    "last_name": "string",
+    "id": "66c4e3c7-3397-4657-95d3-41469158349c",
+    "email": "newStaffemail",
+    "first_name": "new",
+    "last_name": "staff",
     "password": "string",
-    "role": [
-      "CUSTOMER"
-    ],
-    "saved_addresses": [],
-    "created_date": "2026-02-20T21:20:03.613740"
+    "role": "STAFF",
+    "created_date": "2026-02-28T22:36:19.531248+00:00"
   }
 ]

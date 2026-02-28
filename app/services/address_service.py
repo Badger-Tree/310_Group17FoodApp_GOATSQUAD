@@ -6,6 +6,7 @@ from app.repositories.addresses_repo import load_all  as load_addresses, save_al
 from app.schemas.Address import AddressCreate, AddressResponse, AddressUpdate
 from datetime import datetime
 
+
 def get_address_by_id_service(address_id: str) -> AddressResponse:
     addresses_data = load_addresses()
     for a in addresses_data:
