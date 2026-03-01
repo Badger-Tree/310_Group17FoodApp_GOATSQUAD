@@ -1,9 +1,7 @@
 
 from typing import List
 from fastapi import HTTPException
-from app.repositories.users_repo import load_all as load_users, save_all as save_all_users
-from app.repositories.addresses_repo import load_all as load_addresses
-from app.schemas.Address import AddressResponse
+from app.repositories.users_repo_csv import load_all as load_users, save_all as save_all_users
 from app.schemas.User import UserResponse, UserUpdate
 from app.factories.user_factory import CustomerFactory, StaffFactory
 from app.schemas.Role import UserRole

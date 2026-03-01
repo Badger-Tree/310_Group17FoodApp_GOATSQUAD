@@ -79,5 +79,14 @@
     "password": "string",
     "role": "STAFF",
     "created_date": "2026-03-01T20:28:04.770331+00:00"
+  },
+  {
+    "id": "f5d32094-0c38-4a13-a1d6-a9460550e21c",
+    "email": "merry",
+    "first_name": "string",
+    "last_name": "string",
+    "password": "string",
+    "role": "CUSTOMER",
+    "created_date": "2026-03-01T20:36:15.098869+00:00"
   }
 ]

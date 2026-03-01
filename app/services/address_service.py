@@ -1,8 +1,8 @@
 import uuid
 from typing import List, Dict, Any
 from fastapi import HTTPException
-from app.repositories.users_repo import load_all as load_users
-from app.repositories.addresses_repo import load_all  as load_addresses, save_all as save_addresses
+from app.repositories.users_repo_csv import load_all as load_users
+from app.repositories.addresses_repo_csv import load_all  as load_addresses, save_all as save_addresses
 from app.schemas.Address import AddressCreate, AddressResponse, AddressUpdate
 from datetime import datetime
 
