@@ -2,6 +2,8 @@
 from typing import List
 from fastapi import HTTPException
 from app.repositories.users_repo import load_all as load_users, save_all as save_all_users
+from app.repositories.addresses_repo import load_all as load_addresses
+from app.schemas.Address import AddressResponse
 from app.schemas.User import UserResponse, UserUpdate
 from app.factories.user_factory import CustomerFactory, StaffFactory
 from app.schemas.Role import UserRole
@@ -12,7 +14,7 @@ from app.schemas.Role import UserRole
 def list_users() -> List[UserResponse]:
     user_data = load_users()
     user_responses = []
-    for user in user_data:
+    for user in user_data:  
         user_responses.append(UserResponse(**user))
     return user_responses
                     
@@ -55,7 +57,7 @@ def update_user_service(userid:str, payload:UserUpdate, role:UserRole) -> UserRe
                 "last_name" : payload.last_name.strip()if payload.last_name else user.get("last_name"),
                 "password" : payload.password.strip() if payload.password else user.get("password"),
                 "role" : role,
-                "saved_addresses": user.get("saved_addresses", [] if role == UserRole.CUSTOMER else []),
+                # "saved_addresses": user.get("saved_addresses", [] if role == UserRole.CUSTOMER else []),
                 "created_date": user.get("created_date")}
             users[index] = updated
             break

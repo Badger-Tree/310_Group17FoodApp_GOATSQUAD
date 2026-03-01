@@ -6,8 +6,7 @@
     "last_name": "string",
     "password": "string",
     "role": "CUSTOMER",
-    "created_date": "2026-02-20T12:34:56",
-    "saved_addresses": []
+    "created_date": "2026-02-20T12:34:56"
   },
   {
     "id": "2",
@@ -16,7 +15,6 @@
     "last_name": "Smith",
     "password": "password123",
     "role": "CUSTOMER",
-    "saved_addresses": [],
     "created_date": "2026-02-20T12:35:10"
   },
   {
@@ -26,7 +24,6 @@
     "last_name": "Jones",
     "password": "password123",
     "role": "CUSTOMER",
-    "saved_addresses": [],
     "created_date": "2026-02-20T12:36:00"
   },
   {
@@ -36,7 +33,6 @@
     "last_name": "Staff",
     "password": "staffpass123",
     "role": "STAFF",
-    "saved_addresses": [],
     "created_date": "2026-02-20T13:00:00"
   },
   {
@@ -46,7 +42,6 @@
     "last_name": "Staff",
     "password": "staffpass123",
     "role": "STAFF",
-    "saved_addresses": [],
     "created_date": "2026-02-20T13:05:00"
   },
   {
@@ -66,5 +61,23 @@
     "password": "string",
     "role": "STAFF",
     "created_date": "2026-02-28T22:36:19.531248+00:00"
+  },
+  {
+    "id": "edaf823d-acd6-4b17-ba75-6739f741375c",
+    "email": "test",
+    "first_name": "string",
+    "last_name": "string",
+    "password": "string",
+    "role": "CUSTOMER",
+    "created_date": "2026-03-01T20:27:37.975664+00:00"
+  },
+  {
+    "id": "f12448cc-c678-4819-8978-5d43d2f11e70",
+    "email": "delivery boy",
+    "first_name": "string",
+    "last_name": "string",
+    "password": "string",
+    "role": "STAFF",
+    "created_date": "2026-03-01T20:28:04.770331+00:00"
   }
 ]
