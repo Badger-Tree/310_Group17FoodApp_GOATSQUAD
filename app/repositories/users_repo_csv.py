@@ -5,8 +5,11 @@ from typing import List, Dict, Any
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "users.csv"
 
 def load_all() -> List[Dict[str, Any]]:
-   if not DATA_PATH.exists():
+    if not DATA_PATH.exists():
        return []
+    with DATA_PATH.open("r", encoding="utf-8") as f:
+       reader = csv.DictReader(f)
+       return list(reader)
    
 def save_all(items: List[Dict[str, Any]]) -> None:
     tmp = DATA_PATH.with_suffix(".tmp")

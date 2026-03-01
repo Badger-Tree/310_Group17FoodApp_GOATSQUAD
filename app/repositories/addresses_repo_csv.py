@@ -7,6 +7,9 @@ DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "addresses.csv"
 def load_all() -> List[Dict[str, Any]]:
    if not DATA_PATH.exists():
        return []
+   with DATA_PATH.open("r", encoding="utf-8") as f:
+       reader = csv.DictReader(f)
+       return list(reader)
    
 def save_all(items: List[Dict[str, Any]]) -> None:
     tmp = DATA_PATH.with_suffix(".tmp")
