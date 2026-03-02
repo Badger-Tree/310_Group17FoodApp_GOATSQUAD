@@ -1,0 +1,47 @@
+[
+  {
+    "address_id": "2",
+    "user_id": "1",
+    "street": "456 Oak Avenue",
+    "city": "Springfield",
+    "postal_code": "12346",
+    "instructions": "Call upon arrival",
+    "created_date": "2026-02-20T12:36:00"
+  },
+  {
+    "address_id": "3",
+    "user_id": "2",
+    "street": "123 Merry",
+    "city": "Kelowna",
+    "postal_code": "string",
+    "instructions": "string",
+    "created_date": "2026-02-20T12:36:30"
+  },
+  {
+    "address_id": "4",
+    "user_id": "3",
+    "street": "321 Elm Street",
+    "city": "Springfield",
+    "postal_code": "12348",
+    "instructions": "Leave at reception",
+    "created_date": "2026-02-20T12:37:00"
+  },
+  {
+    "address_id": "5",
+    "user_id": "7",
+    "street": "654 Cedar Lane",
+    "city": "Springfield",
+    "postal_code": "12349",
+    "instructions": "Side gate",
+    "created_date": "2026-02-20T12:38:30"
+  },
+  {
+    "address_id": "6",
+    "user_id": "8",
+    "street": "987 Birch Boulevard",
+    "city": "Springfield",
+    "postal_code": "12350",
+    "instructions": "Front porch",
+    "created_date": "2026-02-20T12:39:00"
+  }
+]
