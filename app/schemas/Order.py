@@ -13,6 +13,9 @@ class OrderBase(BaseModel):
     customer_id:str
 class OrderCreate(BaseModel):
     cart_id: str
+    items: List[OrderItemResponse]
+    customer_id:str
+    restaurant_id: str
 class OrderResponse(OrderBase):
     order_id: str
     created_date: datetime

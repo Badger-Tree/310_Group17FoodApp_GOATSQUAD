@@ -6,10 +6,12 @@ class OrderItemBase(BaseModel):
     food_item_id: str
     quantity:int
     price_per_item: float
+
     
-class OrderItemCreate(BaseModel):
+class OrderItemCreate(OrderItemBase):
     pass
     
 class OrderItemResponse(OrderItemBase):
-    order_item_id: str
+    order_item_id: str  
     order_id: str
+
