@@ -1,37 +1,36 @@
 from pathlib import Path
-import json, os
-from typing import List, Dict, Any
+import csv
 from decimal import Decimal
 
 #finds data folder
-DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "food_items.json"
-
-#handles dec math saving to json
-class DecimalEncode(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return str(obj)
-        return super().default(obj)
+DATA_PATH = Path("app/data/food_items.csv")
+FIELDNAMES = ["food_item_id", "restaurant_id", "food_name", "price", "description", "course"]
     
-def load_all() -> List[Dict[str, Any]]:
+def load_all():
     #checking if file exists; if not, return empty list
     if not DATA_PATH.exists():
         return []
     
-    #open file, turn json text into list
-    with DATA_PATH.open("r", encoding="utf-8") as f:
-        return json.load(f)
+    items = []
+    with open(DATA_PATH, mode="r", newline="", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            #manual type conversion since csv is all in str
+            items.append({
+                "food_item_id": int(row["food_item_id"]),
+                "food_name": row["food_name"],
+                "restaurant_id": int(row["restaurant_id"]),
+                "price": Decimal(row["price"]),
+                "description": row["description"],
+                "course": row["course"]
+            })
+    return items
     
-def save_all(food_items: List[Dict[str, Any]]) -> None:
+def save_all(items):
     #makes sure data dir exists before saving 
     DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    #prevent data corruption by making temp file
-    temp = DATA_PATH.with_suffix(".temp")
-
-    with temp.open("w", encoding="utf-8") as f:
-        #cls=DecimalEncode to handle price field
-        json.dump(food_items, f, ensure_ascii=False, indent=2, cls=DecimalEncode)
-
-    #replace old file with new
-    os.replace(temp, DATA_PATH)
+    with open(DATA_PATH, mode="w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=FIELDNAMES)
+        writer.writeheader()
+        writer.writerows(items)
