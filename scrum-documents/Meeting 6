@@ -12,8 +12,19 @@ What was accomplished during the meeting:
   1. Delegating/deciding which part of the software each of us will work on.
   2. Prepared a set of questions to ask the TA during the lab session to confirm details.
   3. Created a preliminary folder structure for everyone to work on in the main branch.
+
+Responsibilities:
+  Tesh: 
+    - Implement continuous integration and pytest
+    - Restaurant management module implementation
+  Ailish:
+    - Shopping Cart Module implementation
+  Colleen:
+    - User Account Management Module
+  Megan:
+    - Food Product and Inventory Module
   
-Action Items (Things to get done as a group) and Responsibilities:
+Action Items (Things to get done as a group):
   1. Complete and implement four features (March 7)
   2. Understand how to use and implement fastAPI (March 1)
-  3. Implement continuous integration and pytest (March 7) (Tesh)
+  3. Implement continuous integration and pytest (March 7)
