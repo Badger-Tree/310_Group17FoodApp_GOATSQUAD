@@ -1,0 +1,7 @@
+restaurant_id,owner_id,restaurant_name,cuisine,address,open_hour,closed_hour,restaurant_status
+
+1,1,Mario's Pizza,Italian,123 Main St.,09:00,21:00,active
+3,2,Sakura Sushi,Japanese,456 Side St.,11:00,22:00,active
+5,3,Taco Loco,Mexican,789 Top St.,10:00,20:00,active
+7,4,The Curry House,Indian,321 Bottom St.,12:00,23:00,active
+9,5,Burger Barn,American,654 Center St.,08:00,22:00,inactive
