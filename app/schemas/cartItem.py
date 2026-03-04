@@ -1,20 +1,19 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class CartItemBase(BaseModel):
     food_item_id: str
-    quantity: str
-    price_per_item: str
+    quantity: int
+    price_per_item: Optional[float] = None
 
 class CartItemResponse(CartItemBase): 
     cart_item_id: str
     cart_id: str
+    subtotal: Optional[float] = None
 
-class CartItemAdd(BaseModel):
-    cart_id: str
-    food_item_id: str
-    quantity: str 
-    price_per_item: str
+class CartItemAdd(CartItemBase):
+    customer_id: str
 
 class CartItemUpdate(BaseModel):
-     quantity: str; 
-     price_per_item: str
+     quantity: Optional[int] = None
+     price_per_item: Optional[float] = None
