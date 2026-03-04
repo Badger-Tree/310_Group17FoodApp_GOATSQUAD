@@ -4,7 +4,9 @@ from datetime import datetime
 from app.repositories.orders_repo import load_all as load_orders, save_all as save_all_orders
 from app.repositories.order_items_repo import load_all as load_order_items, save_all as save_all_order_items
 from app.schemas.Order import OrderResponse, OrderCreate
-from app.schemas.OrderItem import OrderItemResponse
+from app.schemas.OrderItem import OrderItemCreate, OrderItemResponse # type: ignore
+
+
 from app.schemas.OrderStatus import OrderStatus
 import uuid
 
@@ -70,4 +72,50 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
                          created_date = datetime.utcnow().isoformat(),
                          items=new_items)
     
+def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
+    order_data = load_orders()
+    order_item_data = load_order_items()
     
+    for order in order_data:
+        if order.get("order_id") == orderid:
+            items_response = []
+            for item in order_item_data:
+                if item.get("order_id") == orderid:
+                    items_response.append(OrderItemResponse(**item))
+
+            return OrderResponse(**order, items=items_response)
+    return None
+
+def get_orders_by_restaurant_service(restaurantid:str)-> List[OrderResponse] | None:
+    order_data = load_orders()
+    order_item_data = load_order_items()
+    
+    order_responses = []
+    for order in order_data:
+        if order.get("restaurant_id") == restaurantid:
+            items_responses = []
+            for item in order_item_data:
+                if item.get("order_id") == order.get("order_id"):
+                    items_responses.append(OrderItemResponse(**item))
+            order_responses.append(OrderResponse(**order, items = items_responses))
+
+    if not order_responses:
+        return None
+    return order_responses
+
+def get_orders_by_userid_service(userid:str)-> OrderResponse | None:
+    order_data = load_orders()
+    order_item_data = load_order_items()
+    
+    order_responses = []
+    for order in order_data:
+        if order.get("customer_id") == userid:
+            items_responses = []
+            for item in order_item_data:
+                if item.get("order_id") == order.get("order_id"):
+                    items_responses.append(OrderItemResponse(**item))
+            order_responses.append(OrderResponse(**order, items = items_responses))
+
+    if not order_responses:
+        return None
+    return order_responses

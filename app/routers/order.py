@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from app.schemas.Order import OrderCreate, OrderResponse
-from app.services.order_service import create_order_service
+from app.services.order_service import create_order_service, get_order_by_order_id_service,get_orders_by_restaurant_service,get_orders_by_userid_service
 from typing import List
 
 
@@ -18,3 +18,14 @@ def list_orders():
 def create_order(order_input: OrderCreate):
     return create_order_service(order_input)
 
+@router.get("/get_order_by_id", response_model=OrderResponse, status_code=status.HTTP_200_OK)
+def get_order_by_id(orderid: str):
+    return get_order_by_order_id_service(orderid)
+
+@router.get("/get_order_by_restaurant", response_model = List[OrderResponse], status_code=status.HTTP_200_OK)
+def get_orders_by_restaurant(restuarantid:str):
+    return get_orders_by_restaurant_service(restuarantid)
+
+@router.get("/get_order_by_user", response_model = List[OrderResponse], status_code=status.HTTP_200_OK)
+def get_orders_by_userid(userid:str):
+    return get_orders_by_userid_service(userid)
