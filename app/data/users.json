@@ -1,0 +1,92 @@
+[
+  {
+    "id": "1",
+    "email": "jane.doe@example.com",
+    "first_name": "pusheen",
+    "last_name": "string",
+    "password": "string",
+    "role": "CUSTOMER",
+    "created_date": "2026-02-20T12:34:56"
+  },
+  {
+    "id": "2",
+    "email": "mark.smith@example.com",
+    "first_name": "Mark",
+    "last_name": "Smith",
+    "password": "password123",
+    "role": "CUSTOMER",
+    "created_date": "2026-02-20T12:35:10"
+  },
+  {
+    "id": "3",
+    "email": "alice.jones@example.com",
+    "first_name": "Alice",
+    "last_name": "Jones",
+    "password": "password123",
+    "role": "CUSTOMER",
+    "created_date": "2026-02-20T12:36:00"
+  },
+  {
+    "id": "4",
+    "email": "john.staff@example.com",
+    "first_name": "John",
+    "last_name": "Staff",
+    "password": "staffpass123",
+    "role": "STAFF",
+    "created_date": "2026-02-20T13:00:00"
+  },
+  {
+    "id": "5",
+    "email": "mary.staff@example.com",
+    "first_name": "Mary",
+    "last_name": "Staff",
+    "password": "staffpass123",
+    "role": "STAFF",
+    "created_date": "2026-02-20T13:05:00"
+  },
+  {
+    "id": "a7474d0a-a187-418d-96bc-dfa4a214a61a",
+    "email": "string",
+    "first_name": "string",
+    "last_name": "string",
+    "password": "string",
+    "role": "STAFF",
+    "created_date": "2026-02-28T22:33:59.531113+00:00"
+  },
+  {
+    "id": "66c4e3c7-3397-4657-95d3-41469158349c",
+    "email": "newStaffemail",
+    "first_name": "new",
+    "last_name": "staff",
+    "password": "string",
+    "role": "STAFF",
+    "created_date": "2026-02-28T22:36:19.531248+00:00"
+  },
+  {
+    "id": "edaf823d-acd6-4b17-ba75-6739f741375c",
+    "email": "test",
+    "first_name": "string",
+    "last_name": "string",
+    "password": "string",
+    "role": "CUSTOMER",
+    "created_date": "2026-03-01T20:27:37.975664+00:00"
+  },
+  {
+    "id": "f12448cc-c678-4819-8978-5d43d2f11e70",
+    "email": "delivery boy",
+    "first_name": "string",
+    "last_name": "string",
+    "password": "string",
+    "role": "STAFF",
+    "created_date": "2026-03-01T20:28:04.770331+00:00"
+  },
+  {
+    "id": "f5d32094-0c38-4a13-a1d6-a9460550e21c",
+    "email": "merry",
+    "first_name": "string",
+    "last_name": "string",
+    "password": "string",
+    "role": "CUSTOMER",
+    "created_date": "2026-03-01T20:36:15.098869+00:00"
+  }
+]
