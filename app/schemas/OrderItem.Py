@@ -1,11 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
 
 class OrderItemBase(BaseModel):
     food_item_id: str
-    quantity:int
-    price_per_item: float
+    quantity:int = Field(...,gt=0)
+    price_per_item: float = Field(...,gt=0)
 
     
 class OrderItemCreate(OrderItemBase):

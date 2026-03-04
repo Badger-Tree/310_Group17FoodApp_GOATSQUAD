@@ -1,20 +1,21 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, validator
 from typing import List, Optional
 from datetime import datetime
-from app.schemas.OrderItem import OrderItemResponse # type: ignore
+from app.schemas.OrderItem import OrderItemCreate, OrderItemResponse # type: ignore
 from enum import Enum
 from app.schemas.OrderStatus import OrderStatus
-
+from app.schemas.Address import Address
 ## Base Order
 
 class OrderBase(BaseModel):
     restaurant_id: str
     customer_id:str
-class OrderCreate(BaseModel):
+    delivery_address: Address
+    
+class OrderCreate(OrderBase):
     cart_id: str
-    items: List[OrderItemResponse]
-    customer_id:str
-    restaurant_id: str
+    items: List[OrderItemCreate] = Field(...,min_length=1)
+    
 class OrderResponse(OrderBase):
     order_id: str
     created_date: datetime

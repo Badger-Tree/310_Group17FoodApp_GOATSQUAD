@@ -7,4 +7,8 @@ app = FastAPI()
 def health():
     return {"status": "ok"}
 
+@app.get("/")
+async def read_main():
+    return {"msg": "Hello World"}
+
 app.include_router(order_router)

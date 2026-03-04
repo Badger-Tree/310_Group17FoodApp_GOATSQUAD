@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from app.schemas.Order import OrderCreate, OrderResponse
-from app.services.order_service import create_order_service, get_order_by_order_id_service,get_orders_by_restaurant_service,get_orders_by_userid_service,get_order_status_by_id_service,set_order_status_service,cancel_order_customer_service,cancel_order_restaurant_service
+from app.services.order_service import create_order_service, get_order_by_order_id_service,get_orders_by_restaurant_service,get_orders_by_userid_service,get_order_status_by_id_service,set_order_status_service,cancel_order_customer_service,cancel_order_restaurant_service,accept_order_service
 from typing import List
 from enum import Enum
 
@@ -15,8 +15,8 @@ def list_orders():
     return orders
 
 @router.post("/create_order", response_model=OrderResponse,status_code=status.HTTP_201_CREATED)
-def create_order(order_input: OrderCreate):
-    return create_order_service(order_input)
+def create_order(payload: OrderCreate):
+    return create_order_service(payload)
 
 @router.get("/get_order_by_id", response_model=OrderResponse, status_code=status.HTTP_200_OK)
 def get_order_by_id(orderid: str):
@@ -45,3 +45,7 @@ def cancel_order_customer(orderid:str):
 @router.put("/cancel_order_restaurant",response_model = OrderResponse, status_code=status.HTTP_200_OK)
 def cancel_order_restaurant(orderid:str):
     return cancel_order_restaurant_service(orderid)
+
+@router.put("/accept_order",response_model = OrderResponse, status_code=status.HTTP_200_OK)
+def accept_order(orderid:str):
+    return accept_order_service(orderid)

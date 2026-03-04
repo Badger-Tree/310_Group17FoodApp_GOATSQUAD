@@ -34,6 +34,9 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
         if orders["order_id"] == order_id:
                raise HTTPException(status_code=409, detail="ID collision; retry.")
     total = 0.00
+    
+    ## the fees will come from restuarant
+    fees = 1.00
     for item in order_input.items:
         total += item.price_per_item * item.quantity
     
@@ -43,7 +46,7 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
                 "cart_id": order_input.cart_id,
                 "delivery_id" : 0,
                 "status" : "PENDING",
-                "total_amount" : round(total,2),
+                "total_amount" : round(fees + total,2),
                 "created_date" : datetime.utcnow().isoformat()}
     order_data.append(new_order)
     save_all_orders(order_data)
@@ -201,4 +204,28 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
                 return OrderResponse(**order, items = items_responses)
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
+    raise HTTPException(status_code=404, detail="Order not found")
+
+def accept_order_service(orderid:str) -> OrderResponse:
+    order_data = load_orders()
+    order_item_data = load_order_items()
+    
+    for order in order_data:
+        if order.get("order_id") == orderid:   
+            
+            status_str = order.get("status")
+            status_enum = OrderStatus(status_str)
+            
+            if status_enum == OrderStatus.PENDING:
+                order["status"] = OrderStatus.APPROVED.value
+                save_all_orders(order_data)
+                items_responses = []
+                
+                for item in order_item_data:
+                    for item in order_item_data:
+                        if item.get("order_id") == order.get("order_id"):
+                            items_responses.append(OrderItemResponse(**item))
+                return OrderResponse(**order, items = items_responses)
+            else:
+                raise HTTPException(status_code=400, detail = "Cannot accept order")
     raise HTTPException(status_code=404, detail="Order not found")
