@@ -1,0 +1,30 @@
+[
+  {
+    "cart_id": "59d7ab68-94a6-41c3-b1f5-5ecba0abe89c",
+    "customer_id": "cust"
+  },
+  {
+    "cart_id": "cc6a2ca8-85eb-40d5-b7ae-c234e78b759c",
+    "customer_id": "cust"
+  },
+  {
+    "cart_id": "9cd5aa2e-d908-4fe2-b2ce-a67abf97e862",
+    "customer_id": "20"
+  },
+  {
+    "cart_id": "0fe8ea74-fdff-4088-9e27-3ce23b0b3432",
+    "customer_id": "20"
+  },
+  {
+    "cart_id": "1d76ac3e-ba96-4bc7-b7c8-7f1b2f10849f",
+    "customer_id": "50"
+  },
+  {
+    "cart_id": "d970a6e8-69b0-428e-83ad-f970c6c1fb6f",
+    "customer_id": "80"
+  },
+  {
+    "cart_id": "45",
+    "customer_id": "37"
+  }
+]
