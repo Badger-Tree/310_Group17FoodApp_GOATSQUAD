@@ -5,8 +5,7 @@ from app.repositories.orders_repo import load_all as load_orders, save_all as sa
 from app.repositories.order_items_repo import load_all as load_order_items, save_all as save_all_order_items
 from app.schemas.Order import OrderResponse, OrderCreate
 from app.schemas.OrderItem import OrderItemCreate, OrderItemResponse # type: ignore
-
-
+from enum import Enum
 from app.schemas.OrderStatus import OrderStatus
 import uuid
 
@@ -119,3 +118,87 @@ def get_orders_by_userid_service(userid:str)-> OrderResponse | None:
     if not order_responses:
         return None
     return order_responses
+
+
+
+def get_order_status_by_id_service(orderid:str)-> Enum | None:
+    order_data = load_orders()
+
+    for order in order_data:
+        if order.get("order_id") == orderid:
+            status_str = order.get("status")
+            return OrderStatus(status_str)
+    return None
+
+##might not actually need this class
+def set_order_status_service(orderid:str, newstatus:str) -> OrderResponse:
+    order_data = load_orders()
+    order_item_data = load_order_items()
+    
+    for order in order_data:
+        if order.get("order_id") == orderid:
+            try:
+                order_status_enum = OrderStatus(newstatus)
+            except ValueError:
+                raise ValueError(f"{newstatus}  is not a valid status")
+            # this uses value because it is saving as string to csv
+            # the convert method in the OrderStatus class will reconvert to Enum in the response
+            order["status"] = order_status_enum.value
+            save_all_orders(order_data)
+            items_responses = []
+            
+            for item in order_item_data:
+                if item.get("order_id") == order.get("order_id"):
+                    items_responses.append(OrderItemResponse(**item))
+           
+            return OrderResponse(**order, items = items_responses)
+        
+def cancel_order_customer_service(orderid:str) -> OrderResponse:
+        ##this will also need to request payment refund
+    order_data = load_orders()
+    order_item_data = load_order_items()
+    
+    for order in order_data:
+        if order.get("order_id") == orderid:   
+            
+            status_str = order.get("status")
+            status_enum = OrderStatus(status_str)
+            
+            if status_enum == OrderStatus.PENDING:
+                order["status"] = OrderStatus.CANCELED.value
+                save_all_orders(order_data)
+                items_responses = []
+                
+                for item in order_item_data:
+                    for item in order_item_data:
+                        if item.get("order_id") == order.get("order_id"):
+                            items_responses.append(OrderItemResponse(**item))
+                return OrderResponse(**order, items = items_responses)
+            else:
+                raise HTTPException(status_code=400, detail = "Cannot cancel order")
+    raise HTTPException(status_code=404, detail="Order not found")
+
+def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
+    ##this will also need to request payment refund
+    order_data = load_orders()
+    order_item_data = load_order_items()
+    
+    for order in order_data:
+        if order.get("order_id") == orderid:   
+            
+            status_str = order.get("status")
+            status_enum = OrderStatus(status_str)
+            
+            if status_enum == OrderStatus.APPROVED or status_enum == OrderStatus.PENDING or status_enum == OrderStatus.OUT_FOR_DELIVERY or status_enum == OrderStatus.IN_PREPARATION:
+                order["status"] = OrderStatus.CANCELED.value
+                save_all_orders(order_data)
+                items_responses = []
+                
+                for item in order_item_data:
+                    for item in order_item_data:
+                        if item.get("order_id") == order.get("order_id"):
+                            items_responses.append(OrderItemResponse(**item))
+                return OrderResponse(**order, items = items_responses)
+            else:
+                raise HTTPException(status_code=400, detail = "Cannot cancel order")
+    raise HTTPException(status_code=404, detail="Order not found")

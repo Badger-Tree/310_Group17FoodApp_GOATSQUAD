@@ -7,3 +7,5 @@ order_item_id,order_id,food_item_id,quantity,price_per_item
 6,2,3,1,11.50
 7,3,1,1,12.50
 24116cf4-2068-49f4-be07-352641439b4e,7daaff18-ece1-4c9c-b40f-743234aad3ca,string,0,0.0
+05b65de7-4366-4fee-ae35-ff17f4cffbc4,09594553-298b-4075-901d-e590c43a09c3,string,0,0.0
+0386e888-93b5-49a8-b73f-5a97d0b2506b,0b120b88-3816-469e-b873-96d26cd50fdf,1,1,1.0

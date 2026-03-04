@@ -1,10 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import List, Optional
 from datetime import datetime
 from app.schemas.OrderItem import OrderItemResponse # type: ignore
-# from app.schemas.Address import AddressResponse, Address
-# from app.schemas.Role import UserRole
-
+from enum import Enum
+from app.schemas.OrderStatus import OrderStatus
 
 ## Base Order
 
@@ -19,7 +18,13 @@ class OrderCreate(BaseModel):
 class OrderResponse(OrderBase):
     order_id: str
     created_date: datetime
-    status: str
+    status: OrderStatus
     total_amount: float
     delivery_id: str
     items: List[OrderItemResponse]
+    
+    @validator("status", pre=True)
+    def convert_status_to_enum(cls, value):
+        if isinstance(value, str):
+            return OrderStatus(value)
+        return value
