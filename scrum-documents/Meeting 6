@@ -16,16 +16,17 @@ What was accomplished during the meeting:
 Responsibilities:
   Tesh: 
     - Implement continuous integration and pytest
-    - Restaurant management module implementation (feature/restaurant-registration)
+    - Restaurant management module implementation (feature/restaurant-registration, PR posted and currently in review) 
   Ailish:
-    - Shopping Cart Module implementation (feature/add_cart_item)
+    - Shopping Cart Module implementation (feature/add_cart_item complete, PR posted and currently in review)
+    - Reviewed PR for feature/restaurant-registration
   Colleen:
-    - User Account Management Module (feature/user-registration, merged to main)
+    - User Account Management Module (feature/user-registration, PR complete and merged to main)
     - Order Management Module (feature/create-order, in progress)
     - set up structure for project (new-folder-structure, chore/create-csv-data-store)
     - reviewed and merged PR for feature/food_item
   Megan:
-    - Food Product and Inventory Module (feature/food_item)
+    - Food Product and Inventory Module (feature/food_item, PR complete and merged to main)
     - Reviewed and merged PR for feature/user-registration
   
 Action Items (Things to get done as a group):
