@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import HTTPException
+from dateutil import parser
 
 
 """This is pulling the csv file and the functions from the restaurant file in repositories. """
@@ -21,14 +22,16 @@ def create_restaurant_service(payload: RestaurantCreate) -> RestaurantResponse:
     if not payload.restaurant_name.strip():
         raise HTTPException(status_code=400, detail="Restaurant name cannot be blank")
     
+    open_time = parser.parse(payload.open_hour).time()
+    closed_time = parser.parse(payload.closed_hour).time()
     new_restaurant = {
         "restaurant_id": str(new_id),
         "owner_id": str(payload.owner_id),
         "restaurant_name": payload.restaurant_name.strip(),
         "cuisine": payload.cuisine.strip(),
         "address": payload.address.strip(),
-        "open_hour": payload.open_hour.strftime("%H:%M"),
-        "closed_hour": payload.closed_hour.strftime("%H:%M"),
+        "open_hour": open_time.strftime("%H:%M"),
+        "closed_hour": closed_time.strftime("%H:%M"),
         "restaurant_status": "active"
     }
 
@@ -61,9 +64,9 @@ def update_restaurant_service(restaurant_id: int, payload: RestaurantUpdate) -> 
             if payload.address is not None:
                 r["address"] = payload.address.strip()
             if payload.open_hour is not None:
-                r["open_hour"] = payload.open_hour.strftime("%H:%M")
+                r["open_hour"] = payload.open_hour.strftime("%H:%M").strip()
             if payload.closed_hour is not None:
-                r["closed_hour"] = payload.closed_hour.strftime("%H:%M")
+                r["closed_hour"] = payload.closed_hour.strftime("%H:%M").strip()
             if payload.restaurant_status is not None:
                 r["restaurant_status"] = payload.restaurant_status.strip()
             
