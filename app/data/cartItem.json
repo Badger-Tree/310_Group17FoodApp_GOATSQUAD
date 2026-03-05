@@ -1,0 +1,42 @@
+[
+  {
+    "cart_item_id": "1",
+    "cart_id": "233",
+    "food_item_id": "1",
+    "quantity": "5",
+    "price_per_item": "3.0"
+
+  },
+ {
+    "cart_item_id": "2",
+    "cart_id": "234",
+    "food_item_id": "1",
+    "quantity": "5",
+    "price_per_item": "3.0"
+
+  },
+  {
+    "cart_item_id": "3",
+    "cart_id": "235",
+    "food_item_id": "1",
+    "quantity": "5",
+    "price_per_item": "3.0"
+
+  },
+ {
+    "cart_item_id": "4",
+    "cart_id": "236",
+    "food_item_id": "1",
+    "quantity": "5",
+    "price_per_item": "3.0"
+
+  },
+    {
+    "cart_item_id": "5",
+    "cart_id": "237",
+    "food_item_id": "1",
+    "quantity": "5",
+    "price_per_item": "3.0"
+
+  }
+]
