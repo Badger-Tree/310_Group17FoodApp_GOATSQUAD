@@ -1,0 +1,26 @@
+[
+  {
+    "food_name": "Cheesecake",
+    "restaurant_id": 2,
+    "price": "7.0",
+    "description": "Fluffy original cheesecake",
+    "course": "dessert",
+    "food_item_id": 4
+  },
+  {
+    "food_name": "Pizza",
+    "restaurant_id": 10,
+    "price": "3.12",
+    "description": "Original cheese pizza",
+    "course": "appetizer",
+    "food_item_id": 5
+  },
+  {
+    "food_name": "Poutine",
+    "restaurant_id": 10,
+    "price": "15.0",
+    "description": "Creamy melted cheese with fries and gravy",
+    "course": "main",
+    "food_item_id": 6
+  }
+]
