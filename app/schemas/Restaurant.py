@@ -10,9 +10,9 @@ class RestaurantBase(BaseModel):
     open_hour: time
     closed_hour: time
 
-"""User creates a restaurant this this and inputting their owner id"""
+"""User creates a restaurant with this"""
 class RestaurantCreate(RestaurantBase):
-    owner_id: int
+    pass
 
 """User can update any of the restaurant information except for the ids"""
 class RestaurantUpdate(BaseModel):

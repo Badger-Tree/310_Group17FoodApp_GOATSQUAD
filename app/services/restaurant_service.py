@@ -9,7 +9,7 @@ from app.repositories.restaurants_repo_csv import load_all as load_restaurants, 
 from app.schemas.Restaurant import RestaurantCreate, RestaurantUpdate, RestaurantResponse
 
 """Service for creating a restaurant"""
-def create_restaurant_service(payload: RestaurantCreate) -> RestaurantResponse:
+def create_restaurant_service(payload: RestaurantCreate, owner_id: str) -> RestaurantResponse:
     restaurants = load_restaurants()
 
     #Auto-increment the restaurant id
@@ -26,7 +26,7 @@ def create_restaurant_service(payload: RestaurantCreate) -> RestaurantResponse:
     closed_time = parser.parse(payload.closed_hour).time()
     new_restaurant = {
         "restaurant_id": str(new_id),
-        "owner_id": str(payload.owner_id),
+        "owner_id": str(owner_id),
         "restaurant_name": payload.restaurant_name.strip(),
         "cuisine": payload.cuisine.strip(),
         "address": payload.address.strip(),
@@ -41,7 +41,7 @@ def create_restaurant_service(payload: RestaurantCreate) -> RestaurantResponse:
     #return the restaurant response
     return RestaurantResponse(
         restaurant_id = new_id,
-        owner_id = payload.owner_id,
+        owner_id = owner_id,
         restaurant_name = new_restaurant["restaurant_name"],
         cuisine = new_restaurant["cuisine"],
         address = new_restaurant["address"],
