@@ -2,8 +2,11 @@ from datetime import datetime
 import pytest
 ## I'm using monkeypatch, which is part of pytest, but there are other mock and patching dictionaries (e.g. unittest.mock that I read about)
 ## Monkeypatching dynamically changes the code during runtime. This is important in unit testing because
-## it will redirect inputs/methods during your test to mock data instead of real data. More on that below.
-
+## it will redirect inputs/methods during your test to mock data instead of real data. I think that in unit tests we are just testing 
+## how the methods input/output data, so we don't want to connect to other parts of the project (e.g. schemas, routers, etc). We will 
+## do that in integration testing. But if there are issues in how the router gets info, we dont want that affecting how we unit test a service.
+## That's how I understand, hope it is right.
+ 
 from fastapi import HTTPException
 from app.schemas.Role import UserRole
 from app.schemas.User import CustomerCreate, UserUpdate
