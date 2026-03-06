@@ -26,8 +26,6 @@ class UserFactory(ABC):
 class CustomerFactory(UserFactory):
     def create_user(self, payload: CustomerCreate) -> dict:
         user = self.create_base_user(payload, UserRole.CUSTOMER)
-        # removed since saved_address isn't a list in the new user csv
-        # user["saved_addresses"] = []
         return user
 
 class StaffFactory(UserFactory):

@@ -3,7 +3,7 @@ from typing import List
 from fastapi import HTTPException
 from app.repositories.users_repo_csv import load_all as load_users, save_all as save_all_users
 from app.schemas.User import UserResponse, UserUpdate
-from app.factories.user_factory import CustomerFactory, StaffFactory
+from app.factories.user_factory import CustomerFactory, StaffFactory, CustomerCreate, StaffCreate
 from app.schemas.Role import UserRole
 
 
@@ -30,10 +30,10 @@ def get_user_by_email_service(email: str) -> UserResponse:
             return UserResponse(**u)
     raise HTTPException(status_code=404, detail=f"User '{email}' not found")
 
-def register_user_service(payload, role: UserRole) -> UserResponse:
+def register_user_service(payload: CustomerCreate | StaffCreate, role: UserRole) -> UserResponse:
     users = load_users()
     if role ==UserRole.CUSTOMER:
-        factory = CustomerFactory()   
+        factory = CustomerFactory()
     elif role == UserRole.STAFF:
         factory = StaffFactory()
     else:raise HTTPException(status_code=400, detail=f"User role not found")
