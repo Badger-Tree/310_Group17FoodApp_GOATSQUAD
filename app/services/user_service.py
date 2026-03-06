@@ -32,14 +32,21 @@ def get_user_by_email_service(email: str) -> UserResponse:
 
 def register_user_service(payload: CustomerCreate | StaffCreate, role: UserRole) -> UserResponse:
     users = load_users()
+    
+    for user in users:
+        if user["email"].lower() == payload.email.strip().lower():
+            raise HTTPException(status_code=409, detail = "Account with that email already exists")
+    
     if role ==UserRole.CUSTOMER:
         factory = CustomerFactory()
     elif role == UserRole.STAFF:
         factory = StaffFactory()
     else:raise HTTPException(status_code=400, detail=f"User role not found")
     new_user = factory.create_user(payload)
-    if any(it.get("id") == new_user["id"] for it in users):
-        raise HTTPException(status_code=409, detail="ID collision; retry.")
+    
+    for user in users:
+        if user["id"] == new_user["id"]:
+            raise HTTPException(status_code=409, detail="ID collision; retry.")
     users.append(new_user)
     save_all_users(users)
     return UserResponse(**new_user)
