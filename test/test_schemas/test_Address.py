@@ -45,7 +45,7 @@ def test_AddressCreate_success():
                   "city": "Tuckburough",
                   "postal_code":"H0B 1T5",
                   "instructions": "leave at door"}
-    result = Address(**input_data)
+    result = AddressCreate(**input_data)
     assert result.street == "123 Brandybuck Lane"
     assert result.city == "Tuckburough"
     assert result.postal_code == "H0B 1T5"
@@ -56,7 +56,7 @@ def test_AddressCreate_success_partial_input():
     input_data = {"street":"123 Brandybuck Lane",
                   "city": "Tuckburough",
                   "postal_code":"H0B 1T5"}
-    result = Address(**input_data)
+    result = AddressCreate(**input_data)
     assert result.street == "123 Brandybuck Lane"
     assert result.city == "Tuckburough"
     assert result.postal_code == "H0B 1T5"
@@ -75,7 +75,7 @@ def test_AddressUpdate_success():
     assert result.instructions == "leave at side door"
 
 
-# def test_Address_update_empty():
+def test_Address_update_empty():
     """test that AddressUpdate can be created given no input"""
     input_data = {}
     result = AddressUpdate(**input_data)
@@ -85,7 +85,7 @@ def test_AddressUpdate_success():
     assert result.instructions == None
 
 
-# def test_AddressUpdate_partial_input():
+def test_AddressUpdate_partial_input():
     """test that AddressUpdate can be created given partial input data"""
     input_data = {"street":"123 Brandybuck Lane",
                   "city": "Tuckburough"}
@@ -102,7 +102,7 @@ def test_AddressUpdate_invalid_input():
                   "postal_code":"H0B 1T5"}
     with pytest.raises(ValidationError): AddressUpdate(**input_data)
     
-# def test_AddressResponse_success():
+def test_AddressResponse_success():
     """test that AddressResponse is created successfully with valid data"""
     input_data = {"street":"123 Brandybuck Lane",
                   "city": "Tuckburough",
