@@ -15,8 +15,8 @@ from app.services.user_service import list_users, get_user_by_id_service, get_us
 
 #This test is testing list_users() from user_services 
 #Test methods need to intake monkeypatch (or whatever patch method)
-def test_list_users(monkeypatch):
-
+def test_list_users_successful(monkeypatch):
+    """Tests load_users() from user_service. Input: nothing. Output: list of all registered."""
     def mock_load_users():
     ## mock_load_users() is creating a mock version of load_users() from the real list_users() method. This is the method from 
     ## repositories that loads all data from the csv. For the purposes of the test, we don't want the real production data, we want to give 
@@ -47,6 +47,14 @@ def test_list_users(monkeypatch):
     assert result[0].email == "jane.doe@example.com"
     assert result[0].first_name == "jane"
     assert result[0].last_name == "doe"
+    
+def test_list_users_empty_list(monkeypatch):
+    """Tests load_users() from user_service. Input: nothing. Output: list of all registered."""
+    def mock_load_users():
+        return []
+    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+    with pytest.raises(HTTPException, match = "No registed users") as testException: list_users()
+    assert testException.value.status_code ==404
     
 def test_get_user_by_id_service_success(monkeypatch):
     def mock_load_users():
@@ -274,7 +282,7 @@ def test_update_user_service_success(monkeypatch):
     monkeypatch.setattr("app.services.user_service.save_all_users", mock_save_all_users)
     
     payload = UserUpdate(first_name = "UpdatedJane", last_name = None, password = "UpdatedPassword")
-    updated_user = update_user_service("1", payload, role="CUSTOMER")
+    updated_user = update_user_service("1", payload)
     assert updated_user.id == "1"
     assert updated_user.first_name == "UpdatedJane"
     assert updated_user.last_name == "doe"

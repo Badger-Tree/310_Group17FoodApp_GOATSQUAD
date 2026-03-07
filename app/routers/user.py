@@ -33,6 +33,4 @@ def register_staff(payload: StaffCreate):
 
 @router.put("/update-user/{userid}", response_model=UserResponse)
 def update_user(userid: str, payload: UserUpdate):
-    if payload.role is None:
-        raise HTTPException(status_code=400, detail="Role is required")
-    return update_user_service(userid, payload, role = payload.role)
+    return update_user_service(userid, payload)
