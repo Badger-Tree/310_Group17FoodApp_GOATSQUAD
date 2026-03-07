@@ -13,7 +13,6 @@ class AddressCreate(Address):
     """extends base class for creating address"""
     pass
 
-
 class AddressUpdate(BaseModel):
     """class for updating an address record"""
     street: Optional[str] = Field(default=None, min_length=1)
@@ -22,7 +21,7 @@ class AddressUpdate(BaseModel):
     instructions: Optional[str] = Field(default=None, min_length=1)
 
 class AddressResponse(Address):
-    """response class for address, extends base addres class"""
+    """response class for address, extends base address class"""
     address_id: str
     user_id: str
     created_date: datetime
