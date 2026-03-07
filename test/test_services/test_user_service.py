@@ -49,7 +49,7 @@ def test_list_users_successful(monkeypatch):
     assert result[0].last_name == "doe"
     
 def test_list_users_empty_list(monkeypatch):
-    """Tests load_users() from user_service. Input: nothing. Output: list of all registered."""
+    """Tests that load_users() will generate an error message if no users are found"""
     def mock_load_users():
         return []
     monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
@@ -57,6 +57,7 @@ def test_list_users_empty_list(monkeypatch):
     assert testException.value.status_code ==404
     
 def test_get_user_by_id_service_success(monkeypatch):
+    """tests that get_user_by_id_service() will successfully return a UserResponse given valid input"""
     def mock_load_users():
         return [{
         "id": "1",
@@ -76,6 +77,7 @@ def test_get_user_by_id_service_success(monkeypatch):
     assert result.created_date == datetime.fromisoformat("2026-02-20T12:34:56")
 
 def test_get_user_by_id_service_notfound(monkeypatch):
+    """tests that get_user_by_id_service() will generate an error if a user id cannot be found"""
     def mock_load_users():
         return [{
         "id": "1",
@@ -95,6 +97,7 @@ def test_get_user_by_id_service_notfound(monkeypatch):
     
     
 def test_get_user_by_email_service_found(monkeypatch):
+    """tests that get_user_by_email_service() will successfully return a UserResponse given valid input"""
     def mock_load_users():
             return [{
             "id": "1",
@@ -113,8 +116,8 @@ def test_get_user_by_email_service_found(monkeypatch):
     assert result.last_name == "doe"
     assert result.created_date == datetime.fromisoformat("2026-02-20T12:34:56")
 
-
-def test_get_user_by_email_service_notfound(monkeypatch):
+def test_get_user_by_email_service_caseinsensitive(monkeypatch):
+    """tests that get_user_by_email_service() will successfully return a UserResponse given emails that do not match in case"""
     def mock_load_users():
         return [{
         "id": "1",
@@ -133,8 +136,8 @@ def test_get_user_by_email_service_notfound(monkeypatch):
     assert result.last_name == "doe"
     assert result.created_date == datetime.fromisoformat("2026-02-20T12:34:56")
 
-
-def test_get_user_by_email_service_caseinsensitive(monkeypatch):
+def test_get_user_by_email_service_notfound(monkeypatch):
+    """tests that get_user_by_email_service() will create an error if it cannot find a user email"""
     def mock_load_users():
         return [{
         "id": "1",
@@ -150,6 +153,7 @@ def test_get_user_by_email_service_caseinsensitive(monkeypatch):
     assert testException.value.status_code ==404
 
 def test_register_user_service_customer_success(monkeypatch):
+    """Tests that register_user_service() successfully makes a customer record given valid input"""
     class MockCustomerFactory:
         ## this is mocking the factory methods. Since it's a unit test I don't want to connect to the actual factory itself, 
         ## so I'm mocking its input/output
@@ -194,6 +198,7 @@ def test_register_user_service_customer_success(monkeypatch):
     assert saved_users[0]["password"] == "password"
 
 def test_register_user_service_staff_success(monkeypatch):
+    """Tests that register_user_service() successfully makes a staff record given valid input"""
     class MockCustomerFactory:
         def create_user(self, payload):
             return {"id":"1",
@@ -228,6 +233,7 @@ def test_register_user_service_staff_success(monkeypatch):
     assert saved_users[0]["password"] == "password"
 
 def test_register_user_service_duplicate_email(monkeypatch):
+    """Tests that register_user_service() creates an error message if there is already an account with the provided email"""
     class MockCustomerFactory:
         def create_user(self, payload):
             return {"id":"1",
@@ -263,6 +269,7 @@ def test_register_user_service_duplicate_email(monkeypatch):
     assert testException.value.status_code ==409
     
 def test_update_user_service_success(monkeypatch):
+    """Tests that update_user_service() successfully updates a customer record given valid input"""
     def mock_load_users():
         return [{
         "id": "1",
@@ -289,6 +296,7 @@ def test_update_user_service_success(monkeypatch):
     assert saved_users[0]["password"] == "UpdatedPassword"
  
 def update_user_service_usernotfound(monkeypatch):
+    """Tests that update_user_service() creates an error message if there is no user found with provided user id"""
     def mock_load_users():
         return [{
         "id": "1",
@@ -307,8 +315,6 @@ def update_user_service_usernotfound(monkeypatch):
         
     monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
     monkeypatch.setattr("app.services.user_service.save_all_users", mock_save_all_users)
-
     payload = UserUpdate(first_name = "UpdatedJane", last_name = None, password = "UpdatedPassword")
-    
     with pytest.raises(HTTPException, match = "User 77 not found") as testException: update_user_service_usernotfound("77", payload, role="CUSTOMER")
     assert testException.value.status_code ==404
