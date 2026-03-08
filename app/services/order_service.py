@@ -10,22 +10,6 @@ from app.schemas.OrderStatus import OrderStatus
 import uuid
 
 
-## test to show all orders, wont be in final app
-
-def list_all_orders() -> List[OrderResponse]:
-    """"Method creates a list of all orders. Takes no inputs."""
-    order_data = load_orders()
-    order_item_data = load_order_items()
-    order_responses = []
-    for order in order_data:
-        items = []
-        for item in order_item_data:
-            if item["order_id"] == order["order_id"]:
-                items.append(OrderItemResponse(**item))
-        order["items"] = items
-        order_responses.append(OrderResponse(**order))
-    return order_responses
-
 def create_order_service(order_input: OrderCreate) -> OrderResponse:
     """Method Creates an Order from a cart"""
     order_data = load_orders()
@@ -147,30 +131,6 @@ def get_order_status_by_id_service(orderid:str)-> Enum | None:
             status_str = order.get("status")
             return OrderStatus(status_str)
     return None
-
-##might not actually need this class
-def set_order_status_service(orderid:str, newstatus:str) -> OrderResponse:
-    """Method sets a status for an order. Takes in order id (str) and newstatus(str)"""
-    order_data = load_orders()
-    order_item_data = load_order_items()
-    
-    for order in order_data:
-        if order.get("order_id") == orderid:
-            try:
-                order_status_enum = OrderStatus(newstatus)
-            except ValueError:
-                raise ValueError(f"{newstatus}  is not a valid status")
-            # this uses value because it is saving as string to csv
-            # the convert method in the OrderStatus class will reconvert to Enum in the response
-            order["status"] = order_status_enum.value
-            save_all_orders(order_data)
-            items_responses = []
-            
-            for item in order_item_data:
-                if item.get("order_id") == order.get("order_id"):
-                    items_responses.append(OrderItemResponse(**item))
-           
-            return OrderResponse(**order, items = items_responses)
         
 def cancel_order_customer_service(orderid:str) -> OrderResponse:
     """This method lets a customer cancel an order. It changes order status to CANCELED"""
