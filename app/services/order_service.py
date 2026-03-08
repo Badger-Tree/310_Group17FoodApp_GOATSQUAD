@@ -13,6 +13,7 @@ import uuid
 ## test to show all orders, wont be in final app
 
 def list_all_orders() -> List[OrderResponse]:
+    """"Method creates a list of all orders. Takes no inputs."""
     order_data = load_orders()
     order_item_data = load_order_items()
     order_responses = []
@@ -26,6 +27,7 @@ def list_all_orders() -> List[OrderResponse]:
     return order_responses
 
 def create_order_service(order_input: OrderCreate) -> OrderResponse:
+    """Method Creates an Order. Takes an OrderCreate object, outputs an OrderResponse"""
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -64,7 +66,6 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
         new_items.append(OrderItemResponse(**new_item))
         
     save_all_order_items(order_item_data)
-           
     return OrderResponse(order_id= order_id,
                          customer_id= order_input.customer_id, 
                          restaurant_id= order_input.restaurant_id,
@@ -75,6 +76,7 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
                          items=new_items)
     
 def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
+    """Method gets a single OrderResponse object. Takes in an order id (str)"""
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -89,6 +91,8 @@ def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
     return None
 
 def get_orders_by_restaurant_service(restaurantid:str)-> List[OrderResponse] | None:
+    """Method gets list of Order Response objects matching to a restaurant id. Takes in restaurant id"""
+    # should check on Tesh's pull to see what type the restaurant id is, probably int
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -106,6 +110,7 @@ def get_orders_by_restaurant_service(restaurantid:str)-> List[OrderResponse] | N
     return order_responses
 
 def get_orders_by_userid_service(userid:str)-> OrderResponse | None:
+    """Method gets list of OrderResponse objects. Takes in userid (str)"""
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -122,11 +127,9 @@ def get_orders_by_userid_service(userid:str)-> OrderResponse | None:
         return None
     return order_responses
 
-
-
 def get_order_status_by_id_service(orderid:str)-> Enum | None:
+    """Method gets a single order mathcing an order id (str)"""
     order_data = load_orders()
-
     for order in order_data:
         if order.get("order_id") == orderid:
             status_str = order.get("status")
@@ -135,6 +138,7 @@ def get_order_status_by_id_service(orderid:str)-> Enum | None:
 
 ##might not actually need this class
 def set_order_status_service(orderid:str, newstatus:str) -> OrderResponse:
+    """Method sets a status for an order. Takes in order id (str) and newstatus(str)"""
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -157,7 +161,8 @@ def set_order_status_service(orderid:str, newstatus:str) -> OrderResponse:
             return OrderResponse(**order, items = items_responses)
         
 def cancel_order_customer_service(orderid:str) -> OrderResponse:
-        ##this will also need to request payment refund
+    """This method lets a customer cancel an order. Intakes order id (str)"""
+    ##this will also need to request payment refund
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -182,6 +187,7 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
     raise HTTPException(status_code=404, detail="Order not found")
 
 def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
+    """This method lets a restaurant manager cancel an order. Input is order id (str), output is OrderResponse"""
     ##this will also need to request payment refund
     order_data = load_orders()
     order_item_data = load_order_items()
