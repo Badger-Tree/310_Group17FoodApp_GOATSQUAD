@@ -5,7 +5,6 @@ from app.repositories.orders_repo import load_all as load_orders, save_all as sa
 from app.repositories.order_items_repo import load_all as load_order_items, save_all as save_all_order_items
 from app.schemas.Order import OrderResponse, OrderCreate
 from app.schemas.OrderItem import OrderItemResponse # type: ignore
-from enum import Enum
 from app.schemas.OrderStatus import OrderStatus
 import uuid
 
@@ -21,9 +20,9 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
         raise HTTPException(status_code=400, detail="cart is empty")
     
     order_id = str(uuid.uuid4())
-    for orders in order_data:
-        if orders["order_id"] == order_id:
-               raise HTTPException(status_code=409, detail="ID collision; retry.")
+    # for orders in order_data:
+    #     if orders["order_id"] == order_id:
+    #            raise HTTPException(status_code=409, detail="ID collision; retry.")
            
     subtotal = 0.00
     
@@ -31,7 +30,7 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
         subtotal += item.price_per_item * item.quantity
     
     ## the fees will come from restuarant service when it is built
-    fees = temp_get_restaurant_fee(order_input.restaurant_id)
+    fees = temp_get_restaurant_fee(cart.restaurant_id)
     
     total_amount = round(subtotal + fees, 2)
     
@@ -66,6 +65,7 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
                          customer_id= cart.customer_id, 
                          restaurant_id= cart.restaurant_id,
                          delivery_id = None,
+                         delivery_address_id=cart.delivery_address_id,
                          status = "PENDING",
                          total_amount = total_amount,
                          created_date = new_order["created_date"],
@@ -86,7 +86,7 @@ def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
             return OrderResponse(**order, items=items_response)
     return None
 
-def get_orders_by_restaurant_service(restaurantid:str)-> List[OrderResponse] | None:
+def get_orders_by_restaurant_service(restaurantid:str)-> List[OrderResponse]:
     """Method gets list of Order Response objects matching to a restaurant id. Takes in restaurant id"""
     # should check on Tesh's pull to see what type the restaurant id is, probably int
     order_data = load_orders()
@@ -100,12 +100,9 @@ def get_orders_by_restaurant_service(restaurantid:str)-> List[OrderResponse] | N
                 if item.get("order_id") == order.get("order_id"):
                     items_responses.append(OrderItemResponse(**item))
             order_responses.append(OrderResponse(**order, items = items_responses))
-
-    if not order_responses:
-        return None
     return order_responses
 
-def get_orders_by_userid_service(userid:str)-> OrderResponse | None:
+def get_orders_by_userid_service(userid:str)-> List[OrderResponse]:
     """Method gets list of OrderResponse objects. Takes in userid (str)"""
     order_data = load_orders()
     order_item_data = load_order_items()
@@ -118,9 +115,8 @@ def get_orders_by_userid_service(userid:str)-> OrderResponse | None:
                 if item.get("order_id") == order.get("order_id"):
                     items_responses.append(OrderItemResponse(**item))
             order_responses.append(OrderResponse(**order, items = items_responses))
-
     if not order_responses:
-        return None
+        return []
     return order_responses
 
 def get_order_status_by_id_service(orderid:str)-> Enum | None:
@@ -150,9 +146,8 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
                 items_responses = []
                 
                 for item in order_item_data:
-                    for item in order_item_data:
-                        if item.get("order_id") == order.get("order_id"):
-                            items_responses.append(OrderItemResponse(**item))
+                    if item.get("order_id") == order.get("order_id"):
+                        items_responses.append(OrderItemResponse(**item))
                 return OrderResponse(**order, items = items_responses)
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
@@ -176,9 +171,8 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
                 items_responses = []
                 
                 for item in order_item_data:
-                    for item in order_item_data:
-                        if item.get("order_id") == order.get("order_id"):
-                            items_responses.append(OrderItemResponse(**item))
+                    if item.get("order_id") == order.get("order_id"):
+                        items_responses.append(OrderItemResponse(**item))
                 return OrderResponse(**order, items = items_responses)
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
@@ -201,9 +195,8 @@ def accept_order_service(orderid:str) -> OrderResponse:
                 items_responses = []
                 
                 for item in order_item_data:
-                    for item in order_item_data:
-                        if item.get("order_id") == order.get("order_id"):
-                            items_responses.append(OrderItemResponse(**item))
+                    if item.get("order_id") == order.get("order_id"):
+                        items_responses.append(OrderItemResponse(**item))
                 return OrderResponse(**order, items = items_responses)
             else:
                 raise HTTPException(status_code=400, detail = "Cannot accept order")
