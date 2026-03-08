@@ -34,7 +34,7 @@ def test_OrderBase_missing_input():
     with pytest.raises(ValidationError): OrderBase(**input_data)
 
 def test_OrderBase_missing_optional_input():
-    """test that OrderBase creates an error if it receives an input with missing field"""
+    """test that OrderBase creates an error if it receives an input with missing optional field"""
     input_data = {"customer_id" : "44",
                 "delivery_address_id" : "5",
                 "delivery_address" : "268 High Street"}
@@ -48,7 +48,7 @@ def test_OrderCreate_valid_input():
                 "delivery_address" : "268 High Street",
                 "cart_id": "999",
                 "items": [{
-                    "food_item_id": "1",
+                    "food_item_id": 1,
                     "quantity": 1,
                     "price_per_item": 88.88
                 }]
@@ -59,7 +59,7 @@ def test_OrderCreate_valid_input():
     assert result.delivery_address == "268 High Street"
     assert result.customer_id == "44"
     assert len(result.items) == 1
-    assert result.items[0].food_item_id == "1"
+    assert result.items[0].food_item_id == 1
     
 
 def test_OrderCreate_invalid_input():
@@ -70,7 +70,7 @@ def test_OrderCreate_invalid_input():
                     "delivery_address" : "268 High Street",
                     "cart_id": "999",
                     "items": [{
-                        "food_item_id": "1",
+                        "food_item_id": 1,
                         "quantity": 1,
                         "price_per_item": 88.88
                     }]
@@ -79,7 +79,7 @@ def test_OrderCreate_invalid_input():
 
 def test_OrderCreate_no_items():
     """test that OrderCreate creates an error if it receives an input with no items"""
-    input_data = {"restaurant_id" : "1",
+    input_data = {"restaurant_id" : 1,
                     "customer_id" : "44",
                     "delivery_address_id" : "5",
                     "delivery_address" : "268 High Street",
@@ -97,7 +97,7 @@ def test_OrderCreate_missing_input():
                     "delivery_address" : "268 High Street",
                     "cart_id": "999",
                     "items": [{
-                        "food_item_id": "1",
+                        "food_item_id": 1,
                         "quantity": 1,
                         "price_per_item": 88.88
                     }]
@@ -114,7 +114,7 @@ def test_OrderResponse_valid_input():
                 "items": [{
                     "order_item_id": "1",
                     "order_id": "333",
-                    "food_item_id": "1",
+                    "food_item_id": 1,
                     "quantity": 1,
                     "price_per_item": 88.88
                 }],
@@ -128,7 +128,7 @@ def test_OrderResponse_valid_input():
     assert result.order_id == "333"
     assert result.created_date == datetime.fromisoformat("2024-02-20T12:34:56")
     assert len(result.items) == 1
-    assert result.items[0].food_item_id == "1"
+    assert result.items[0].food_item_id == 1
     assert result.items[0].order_item_id == "1"    
     assert result.restaurant_id == "45"
     assert result.delivery_address == "268 High Street"
@@ -145,7 +145,7 @@ def test_OrderResponse_invalid_input():
                     "items": [{
                         "order_item_id": "1",
                         "order_id": "333",
-                        "food_item_id": "1",
+                        "food_item_id": 1,
                         "quantity": 1,
                         "price_per_item": 88.88
                     }],
@@ -167,7 +167,7 @@ def test_OrderResponse_invalid_status():
                     "items": [{
                         "order_item_id": "1",
                         "order_id": "333",
-                        "food_item_id": "1",
+                        "food_item_id": 1,
                         "quantity": 1,
                         "price_per_item": 88.88
                     }],
@@ -191,7 +191,7 @@ def test_OrderResponse_invalid_status():
                     "items": [{
                         "order_item_id": "1",
                         "order_id": "333",
-                        "food_item_id": "1",
+                        "food_item_id": 1,
                         "quantity": 1,
                         "price_per_item": 88.88
                     }],

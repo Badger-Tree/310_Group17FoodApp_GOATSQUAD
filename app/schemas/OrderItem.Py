@@ -1,10 +1,8 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
-from datetime import datetime
 
 class OrderItemBase(BaseModel):
     """base pydantic class for an item in an order"""
-    food_item_id: str = Field(min_length=1)
+    food_item_id: int
     quantity:int = Field(...,gt=0) 
     price_per_item: float = Field(...,gt=0)
 
