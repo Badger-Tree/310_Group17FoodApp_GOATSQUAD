@@ -4,26 +4,31 @@ from datetime import datetime
 from app.schemas.OrderItem import OrderItemCreate, OrderItemResponse # type: ignore
 from enum import Enum
 from app.schemas.OrderStatus import OrderStatus
-from app.schemas.Address import Address
+# from app.schemas.Address import Address
 ## Base Order
 
 class OrderBase(BaseModel):
-    restaurant_id: str
-    customer_id:str
-    delivery_address: Address
+    """Base pydantic class or order object"""
+    restaurant_id: str = Field(min_length=1)
+    customer_id:str = Field(min_length=1)
+    delivery_address_id: Optional[str] = Field(default=None)
+    delivery_address: Optional[str] = Field(default=None)
+    # delivery_address will be an Adress object after merging
     
 class OrderCreate(OrderBase):
-    cart_id: str
+    """Extension of base order used to structure/orgnaize data used to mkae an order"""
+    cart_id: str = Field(min_length=1)
     items: List[OrderItemCreate] = Field(...,min_length=1)
     
 class OrderResponse(OrderBase):
-    order_id: str
+    """Extension of base order class used to send information about an order when requested"""
+    order_id: str = Field(min_length=1)
     created_date: datetime
     status: OrderStatus
-    total_amount: float
-    delivery_id: str
+    total_amount: float 
+    delivery_id : Optional[str] = Field(default=None)
     items: List[OrderItemResponse]
-    
+    # validates that status uses the enum
     @validator("status", pre=True)
     def convert_status_to_enum(cls, value):
         if isinstance(value, str):
