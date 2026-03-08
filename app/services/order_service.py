@@ -85,7 +85,7 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
                          status = "PENDING",
                          total_amount = total_amount,
                          created_date = new_order["created_date"],
-                         items=new_items)
+                         items = new_items)
     
 def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
     """Method gets a single OrderResponse object. Takes in an order id (str)"""

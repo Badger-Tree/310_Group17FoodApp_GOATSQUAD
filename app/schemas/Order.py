@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 from datetime import datetime
 from app.schemas.OrderItem import OrderItemCreate, OrderItemResponse # type: ignore
@@ -29,7 +29,7 @@ class OrderResponse(OrderBase):
     delivery_id : Optional[str] = Field(default=None)
     items: List[OrderItemResponse]
     # validates that status uses the enum
-    @validator("status", pre=True)
+    @field_validator("status")
     def convert_status_to_enum(cls, value):
         if isinstance(value, str):
             return OrderStatus(value)
