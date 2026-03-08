@@ -23,7 +23,6 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
     # for orders in order_data:
     #     if orders["order_id"] == order_id:
     #            raise HTTPException(status_code=409, detail="ID collision; retry.")
-           
     subtotal = 0.00
     
     for item in cart.cart_items:

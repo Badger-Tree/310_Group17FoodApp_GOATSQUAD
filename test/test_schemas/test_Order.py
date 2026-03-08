@@ -46,21 +46,13 @@ def test_OrderCreate_valid_input():
                 "customer_id" : "44",
                 "delivery_address_id" : "5",
                 "delivery_address" : "268 High Street",
-                "cart_id": "999",
-                "items": [{
-                    "food_item_id": 1,
-                    "quantity": 1,
-                    "price_per_item": 88.88
-                }]
+                "cart_id": "999"
                 }
     result = OrderCreate(**input_data)
     assert result.restaurant_id == "1"
     assert result.cart_id == "999"
     assert result.delivery_address == "268 High Street"
     assert result.customer_id == "44"
-    assert len(result.items) == 1
-    assert result.items[0].food_item_id == 1
-    
 
 def test_OrderCreate_invalid_input():
     """test that OrderCreate creates an error if it receives in invalid input"""
@@ -77,17 +69,17 @@ def test_OrderCreate_invalid_input():
                     }
     with pytest.raises(ValidationError): OrderCreate(**input_data)
 
-def test_OrderCreate_no_items():
-    """test that OrderCreate creates an error if it receives an input with no items"""
-    input_data = {"restaurant_id" : 1,
-                    "customer_id" : "44",
-                    "delivery_address_id" : "5",
-                    "delivery_address" : "268 High Street",
-                    "cart_id": "999",
-                    "items": [{
-                }]
-                }
-    with pytest.raises(ValidationError): OrderCreate(**input_data)
+# def test_OrderCreate_no_items():
+#     """test that OrderCreate creates an error if it receives an input with no items"""
+#     input_data = {"restaurant_id" : 1,
+#                     "customer_id" : "44",
+#                     "delivery_address_id" : "5",
+#                     "delivery_address" : "268 High Street",
+#                     "cart_id": "999",
+#                     "items": [{
+#                 }]
+#                 }
+#     with pytest.raises(ValidationError): OrderCreate(**input_data)
     
 def test_OrderCreate_missing_input():
     """test that OrderCreate creates an error if it receives an input with missing field"""
@@ -95,12 +87,7 @@ def test_OrderCreate_missing_input():
                     "customer_id" : "44",
                     "delivery_address_id" : "5",
                     "delivery_address" : "268 High Street",
-                    "cart_id": "999",
-                    "items": [{
-                        "food_item_id": 1,
-                        "quantity": 1,
-                        "price_per_item": 88.88
-                    }]
+                    "cart_id": "999"
                     }
     with pytest.raises(ValidationError): OrderCreate(**input_data)
     
