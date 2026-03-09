@@ -1,22 +1,27 @@
-from services.food_item_service import create_food_item
-from schemas.food_item import FoodItemCreate
+import pytest
+from decimal import Decimal
+from app.services.food_item_service import create_food_item, list_food_items, get_food_by_id, update_food_item, delete_food_item
+from app.schemas.food_item import FoodItemCreate, FoodItemUpdate
 
 def test_create_food_item(): 
+    """Tests that a food item is created and an ID is automatically assigned."""
+    payload = FoodItemCreate (
+        food_name="Cheesecake",
+        restaurant_id=2,
+        price=Decimal("7.0"),
+        description="Fluffy original cheesecake",
+        course="dessert",
+    )
 
-    payload = {
-        "food_name": "Cheesecake",
-        "restaurant_id": 2,
-        "price": "7.0",
-        "description": "Fluffy original cheesecake",
-        "course": "dessert",
-        "food_item_id": 4
-  }
+    new_item = create_food_item(payload)
 
-    result = create_food_item(payload)
-    assert result == { 
-        "food_name": "foodName",
-        "restaurant_id": 30,
-        "price": 3.33,
-        "description": "description",
-        "course": "comp sci",
-    }
+    assert new_item["food_name"] == "Cheesecake"
+    assert new_item["price"] == Decimal("7.0")
+    assert new_item["description"] == "Fluffy original cheesecake"
+    assert new_item["course"] == "dessert"
+
+
+    assert "food_item_id" in new_item
+    assert isinstance(new_item["food_item_id"], int)
+
+    delete_food_item(new_item["food_item_id"])
