@@ -9,7 +9,7 @@ from app.repositories.restaurants_repo_csv import load_all as load_restaurants, 
 from app.schemas.Restaurant import RestaurantCreate, RestaurantUpdate, RestaurantResponse
 
 """Service for creating a restaurant"""
-def create_restaurant_service(payload: RestaurantCreate, owner_id: str) -> RestaurantResponse:
+def create_restaurant_service(payload: RestaurantCreate) -> RestaurantResponse:
     restaurants = load_restaurants()
 
     #Auto-increment the restaurant id
@@ -22,16 +22,14 @@ def create_restaurant_service(payload: RestaurantCreate, owner_id: str) -> Resta
     if not payload.restaurant_name.strip():
         raise HTTPException(status_code=400, detail="Restaurant name cannot be blank")
     
-    open_time = parser.parse(payload.open_hour).time()
-    closed_time = parser.parse(payload.closed_hour).time()
     new_restaurant = {
         "restaurant_id": str(new_id),
-        "owner_id": str(owner_id),
+        "owner_id": str(payload.owner_id),
         "restaurant_name": payload.restaurant_name.strip(),
         "cuisine": payload.cuisine.strip(),
         "address": payload.address.strip(),
-        "open_hour": open_time.strftime("%H:%M"),
-        "closed_hour": closed_time.strftime("%H:%M"),
+        "open_hour": payload.open_hour.strftime("%H:%M"),
+        "closed_hour": payload.closed_hour.strftime("%H:%M"),
         "restaurant_status": "active"
     }
 
@@ -41,7 +39,7 @@ def create_restaurant_service(payload: RestaurantCreate, owner_id: str) -> Resta
     #return the restaurant response
     return RestaurantResponse(
         restaurant_id = new_id,
-        owner_id = owner_id,
+        owner_id = payload.owner_id,
         restaurant_name = new_restaurant["restaurant_name"],
         cuisine = new_restaurant["cuisine"],
         address = new_restaurant["address"],

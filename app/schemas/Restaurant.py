@@ -12,7 +12,7 @@ class RestaurantBase(BaseModel):
 
 """User creates a restaurant with this"""
 class RestaurantCreate(RestaurantBase):
-    pass
+    owner_id: int
 
 """User can update any of the restaurant information except for the ids"""
 class RestaurantUpdate(BaseModel):

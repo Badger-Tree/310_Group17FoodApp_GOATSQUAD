@@ -1,0 +1,43 @@
+Date: March 5, 2026
+Type: Team Meeting
+Attendees: Ailish, Colleen, Megan, Hitesh
+
+Key Discussion Points:
+  1. Planning and next steps for M3
+  2. Deciding which classes/functionality to work on first
+  3. Questions to ask the TA.
+  4. Understaning how to conduct unit testing and other testing methods.
+
+What was accomplished during the meeting:
+  1. Making sure we all understand what each of us is working on.
+  2. Asked the TA many clarification questions and will get started with testing before merging to main.
+
+Responsibilities:
+
+General:
+- Testing
+- Code review
+- Making sure the sprint backlog is organized and followed
+
+Tesh:
+- Implementing continuous integration
+- Implementing the restaurant module
+- Will try to implement session manager
+
+Colleen:
+- Implementing user registration module
+- Implementing orders module
+
+Megan:
+- Implementing continuous integration
+- Implementing food item module
+- Implementing inventory module
+
+Ailish:
+- Implementing cart module
+- Implementing payment module
+  
+Action Items (Things to get done as a group) and Responsibilities:
+  1. Complete the testing and implementation of our initial modules
+  2. Make some code reviews and merges to main
+  3. Get started in additioanl modules next week
