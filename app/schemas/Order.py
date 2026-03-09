@@ -19,7 +19,6 @@ class OrderCreate(OrderBase):
     """Extension of base order used to structure/orgnaize data used to mkae an order"""
     cart_id: str = Field(min_length=1)
 
-    
 class OrderResponse(OrderBase):
     """Extension of base order class used to send information about an order when requested"""
     order_id: str = Field(min_length=1)

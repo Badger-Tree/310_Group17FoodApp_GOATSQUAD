@@ -7,7 +7,7 @@ from app.schemas.Order import OrderResponse, OrderCreate
 from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
-
+from enum import Enum
 
 def create_order_service(order_input: OrderCreate) -> OrderResponse:
     """Method Creates an Order from a cart"""
@@ -83,6 +83,7 @@ def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
                     items_response.append(OrderItemResponse(**item))
 
             return OrderResponse(**order, items=items_response)
+    
     return None
 
 def get_orders_by_restaurant_service(restaurantid:str)-> List[OrderResponse]:
@@ -114,8 +115,6 @@ def get_orders_by_userid_service(userid:str)-> List[OrderResponse]:
                 if item.get("order_id") == order.get("order_id"):
                     items_responses.append(OrderItemResponse(**item))
             order_responses.append(OrderResponse(**order, items = items_responses))
-    if not order_responses:
-        return []
     return order_responses
 
 def get_order_status_by_id_service(orderid:str)-> Enum | None:
@@ -215,9 +214,9 @@ def get_cart_by_id(cart_id: str):
             self.customer_id = "123"
             self.restaurant_id = "456"
             self.delivery_address_id = "1"
-            self.cart_items = [TempCartItem("food1", 1, 4.00),
-                               TempCartItem("food2", 5, 1.20),
-                               TempCartItem("food3", 2, 2.00),                  
+            self.cart_items = [TempCartItem(1, 1, 4.00),
+                               TempCartItem(2, 5, 1.20),
+                               TempCartItem(3, 2, 2.00),                  
             ]
     class TempCartItem:
         def __init__(self, food_item_id, quantity, price_per_item):
