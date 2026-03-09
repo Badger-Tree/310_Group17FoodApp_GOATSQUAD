@@ -10,51 +10,52 @@ import pytest
 from fastapi import HTTPException
 from app.schemas.Role import UserRole
 from app.schemas.User import CustomerCreate, UserUpdate
-from app.services.user_service import list_users, get_user_by_id_service, get_user_by_email_service, register_user_service, update_user_service
+from app.services.user_service import get_user_by_id_service, get_user_by_email_service, register_user_service, update_user_service
 
 
-#This test is testing list_users() from user_services 
+#This test is testing list_users() from user_services. I deleted that method since it wasnt needed anymore after refactoring, 
+# but I left in this testing method since it is documented in detail. Will delete.
 #Test methods need to intake monkeypatch (or whatever patch method)
-def test_list_users_successful(monkeypatch):
-    """Tests load_users() from user_service. Input: nothing. Output: list of all registered."""
-    def mock_load_users():
-    ## mock_load_users() is creating a mock version of load_users() from the real list_users() method. This is the method from 
-    ## repositories that loads all data from the csv. For the purposes of the test, we don't want the real production data, we want to give 
-    ## it fake data. So this mock method just returns a dictionary with the same fields/format that the real load_users() would.
-    ## My example only has one element, but there can be many. I saw people use decorators to parameterize the input to have multiple 
-    ## input values, but I didn't do that here.
+# def test_list_users_successful(monkeypatch):
+#     """Tests load_users() from user_service. Input: nothing. Output: list of all registered."""
+#     def mock_load_users():
+#     ## mock_load_users() is creating a mock version of load_users() from the real list_users() method. This is the method from 
+#     ## repositories that loads all data from the csv. For the purposes of the test, we don't want the real production data, we want to give 
+#     ## it fake data. So this mock method just returns a dictionary with the same fields/format that the real load_users() would.
+#     ## My example only has one element, but there can be many. I saw people use decorators to parameterize the input to have multiple 
+#     ## input values, but I didn't do that here.
     
-    ## You could also define the mock method/data outside and then re-use it in every test. I was having issues doing that but I 
-    ## might try again since my code is really messy/has lots of repeats.
+#     ## You could also define the mock method/data outside and then re-use it in every test. I was having issues doing that but I 
+#     ## might try again since my code is really messy/has lots of repeats.
     
-        return [{
-        "id": "1",
-        "email": "jane.doe@example.com",
-        "first_name": "jane",
-        "last_name": "doe",
-        "password": "password",
-        "role": "CUSTOMER",
-        "created_date": "2026-02-20T12:34:56"
-        }]
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
-    ## This method is declaring where/how to redirect data. 
-    ## syntax: monkeypatch.setattr("real method that you want to redirect away from", mock method)
+#         return [{
+#         "id": "1",
+#         "email": "jane.doe@example.com",
+#         "first_name": "jane",
+#         "last_name": "doe",
+#         "password": "password",
+#         "role": "CUSTOMER",
+#         "created_date": "2026-02-20T12:34:56"
+#         }]
+#     monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+#     ## This method is declaring where/how to redirect data. 
+#     ## syntax: monkeypatch.setattr("real method that you want to redirect away from", mock method)
     
-    result = list_users()
-    ## call the real method that you're testing and hold in variable. Then test the outcome using assert.
-    assert len(result) == 1
-    assert result[0].id == "1";
-    assert result[0].email == "jane.doe@example.com"
-    assert result[0].first_name == "jane"
-    assert result[0].last_name == "doe"
+#     result = list_users()
+#     ## call the real method that you're testing and hold in variable. Then test the outcome using assert.
+#     assert len(result) == 1
+#     assert result[0].id == "1";
+#     assert result[0].email == "jane.doe@example.com"
+#     assert result[0].first_name == "jane"
+#     assert result[0].last_name == "doe"
     
-def test_list_users_empty_list(monkeypatch):
-    """Tests that load_users() will generate an error message if no users are found"""
-    def mock_load_users():
-        return []
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
-    with pytest.raises(HTTPException, match = "No registed users") as testException: list_users()
-    assert testException.value.status_code ==404
+# def test_list_users_empty_list(monkeypatch):
+#     """Tests that load_users() will generate an error message if no users are found"""
+#     def mock_load_users():
+#         return []
+#     monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+#     with pytest.raises(HTTPException, match = "No registed users") as testException: list_users()
+#     assert testException.value.status_code ==404
     
 def test_get_user_by_id_service_success(monkeypatch):
     """tests that get_user_by_id_service() will successfully return a UserResponse given valid input"""

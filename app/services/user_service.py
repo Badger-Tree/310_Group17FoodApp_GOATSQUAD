@@ -7,18 +7,6 @@ from app.factories.user_factory import CustomerFactory, StaffFactory, CustomerCr
 from app.schemas.Role import UserRole
 
 
-# this method (showing all customers) is just for testing, doesn't have a role in
-# the actual project architecture
-def list_users() -> List[UserResponse]:
-    """This function returns a list of UserResponse objects for all users in system"""
-    user_data = load_users()
-    user_responses = []
-    for user in user_data:  
-        user_responses.append(UserResponse(**user))
-    if not user_data: 
-        raise HTTPException(status_code=404, detail=f"No registed users")
-    return user_responses
-                    
 def get_user_by_id_service(userid : str) -> UserResponse:
     """This function returns a UserResponse for a user given a user id"""
     user_data = load_users()
