@@ -1,0 +1,57 @@
+Date: March 9, 2026
+Type: Team Meeting
+Attendees: Ailish, Colleen, Megan, Hitesh
+
+Key Discussion Points:
+  1. Understanding next steps to complete M3
+  2. Implementing testing
+  3. Integration with each others' modules
+
+What was accomplished during the meeting:
+  1. 
+  2.
+
+Responsibilities:
+
+General:
+- Testing
+- Code review
+- Making sure the sprint backlog is organized and followed
+
+Tesh:
+- Implementing continuous integration
+- Implementing the restaurant module
+- Will try to implement session manager
+- Implementing delivery module
+
+Colleen:
+- Implementing user registration module
+- Implementing orders module
+- Implementing session manager
+- Implementing authorization and authentication
+
+Megan:
+- Implementing continuous integration
+- Implementing food item and inventory module
+- Implementing notification module
+
+Ailish:
+- Implementing cart module
+- Implementing payment module
+
+Discussion during the meeting:
+- What's working well?
+  1. We are doing well.
+  2. Good communication both in github and in discord.
+  3. Good organization.
+  4. It's been helpful talking through each other's code and problems.
+- What needs improvement
+  1. More work on github. More PRs, breaking up features into smaller components.
+  2. We should walk through with everyone what we coded.
+  
+Action Items (Things to get done as a group) and Responsibilities:
+  1. Conduct testing for our modules
+  2. Break down code to multiple functions and PRs.
+  3. Work on leftover modules.
+  4. API documentation
+  5. Ask the TA on how to create API documentation / what does API documentation look like
