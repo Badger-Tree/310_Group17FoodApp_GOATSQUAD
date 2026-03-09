@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import HTTPException
-from datetime import datetime
+from datetime import datetime, timezone
 from app.repositories.orders_repo import load_all as load_orders, save_all as save_all_orders
 from app.repositories.order_items_repo import load_all as load_order_items, save_all as save_all_order_items
 from app.schemas.Order import OrderResponse, OrderCreate
@@ -40,7 +40,7 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
                 "delivery_id" : None,
                 "status" : "PENDING",
                 "total_amount" : total_amount,
-                "created_date" : datetime.utcnow().isoformat(),
+                "created_date" : datetime.now(timezone.utc),
                 "delivery_address_id" : cart.delivery_address_id}
     order_data.append(new_order)
     save_all_orders(order_data)
@@ -86,7 +86,7 @@ def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
     
     return None
 
-def get_orders_by_restaurant_service(restaurantid:str)-> List[OrderResponse]:
+def get_orders_by_restaurant_service(restaurantid:int)-> List[OrderResponse]:
     """Method gets list of Order Response objects matching to a restaurant id. Takes in restaurant id"""
     # should check on Tesh's pull to see what type the restaurant id is, probably int
     order_data = load_orders()
