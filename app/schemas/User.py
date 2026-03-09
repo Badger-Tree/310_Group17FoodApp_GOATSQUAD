@@ -19,7 +19,6 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = Field(default=None, min_length=1)
     password: Optional[str] = Field(default=None, min_length=5)
 
-
 ## Customer
 class CustomerCreate(UserBase):
     password: str = Field(min_length=5)

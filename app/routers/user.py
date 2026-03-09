@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from typing import List
 from app.schemas.User import CustomerCreate, UserResponse, StaffCreate, UserUpdate
 from app.schemas.Role import UserRole
-from app.services.user_service import  get_user_by_id_service, get_user_by_email_service, register_user_service, update_user_service
+from app.services.user_service import  get_user_by_id_service, get_user_by_email_service, register_user_service, update_user_service, get_staff_by_restaurant_id_service, get_couriers_by_restaurant_id_service
 
 
 router = APIRouter(prefix="/users", tags=["users"])
