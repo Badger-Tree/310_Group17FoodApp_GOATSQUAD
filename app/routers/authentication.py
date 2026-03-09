@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status
-from app.schemas.Login import LoginRequest, LoginResponse
+from app.schemas.Session import LoginRequest, LoginResponse
 from app.services.authentication_service import login_service, get_user_from_token_service, logout_service
 router = APIRouter(prefix="/auth", tags=["auth"])
 
