@@ -1,11 +1,10 @@
 import pytest
 from fastapi import HTTPException
 from datetime import datetime
-from app.schemas.Order import OrderResponse, OrderCreate
-from app.schemas.OrderItem import OrderItemResponse,OrderItemCreate # type: ignore
+from app.schemas.Order import OrderCreate
 from app.schemas.OrderStatus import OrderStatus
 from app.services.order_service import create_order_service, get_order_by_order_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service, get_order_status_by_id_service, cancel_order_customer_service, cancel_order_restaurant_service,accept_order_service 
-from enum import Enum
+
 
 def test_create_order_service_success(monkeypatch):
     """tests that create_order_service() will successfully create an order given valid input"""
@@ -53,6 +52,7 @@ def test_create_order_service_success(monkeypatch):
     assert result.delivery_address_id =="addr1"
     assert len(result.items) == 2
     assert result.items[0].food_item_id == 1
+    
 def test_create_order_service_empty_cart(monkeypatch):
     """tests that create_order_service() will generate error given empty cart"""
 
