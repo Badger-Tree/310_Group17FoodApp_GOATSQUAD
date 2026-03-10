@@ -68,7 +68,7 @@ def delete_inventory_record(food_item_id: int) -> bool:
     new_items = [item for item in items if int(item["food_item_id"]) != food_item_id]
 
     if len(new_items) == len(items):
-        return False  # No record found to delete
+        return False  
 
     save_all(new_items)
     return True
