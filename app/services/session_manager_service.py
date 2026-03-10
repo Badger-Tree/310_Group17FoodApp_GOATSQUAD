@@ -1,0 +1,49 @@
+from datetime import datetime, timedelta, timezone
+from fastapi import HTTPException
+import secrets
+from app.schemas.Login import LoginRequest
+from app.schemas.Token import Token, TokenResponse
+from app.repositories.sessions_repo import load_all as load_sessions, save_all as save_sessions
+from app.services.user_service import get_user_by_email_service
+
+def create_session_service(credentials: LoginRequest) -> TokenResponse:
+    """Creates and stores a session. 
+    Input:Login Request(email, password). 
+    Output: TokenResponse (userid, token, created, expires) """
+    token = secrets.token_hex(16)
+    created = datetime.now(timezone.utc)
+    expires = created + timedelta(hours=1)
+
+    user = get_user_by_email_service(credentials.email)
+    new_token = {"token": token,
+                         "email": credentials.email,
+                        "user_id": user.id,
+                        "user_role" : user.role}
+    sessions = load_sessions()
+    sessions.append({"userid":user.id,
+                     "token": token,
+                     "created" : created.isoformat(),
+                     "expires" : expires.isoformat()})
+    save_sessions(sessions)
+    
+    return TokenResponse(**new_token)
+
+def expire_session_service(token:str): 
+    sessions = load_sessions()
+    new_sessions = []
+    for session in sessions:
+        if session["token"] != token:
+            new_sessions.append(session)
+        if len(new_sessions) == len(sessions):
+            raise HTTPException(status_code=401, detail="invalid token")
+    save_sessions(new_sessions)
+
+def validate_token_service(token: Token) -> True:
+    sessions = load_sessions()
+    for session in sessions:
+        if session["token"] == Token.token:
+            expires = datetime.fromisoformat(session["expires"])
+            if datetime.now(timezone.utc) > expires:
+                expire_session_service(token)
+                raise HTTPException(status_code=401, detail="session expired")
+            return True
