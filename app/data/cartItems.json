@@ -33,5 +33,14 @@
     "cart_item_id": "653cedd7-9fc3-45b0-aac2-efecaaa1c68e",
     "cart_id": "d970a6e8-69b0-428e-83ad-f970c6c1fb6f",
     "subtotal": 25.0
+  },
+
+  {
+    "cart_item_id": "5",
+    "cart_id": "0fe8ea74-fdff-4088-9e27-3ce23b0b3432",
+    "food_item_id": "34",
+    "quantity": 1,
+    "price_per_item": 4.0,
+    "subtotal": 4.0
   }
 ]
