@@ -1,14 +1,15 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 from app.schemas.Role import UserRole
     
 class Token(BaseModel):
+    """Base class for token"""
     token: str
     
 class TokenResponse(BaseModel):
-    """This sends a token response back to API"""
+    """This sends back information about a session/token"""
     token:str
     user_id: str
     role : UserRole
