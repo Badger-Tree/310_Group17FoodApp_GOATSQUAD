@@ -5,21 +5,24 @@ import pytest
 
 from app.schemas.Token import Token, TokenResponse
 
-
 def test_Token_success(): 
+    """Tests that Token instantiates with valid input"""
     input_data = {"token": "gandalf"}
     result = Token(**input_data)
     assert result.token == "gandalf"
              
-def test_Token_missing_data(): 
+def test_Token_missing_data():
+    """Tests that Token raises a validation error if input has a missing field""" 
     input_data = {}
     with pytest.raises(ValidationError):Token(**input_data)
     
 def test_Token_invalid_data(): 
+    """Tests that Token raises a validation error if input has an invalid field""" 
     input_data = {"token":123}
     with pytest.raises(ValidationError):Token(**input_data)
     
 def test_TokenResponse_success(): 
+    """Tests that TokenResponse instantiates with valid input"""
     input_data = {"token":"123",
                 "user_id": "gandalf",
                 "role" : "CUSTOMER",
@@ -33,6 +36,7 @@ def test_TokenResponse_success():
     assert result.expires == datetime.fromisoformat("2024-03-20T12:34:56")
     
 def test_TokenResponse_missing_data(): 
+    """Tests that TokenResponse raises a validation error if input has a missing field""" 
     input_data = {"token":"123",
                 "role" : "CUSTOMER",
                 "created" : "2024-02-20T12:34:56",
@@ -40,6 +44,7 @@ def test_TokenResponse_missing_data():
     with pytest.raises(ValidationError): TokenResponse(**input_data)
     
 def test_TokenResponse_invalid_data(): 
+    """Tests that TokenResponse raises a validation error if input has an invalid field""" 
     input_data = {"token":1234,
                 "user_id": "gandalf",
                 "role" : "CUSTOMER",
