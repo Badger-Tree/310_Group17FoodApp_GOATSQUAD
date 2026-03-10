@@ -15,17 +15,20 @@ def create_session_service(credentials: LoginRequest) -> TokenResponse:
     expires = created + timedelta(hours=1)
 
     user = get_user_by_email_service(credentials.email)
-    new_token = {"token": token,
-                         "email": credentials.email,
-                        "user_id": user.id,
-                        "user_role" : user.role}
     sessions = load_sessions()
     sessions.append({"userid":user.id,
+                     "role":user.role,
                      "token": token,
                      "created" : created.isoformat(),
                      "expires" : expires.isoformat()})
     save_sessions(sessions)
     
+    new_token = {"token": token,
+                "user_id": user.id,
+                "role" : user.role,
+                "created" : created,
+                "expires" : expires}
+    sessions = load_sessions()
     return TokenResponse(**new_token)
 
 def expire_session_service(token:str): 
@@ -34,16 +37,16 @@ def expire_session_service(token:str):
     for session in sessions:
         if session["token"] != token:
             new_sessions.append(session)
-        if len(new_sessions) == len(sessions):
-            raise HTTPException(status_code=401, detail="invalid token")
+    if len(new_sessions) == len(sessions):
+        raise HTTPException(status_code=401, detail="invalid token")
     save_sessions(new_sessions)
 
-def validate_token_service(token: Token) -> True:
+def validate_token_service(token: Token) -> dict:
     sessions = load_sessions()
     for session in sessions:
-        if session["token"] == Token.token:
+        if session["token"] == token.token:
             expires = datetime.fromisoformat(session["expires"])
             if datetime.now(timezone.utc) > expires:
                 expire_session_service(token)
                 raise HTTPException(status_code=401, detail="session expired")
-            return True
+            return (session)

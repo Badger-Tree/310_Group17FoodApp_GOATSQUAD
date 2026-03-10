@@ -9,7 +9,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 async def login(credentials: LoginRequest):
     """Lets user log into system. 
     Input: LoginRequest(email, password). 
-    Output: TokenResponse (userid, token, created, expires)"""
+    Output: TokenResponse (token, email, user_id, UserRole)"""
     return login_service(credentials)
     
 @router.post("/logout")
