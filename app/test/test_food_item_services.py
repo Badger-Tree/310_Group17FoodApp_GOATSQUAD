@@ -1,7 +1,6 @@
-import pytest
 from decimal import Decimal
-from app.services.food_item_service import create_food_item, list_food_items, get_food_by_id, update_food_item, delete_food_item
-from app.schemas.food_item import FoodItemCreate, FoodItemUpdate
+from app.services.food_item_service import create_food_item, delete_food_item
+from app.schemas.food_item import FoodItemCreate
 
 def test_create_food_item(): 
     """Tests that a food item is created and an ID is automatically assigned."""
