@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
 from app.schemas.Role import UserRole
-from app.schemas.Token import TokenResponse
-from app.services.session_manager_service import create_session_service, expire_session_service, validate_token_service
+from app.schemas.Token import Token, TokenResponse
+from app.schemas.User import UserResponse
+from app.services.session_manager_service import create_session_service, expire_session_service, get_user_from_session, validate_token_service
 import pytest
 
 mock_users = {
@@ -112,3 +113,29 @@ def test_validate_token_service_session_expired(mocker):
     with pytest.raises(HTTPException) as testException: validate_token_service(mock_token)
     assert testException.value.status_code ==401
     
+def test_get_user_from_session(mocker):
+    """checks that get_user_from_session will return a UserResponse if given a valid session token"""
+    # token_str = "asdf"
+    # token = Token(token = token_str)
+    future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
+    mock_session = {"token": "asdf","user_id":"1", "role" : "CUSTOMER", "created" : now,"expires":future}   
+    
+    mocker.patch("app.services.session_manager_service.validate_token_service", return_value = mock_session)    
+
+    
+    mock_user = UserResponse(id= "1",
+                    email= "pippin@example.com",
+                    first_name= "peregrin",
+                    last_name= "took",
+                    password= "password",
+                    role= "CUSTOMER",
+                    created_date= datetime.fromisoformat("2026-02-20T12:34:56")
+                    )
+    
+    mocker.patch("app.services.user_service.get_user_by_id_service", return_value = mock_user)
+    result = get_user_from_session(Token(token = "asdf"))
+        
+    assert result.id == mock_user.id
+    assert result.role == mock_user.role
+    assert result.created_date == mock_user.created_date

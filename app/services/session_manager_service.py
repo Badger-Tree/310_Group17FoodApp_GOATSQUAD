@@ -59,10 +59,5 @@ def get_user_from_session(token: Token) -> UserResponse:
     user = get_user_by_id_service(session["user_id"])
     if not user:
         raise HTTPException(status_code=404, detail="user not found")
-    return UserResponse(id = user.id,
-                        email=user.email,
-                        first_name= user.first_name,
-                        last_name = user.last_name,
-                        role = user.role,
-                        created_date = user.created_date)
+    return user
     
