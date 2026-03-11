@@ -1,7 +1,5 @@
 from datetime import datetime
-
 from fastapi import HTTPException
-
 from app.schemas.Login import LoginRequest
 from app.schemas.Role import UserRole
 from app.schemas.Token import Token, TokenResponse
@@ -19,13 +17,11 @@ mock_users = {
         "created_date": "2026-02-20T12:34:56"
         }
 
-
 mock_token = TokenResponse(token="abc", 
                             user_id = "1", 
                             role= "CUSTOMER",
                             created = "2026-02-20T12:34:56",
                             expires = "2026-03-20T12:34:56")
-
 
 def test_login_service_success(mocker):
     """Tests if login_service will successfully return a token if provided email and password matching to user in system"""
@@ -134,52 +130,3 @@ def test_validate_credentials_user_not_found(mocker):
     mocker.patch("app.services.authentication_service.load_users", return_value = mock_users)
     result = validate_credentials(input_email, input_password)
     assert result == False
-
-    
-    
-    
-    
-    # def validate_credentials(email : str, password : str) -> bool:
-    # """Validates a user's email and password. Input: email (str), password (str). Output: boolean"""
-    # users = load_users()
-    # for user in users:
-    #     if user["email"] == email and user["password"] == password:
-    #             return True
-    # return False
-    
-    
-
-# def test_validate_credentials_user_credentials_false(mocker):
-#     """Tests if """
-#     input_data = LoginRequest(email = "pippin@example.com", password = "password")
-
-#     mocker.patch("app.services.authentication_service.validate_credentials", return_value = False)
-#     mocker.patch("app.services.authentication_service.create_session_service", return_value=mock_token)
-#     with pytest.raises(HTTPException) as testException: login_service(input_data)
-
-        
-
-# def test_login_service_success(mocker):
-
-#     mock_credentials = LoginRequest(email ="test@test.com", password="pass")
-    
-#     mock_load_a
-    
-#     mock_token = TokenResponse(token="abc", 
-#                                user_id = "1", 
-#                                role= "CUSTOMER",
-#                                created = "2026-01-01",
-#                                expires = "2026-01-02")
-    
-#     mock_create = mocker.patch("app.services.authentication_service.validate_credentials", return_value=mock_token)
-#     result = login_service(mock_credentials)
-#     assert result == mock_token
-#     mock_create.assert_called_once_with(mock_credentials)
-    
-    # stub_validate_credentials_return_value = True
-    # stub_validate_credentials_return_value = False
-    
-    
-    
-    # mocker.patch("app.services.authentication_service.validate_credentials", return_value=mock_token)
-    

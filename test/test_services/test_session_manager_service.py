@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
 from app.schemas.Role import UserRole
-from app.services.session_manager_service import create_session_service, expire_session_service
+from app.schemas.Token import TokenResponse
+from app.services.session_manager_service import create_session_service, expire_session_service, validate_token_service
 import pytest
 
 mock_users = {
@@ -34,30 +35,80 @@ def test_create_session_service_success(mocker):
     assert result.role == UserRole.CUSTOMER
     assert result.expires > result.created
 
-# def test_expire_session_service(mocker):
-#     """tests that expire_session_service will remove a session record given a token (str)"""
-#     mock_token = "abc123"
+def test_expire_session_service(mocker):
+    """tests that expire_session_service will remove a session record given a token (str)"""
+    mock_token = "abc123"
         
-#     mock_sessions = [
-#         {"token": "abc123", "user_id": "1"},
-#         {"token": "def456", "user_id": "2"}
-#         ]
+    mock_sessions = [
+        {"token": "abc123", "user_id": "1"},
+        {"token": "def456", "user_id": "2"}
+        ]
     
-#     def mock_load_sessions():
-#         return mock_sessions
-
-#     def mock_save_sessions():
-#         return []
-#     mocker.patch("app.services.session_manager_service.load_sessions", mock_load_sessions())
-#     mocker.patch("app.services.session_manager_service.save_sessions", mock_save_sessions())
-
-#     result = expire_session_service(mock_token)
-#     assert result is None
+    mock_load_sessions = mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
+    mock_save_sessions = mocker.patch("app.services.session_manager_service.save_sessions")
+    
+    expire_session_service(mock_token)
+    mock_save_sessions.assert_called_once_with([{"token": "def456", "user_id": "2"}])
 
     
-# def test_validate_token_service_success
-
-# def test_validate_token_service_session_not_found
-
+def test_validate_token_service_success(mocker):
+    """tests that validate_token_service will return a dictionary with session data if given a Token"""
+    mock_token = mocker.Mock()
+    mock_token.token="abc123"
+    mock_token.user_id = "1"
+    mock_token.role= UserRole.CUSTOMER
+    future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
+    mock_token.created = now
+    mock_token.expires = future
     
-# def test_validate_token_service_session_expired
+    mock_sessions = [
+        {"token": "abc123","user_id":"1", "role" : "CUSTOMER", "created" : now,"expires":future}]
+
+    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
+    
+    result = validate_token_service(mock_token)
+    assert result["token"] == "abc123"
+    assert result["user_id"] == "1"  
+    assert result["role"] == UserRole.CUSTOMER
+    assert result["created"] == now
+    assert result["expires"] == future
+    
+def test_validate_token_service_session_not_found(mocker):
+    """tests that validate_token_service will raise an error if a session id not found"""
+    mock_token = mocker.Mock()
+    mock_token.token="abc"
+    mock_token.user_id = "1"
+    mock_token.role= UserRole.CUSTOMER
+    future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
+    mock_token.created = now
+    mock_token.expires = future
+    
+
+    mock_sessions = [
+        {"token": "abc123","user_id":"1", "role" : "CUSTOMER", "created" : now,"expires":future}]
+
+    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
+    with pytest.raises(HTTPException) as testException: validate_token_service(mock_token)
+    assert testException.value.status_code ==404
+    
+def test_validate_token_service_session_expired(mocker):
+    """tests that validate_token_service will raise an error if a session is expired"""
+    mock_token = mocker.Mock()
+    mock_token.token="abc123"
+    mock_token.user_id = "1"
+    mock_token.role= UserRole.CUSTOMER
+    past = (datetime.now(timezone.utc) + timedelta(hours=-1)).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
+    mock_token.created = now
+    mock_token.expires = past
+    
+
+    mock_sessions = [
+        {"token": "abc123","user_id":"1", "role" : "CUSTOMER", "created" : now,"expires":past}]
+
+    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
+    with pytest.raises(HTTPException) as testException: validate_token_service(mock_token)
+    assert testException.value.status_code ==401
+    

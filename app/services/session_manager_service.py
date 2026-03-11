@@ -50,4 +50,4 @@ def validate_token_service(token: Token) -> dict:
                 expire_session_service(token)
                 raise HTTPException(status_code=401, detail="session expired")
             return (session)
-        raise HTTPException(status_code=404, detail="session not found")
+    raise HTTPException(status_code=404, detail="session not found")
