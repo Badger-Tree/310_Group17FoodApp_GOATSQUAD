@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Header, status
 from typing import List
 from app.schemas.User import CustomerCreate, UserResponse, StaffCreate, UserUpdate
 from app.schemas.Role import UserRole
@@ -36,8 +36,12 @@ def register_staff(payload: StaffCreate):
     return register_user_service(payload, role=UserRole.STAFF)
 
 @router.put("/update-user/{userid}", response_model=UserResponse)
-def update_user(userid: str, payload: UserUpdate):
+def update_user(payload: UserUpdate, token: str = Header(...)):
     """Updates the first_name, last_name, and/or password for an account. 
     Intake: userid, UserUpdate as payload
     Return: UserResponse (email, first_name, last_name, id, role, created_date)"""
+    session = Token(token=token)
+    user = get_user_from_session(session)
+    
+    
     return update_user_service(userid, payload)
