@@ -5,6 +5,7 @@ from app.schemas.Order import OrderCreate
 from app.schemas.OrderStatus import OrderStatus
 from app.services.order_service import create_order_service, get_order_by_order_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service, get_order_status_by_id_service, cancel_order_customer_service, cancel_order_restaurant_service,accept_order_service 
 
+def process_order_service(order_input: OrderCreate):
 
 def test_create_order_service_success(monkeypatch):
     """tests that create_order_service() will successfully create an order given valid input"""

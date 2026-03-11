@@ -1,3 +1,4 @@
+import random
 from typing import List
 from fastapi import HTTPException
 from datetime import datetime, timezone
@@ -9,30 +10,21 @@ from app.schemas.OrderStatus import OrderStatus
 import uuid
 from enum import Enum
 
-def create_order_service(order_input: OrderCreate) -> OrderResponse:
-    """Method Creates an Order from a cart"""
-    order_data = load_orders()
-    order_item_data = load_order_items()
-    
+def process_order_service(cart_id: str):
+    """receives a cart and asks for payment before creating the order and sending for review"""
     # this is using a stub to get cart data
-    cart = get_cart_by_id(order_input.cart_id)
+    cart = get_cart_by_id(cart_id)
     if not cart.cart_items:
         raise HTTPException(status_code=400, detail="cart is empty")
     
+    # make an order id
     order_id = str(uuid.uuid4())
-    # for orders in order_data:
-    #     if orders["order_id"] == order_id:
-    #            raise HTTPException(status_code=409, detail="ID collision; retry.")
-    subtotal = 0.00
     
+    # get total
+    subtotal = 0.00
     for item in cart.cart_items:
         subtotal += item.price_per_item * item.quantity
-    
-    ## the fees will come from restuarant service when it is built
-    fees = temp_get_restaurant_fee(cart.restaurant_id)
-    
-    total_amount = round(subtotal + fees, 2)
-    
+    total_amount = round(subtotal,2)
     new_order = {"order_id": order_id,
                 "customer_id": cart.customer_id,
                 "restaurant_id": cart.restaurant_id,
@@ -42,10 +34,7 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
                 "total_amount" : total_amount,
                 "created_date" : datetime.now(timezone.utc),
                 "delivery_address_id" : cart.delivery_address_id}
-    order_data.append(new_order)
-    save_all_orders(order_data)
-    
- 
+    # process items from cart
     new_items = []
     for item in cart.cart_items:
         new_item = {
@@ -55,19 +44,40 @@ def create_order_service(order_input: OrderCreate) -> OrderResponse:
             "quantity": item.quantity,
             "price_per_item": item.price_per_item
             }
-        order_item_data.append(new_item)
-        new_items.append(OrderItemResponse(**new_item))
+        new_items.append(new_item)
+    # send to payment
+    paid = process_payment()
+    if paid:
+        create_order_service(new_order,new_items)
+    else:
+        raise HTTPException(status_code=400, detail = "payment not processed order")
+        
+def create_order_service(new_order: dict, new_items: list[dict]) -> OrderResponse:
+    """Method Creates an Order from a dictionary after if was processed for payment"""
+    # save the new order to db
+    order_data = load_orders()
+    order_item_data = load_order_items()
+    
+    order_data.append(new_order)
+    save_all_orders(order_data)
+    
+    new_items_response = []
+    for item in new_items:
+        order_item_data.append(item)
+        new_items_response.append(OrderItemResponse(**item))
         
     save_all_order_items(order_item_data)
     
-    return OrderResponse(order_id= order_id,
-                         customer_id= cart.customer_id, 
-                         restaurant_id= cart.restaurant_id,
+    # send notification to customer, restaurant owner
+    
+    return OrderResponse(order_id= new_order.order_id,
+                         customer_id= new_order.customer_id, 
+                         restaurant_id= new_order.restaurant_id,
                          delivery_id = None,
-                         delivery_address_id=cart.delivery_address_id,
-                         status = "PENDING",
-                         total_amount = total_amount,
-                         created_date = new_order["created_date"],
+                         delivery_address_id=new_order.delivery_address_id,
+                         status = OrderStatus.PENDING,
+                         total_amount = new_order.total_amount,
+                         created_date = new_order.created_date,
                          items = new_items)
     
 def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
@@ -81,14 +91,11 @@ def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
             for item in order_item_data:
                 if item.get("order_id") == orderid:
                     items_response.append(OrderItemResponse(**item))
-
             return OrderResponse(**order, items=items_response)
-    
     return None
 
 def get_orders_by_restaurant_service(restaurantid:int)-> List[OrderResponse]:
     """Method gets list of Order Response objects matching to a restaurant id. Takes in restaurant id"""
-    # should check on Tesh's pull to see what type the restaurant id is, probably int
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -134,19 +141,21 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
     
     for order in order_data:
         if order.get("order_id") == orderid:   
-            
             status_str = order.get("status")
             status_enum = OrderStatus(status_str)
             
             if status_enum == OrderStatus.PENDING:
-                order["status"] = OrderStatus.CANCELED.value
-                save_all_orders(order_data)
-                items_responses = []
-                
-                for item in order_item_data:
-                    if item.get("order_id") == order.get("order_id"):
-                        items_responses.append(OrderItemResponse(**item))
-                return OrderResponse(**order, items = items_responses)
+                refunded = process_refund(order["total_amount"])
+                if refunded: 
+                    order["status"] = OrderStatus.CANCELED.value
+                    save_all_orders(order_data)
+                    items_responses = []
+                    
+                    for item in order_item_data:
+                        if item.get("order_id") == order.get("order_id"):
+                            items_responses.append(OrderItemResponse(**item))
+                    return OrderResponse(**order, items = items_responses)
+                raise HTTPException(status_code=400, detail = "refund not processed")
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
     raise HTTPException(status_code=404, detail="Order not found")
@@ -164,14 +173,18 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
             status_enum = OrderStatus(status_str)
             
             if status_enum == OrderStatus.APPROVED or status_enum == OrderStatus.PENDING or status_enum == OrderStatus.OUT_FOR_DELIVERY or status_enum == OrderStatus.IN_PREPARATION:
-                order["status"] = OrderStatus.CANCELED.value
-                save_all_orders(order_data)
-                items_responses = []
-                
-                for item in order_item_data:
-                    if item.get("order_id") == order.get("order_id"):
-                        items_responses.append(OrderItemResponse(**item))
-                return OrderResponse(**order, items = items_responses)
+                refunded = process_refund(order["total_amount"])
+                if refunded:
+                    order["status"] = OrderStatus.CANCELED.value
+                    save_all_orders(order_data)
+                    items_responses = []
+                    
+                    for item in order_item_data:
+                        if item.get("order_id") == order.get("order_id"):
+                            items_responses.append(OrderItemResponse(**item))
+                    return OrderResponse(**order, items = items_responses)
+                else:
+                    raise HTTPException(status_code=400, detail = "refund not processed")
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
     raise HTTPException(status_code=404, detail="Order not found")
@@ -202,11 +215,16 @@ def accept_order_service(orderid:str) -> OrderResponse:
 ##################################################################
 # Stub methods that will get replaced when real modules are availble
 ##################################################################
-def temp_get_restaurant_fee(restaurant_id: str) -> float:
-    """
-    Temporary placeholder until restaurant service is created
-    """
-    return 1.00
+
+def process_payment(amount: float) -> bool:
+    """This simulates a payment and returns a boolean to indicate if payment was successful"""
+    return random.choice(True, True, True, True,False)
+
+def process_refund(amount: float) -> bool:
+    """This simulates a refund and returns a boolean to indicate if refund was successful"""
+    return random.choice(True, True, True, True,False)
+
+
 def get_cart_by_id(cart_id: str):
     class TempCart:
         def __init__(self):
