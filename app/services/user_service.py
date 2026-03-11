@@ -55,7 +55,6 @@ def update_user_service(userid:str, payload:UserUpdate, role:UserRole) -> UserRe
                 "last_name" : payload.last_name.strip()if payload.last_name else user.get("last_name"),
                 "password" : payload.password.strip() if payload.password else user.get("password"),
                 "role" : role,
-                # "saved_addresses": user.get("saved_addresses", [] if role == UserRole.CUSTOMER else []),
                 "created_date": user.get("created_date")}
             users[index] = updated
             break
