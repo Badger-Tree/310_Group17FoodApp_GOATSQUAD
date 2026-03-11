@@ -8,7 +8,7 @@ def test_load_all_with_valid(mocker):
         {
             "cart_item_id": "7950136a-403b-4749-b612-ff0f0f8d2338",
             "cart_id": "0fe8ea74-fdff-4088-9e27-3ce23b0b3432",
-            "food_item_id": "10",
+            "food_item_id": 10,
             "quantity": 1,
             "price_per_item": 6.0,
             "subtotal": 6.0
@@ -19,7 +19,7 @@ def test_load_all_with_valid(mocker):
     result = repo.load_all()
     assert result[0]["cart_item_id"] == "7950136a-403b-4749-b612-ff0f0f8d2338"
     assert result[0]["cart_id"] == "0fe8ea74-fdff-4088-9e27-3ce23b0b3432"
-    assert result[0]["food_item_id"] == "10"
+    assert result[0]["food_item_id"] == 10
     assert result[0]["quantity"] == 1
     assert result[0]["price_per_item"] == 6.0 
     assert result[0]["subtotal"] == 6.0
@@ -61,7 +61,7 @@ def test_save_all_with_valid(tmp_path):
         {
             "cart_item_id": "7950136a-403b-4749-b612-ff0f0f8d2338",
             "cart_id": "0fe8ea74-fdff-4088-9e27-3ce23b0b3432",
-            "food_item_id": "10",
+            "food_item_id": 10,
             "quantity": 1,
             "price_per_item": 6.0,
             "subtotal": 6.0

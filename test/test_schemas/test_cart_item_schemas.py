@@ -6,13 +6,13 @@ from app.schemas.cartItem import CartItemBase, CartItemResponse
 def test_CartItemBase_valid(): 
 
     cartItem_data = { 
-        "food_item_id": "f01",
+        "food_item_id": 1,
         "quantity": 3,
         "price_per_item": 2.0
     }
 
     result = CartItemBase(**cartItem_data)
-    assert result.food_item_id == "f01"
+    assert result.food_item_id == 1
     assert result.quantity == 3
     assert result.price_per_item == 2.0
 
@@ -33,7 +33,7 @@ def test_CartItemBase_wrong_value():
 def test_CartItemBase_missing_input(): 
 
     cartItem_data = { 
-        "food_item_id": "f01",
+        "food_item_id": 1,
         "price_per_item": 2.0
     }
     with pytest.raises(ValidationError):
@@ -41,12 +41,10 @@ def test_CartItemBase_missing_input():
 
 
 
-
-
 def test_CartItemResponse_valid(): 
 
     cartItem_data = { 
-        "food_item_id": "f01",
+        "food_item_id": 1,
         "quantity": 3,
         "price_per_item": 2.0,
         "cart_item_id": "31",
@@ -55,7 +53,7 @@ def test_CartItemResponse_valid():
     }
 
     result = CartItemResponse(**cartItem_data)
-    assert result.food_item_id == "f01"
+    assert result.food_item_id == 1
     assert result.quantity == 3
     assert result.price_per_item == 2.0
     assert result.cart_item_id == "31"
@@ -80,10 +78,39 @@ def test_CartItemResponse_wrong_value():
 def test_CartItemResponse_missing_input(): 
 
     cartItem_data = { 
-        "food_item_id": "f01",
+        "food_item_id": 1,
         "price_per_item": 2.0,
         "cart_item_id": "200",
         "cart_id": "400",
+    }
+    with pytest.raises(ValidationError):
+       CartItemResponse(**cartItem_data)
+
+
+def test_CartItemResponse_zero_value(): 
+
+    cartItem_data = { 
+        "food_item_id": 1,
+        "quantity": 0,
+        "price_per_item": 2.0,
+        "cart_item_id": "200",
+        "cart_id": 400,
+        "subtotal": 2.0
+    }
+    with pytest.raises(ValidationError):
+       CartItemResponse(**cartItem_data)
+
+
+
+def test_CartItemResponse_negative_value(): 
+
+    cartItem_data = { 
+        "food_item_id": 1,
+        "quantity": -1,
+        "price_per_item": 2.0,
+        "cart_item_id": "200",
+        "cart_id": 400,
+        "subtotal": 2.0
     }
     with pytest.raises(ValidationError):
        CartItemResponse(**cartItem_data)
