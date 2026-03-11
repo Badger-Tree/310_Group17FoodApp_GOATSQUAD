@@ -6,15 +6,15 @@ from app.schemas.Token import Token, TokenResponse
 from app.repositories.sessions_repo import load_all as load_sessions, save_all as save_sessions
 from app.services.user_service import get_user_by_email_service
 
-def create_session_service(credentials: LoginRequest) -> TokenResponse:
+def create_session_service(email) -> TokenResponse:
     """Creates and stores a session. 
-    Input:Login Request(email, password). 
+    Input:user email (str). 
     Output: TokenResponse (userid, token, created, expires) """
     token = secrets.token_hex(16)
     created = datetime.now(timezone.utc)
     expires = created + timedelta(hours=1)
 
-    user = get_user_by_email_service(credentials.email)
+    user = get_user_by_email_service(email)
     sessions = load_sessions()
     sessions.append({"userid":user.id,
                      "role":user.role,
@@ -50,3 +50,4 @@ def validate_token_service(token: Token) -> dict:
                 expire_session_service(token)
                 raise HTTPException(status_code=401, detail="session expired")
             return (session)
+        raise HTTPException(status_code=404, detail="session not found")
