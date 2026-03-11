@@ -41,7 +41,8 @@ def update_user(payload: UserUpdate, token: str = Header(...)):
     Intake: userid, UserUpdate as payload
     Return: UserResponse (email, first_name, last_name, id, role, created_date)"""
     session = Token(token=token)
-    user = get_user_from_session(session)
+    current_user = get_user_from_session(session)
+    current_user_id = current_user.id
+    has_role_service(current_user, UserRole.CUSTOMER)
     
-    
-    return update_user_service(userid, payload)
+    return update_user_service(current_user_id, payload)
