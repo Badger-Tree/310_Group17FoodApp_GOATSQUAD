@@ -2,7 +2,7 @@
 from fastapi import HTTPException
 import pytest
 from app.schemas.Role import UserRole
-from app.services.AuthorizationService import has_role_service, require_role_service
+from app.services.authorization_service import has_role_service, require_role_service
 
 
 def test_has_role_servicesuccess(mocker):
