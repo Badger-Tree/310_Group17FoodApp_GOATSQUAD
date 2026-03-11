@@ -4,7 +4,8 @@ import secrets
 from app.schemas.Login import LoginRequest
 from app.schemas.Token import Token, TokenResponse
 from app.repositories.sessions_repo import load_all as load_sessions, save_all as save_sessions
-from app.services.user_service import get_user_by_email_service
+from app.schemas.User import UserResponse
+from app.services.user_service import get_user_by_email_service, get_user_by_id_service
 
 def create_session_service(email) -> TokenResponse:
     """Creates and stores a session. 
@@ -51,3 +52,17 @@ def validate_token_service(token: Token) -> dict:
                 raise HTTPException(status_code=401, detail="session expired")
             return (session)
     raise HTTPException(status_code=404, detail="session not found")
+
+def get_user_from_session(token: Token) -> UserResponse:
+    """Returns the user from a given session"""
+    session = validate_token_service(token)
+    user = get_user_by_id_service(session["user_id"])
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+    return UserResponse(id = user.id,
+                        email=user.email,
+                        first_name= user.first_name,
+                        last_name = user.last_name,
+                        role = user.role,
+                        created_date = user.created_date)
+    
