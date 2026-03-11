@@ -115,15 +115,13 @@ def test_validate_token_service_session_expired(mocker):
     
 def test_get_user_from_session(mocker):
     """checks that get_user_from_session will return a UserResponse if given a valid session token"""
-    # token_str = "asdf"
-    # token = Token(token = token_str)
+
     future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
     now = datetime.now(timezone.utc).isoformat()
     mock_session = {"token": "asdf","user_id":"1", "role" : "CUSTOMER", "created" : now,"expires":future}   
     
     mocker.patch("app.services.session_manager_service.validate_token_service", return_value = mock_session)    
 
-    
     mock_user = UserResponse(id= "1",
                     email= "pippin@example.com",
                     first_name= "peregrin",
