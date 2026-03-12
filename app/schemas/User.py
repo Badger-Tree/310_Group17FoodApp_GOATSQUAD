@@ -16,8 +16,6 @@ class UserResponse(UserBase):
     id: str
     role: UserRole
     created_date: datetime
-    # removed since refactor to keep addresses and users separate
-    # saved_addresses: Optional[List[AddressResponse]] = None
     
 class UserUpdate(BaseModel):
     email: Optional[str] = None
@@ -25,14 +23,10 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = None
     password: Optional[str] = None
     role: Optional[UserRole] = None
-    # removing address from the update since address is managed through address enopint
-    # saved_addresses: Optional[List[Address]] = None
-## Customer
     
 class CustomerCreate(UserBase):
     password: str
 
-## Staff
 class StaffCreate(UserBase):
     password: str
     

@@ -17,7 +17,6 @@ def root():
     return {"message": "FastAPI is running!"}
 
 app.include_router(cartItems_router)
-
 app.include_router(user_router)
 app.include_router(address_router)
 app.include_router(food_router)
