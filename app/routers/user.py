@@ -36,6 +36,7 @@ def register_staff(payload: StaffCreate):
     return register_user_service(payload, role=UserRole.STAFF)
 
 @router.put("/update-user/{userid}", response_model=UserResponse)
+<<<<<<< HEAD
 def update_user(payload: UserUpdate, token: str = Header(...)):
     """Updates the first_name, last_name, and/or password for an account. 
     Intake: userid, UserUpdate as payload
@@ -46,3 +47,22 @@ def update_user(payload: UserUpdate, token: str = Header(...)):
     has_role_service(current_user, UserRole.CUSTOMER)
     
     return update_user_service(current_user_id, payload)
+=======
+def update_user(userid: str, payload: UserUpdate):
+    """Updates the first_name, last_name, and/or password for an account. 
+    Intake: userid, UserUpdate as payload
+    Return: UserResponse (email, first_name, last_name, id, role, created_date)"""
+    return update_user_service(userid, payload)
+
+# @router.put("/update-user/{userid}", response_model=UserResponse)
+# def update_user(payload: UserUpdate, token: str = Header(...)):
+#     """Updates the first_name, last_name, and/or password for an account. 
+#     Intake: userid, UserUpdate as payload
+#     Return: UserResponse (email, first_name, last_name, id, role, created_date)"""
+#     session = Token(token=token)
+#     current_user = get_user_from_session(session)
+#     current_user_id = current_user.id
+#     require_role_service(current_user, UserRole.CUSTOMER)
+    
+#     return update_user_service(current_user_id, payload)
+>>>>>>> main
