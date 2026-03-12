@@ -1,5 +1,5 @@
 from ..schemas.food_item import FoodItemCreate, FoodItemUpdate
-from ..repositories.food_item_repo import load_all, save_all
+from ..repositories.food_item_repo import load_all, save_all, find_by_name
 
 def list_food_items():
     """list_food_items() retrieves all food items and returns as a list of dictionaries."""
@@ -23,9 +23,11 @@ def get_food_by_id(food_id: int):
     items = load_all()
     return next((item for item in items if item["food_item_id"] == food_id), None)
 
-def filter_food_items(restaurant_id: int = None, course: str = None):
-    """filter_food_items() retrieves food items with optional filtering by restaurant_id and course; returns list of matching items."""
+def filter_food_items(name: str = None, restaurant_id: int = None, course: str = None):
+    """filter_food_items() retrieves food items with optional filtering by name, restaurant_id and course; returns list of matching items."""
     items = load_all()
+    if name:
+        items = [item for item in items if name.lower() in item["food_name"].lower()]
     if restaurant_id:
         items = [item for item in items if item["restaurant_id"] == restaurant_id]
     if course:
