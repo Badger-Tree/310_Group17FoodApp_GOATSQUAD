@@ -1,20 +1,19 @@
-from pydantic import BaseModel
+
+from pydantic import BaseModel, Field, PositiveInt
+from decimal import Decimal
+from typing import Optional
 
 class CartItemBase(BaseModel):
-    food_item_id: str
-    quantity: str
-    price_per_item: str
+        food_item_id: int
+        quantity: PositiveInt
+        price_per_item: Decimal = Field(max_digits=10, decimal_places=2)
 
-class CartItemResponse(CartItemBase): 
-    cart_item_id: str
-    cart_id: str
 
-class CartItemAdd(BaseModel):
-    cart_id: str
-    food_item_id: str
-    quantity: str 
-    price_per_item: str
+class CartItemResponse(CartItemBase):
+        cart_item_id: str
+        cart_id: str
+        subtotal: Optional[Decimal] = None
 
 class CartItemUpdate(BaseModel):
-     quantity: str; 
-     price_per_item: str
+     quantity: PositiveInt
+     price_per_item: Decimal
