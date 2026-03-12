@@ -1,5 +1,5 @@
 id,email,first_name,last_name,password,role,created_date
-1,tame@example.com,New Name,New Last Name,string,CUSTOMER,2026-02-20T12:34:56
+1,tame@example.com,Hello,World,string,CUSTOMER,2026-02-20T12:34:56
 2,name@example.com,first,last,password123,CUSTOMER,2026-02-20T12:34:56
 9c6dbfcb-72c5-4cc4-9f76-29200f0efda7,name1@example.com,first,last,password123,CUSTOMER,2026-02-20T12:34:56
 b3e207bd-103e-4154-b7cc-7e32bd898ee3,name3@example.com,first,last,password123,STAFF,2026-02-20T12:34:56
