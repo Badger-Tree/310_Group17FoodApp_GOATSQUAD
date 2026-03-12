@@ -231,7 +231,7 @@ def test_update_user_service_success(monkeypatch):
     assert updated_user.last_name == "doe"
     assert saved_users[0]["password"] == "UpdatedPassword"
  
-def update_user_service_usernotfound(monkeypatch):
+def test_update_user_service_usernotfound(monkeypatch):
     """Tests that update_user_service() creates an error message if there is no user found with provided user id"""
     def mock_load_users():
         return [{
@@ -252,5 +252,5 @@ def update_user_service_usernotfound(monkeypatch):
     monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
     monkeypatch.setattr("app.services.user_service.save_all_users", mock_save_all_users)
     payload = UserUpdate(first_name = "UpdatedJane", last_name = None, password = "UpdatedPassword")
-    with pytest.raises(HTTPException, match = "User 77 not found") as testException: update_user_service_usernotfound("77", payload, role="CUSTOMER")
+    with pytest.raises(HTTPException, match = "User 77 not found") as testException: update_user_service("77", payload)
     assert testException.value.status_code ==404
