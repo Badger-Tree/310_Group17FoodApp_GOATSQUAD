@@ -10,7 +10,7 @@ def login_service(credentials: LoginRequest) -> TokenResponse:
     """Lets a user log in to the system. Input: LoginRequest(email, password). 
     Output: TokenResponse (userid, token, created, expires)"""
     if validate_credentials(credentials.email, credentials.password):
-        token = create_session_service(credentials)
+        token = create_session_service(credentials.email)
         return token
     raise HTTPException(status_code=401, detail=f"Incorrect credentials")
 
