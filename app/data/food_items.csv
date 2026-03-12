@@ -1,0 +1,4 @@
+food_item_id,restaurant_id,food_name,price,description,course
+1,101,Poutine,15.50,Melted creamy cheese with fries and gravy,Main
+2,102,Miso Soup,5.99,Traditional tasty soybean broth,Starter
+3,103,Pizza,10.00,Fresh cheesy mozzarella and basil,Dessert
