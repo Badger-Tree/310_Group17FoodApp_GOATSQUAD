@@ -15,7 +15,7 @@ def test_load_all_success(monkeypatch, tmp_path):
     monkeypatch.setattr("app.repositories.order_items_repo.DATA_PATH", mock_path)
     result = load_all()
     assert len(result) == 3
-    assert result[1]["order_item_id"] == "5cf89d5c-7ad2-4e03-856a-28cbb24e0591,a3a24e38-1f57-431a-ab30-58f2b6a2cf08"
+    assert result[1]["order_item_id"] == "5cf89d5c-7ad2-4e03-856a-28cbb24e0591"
     assert result[2]["order_id"] == "3"
 
 def test_load_all_fileDNE(monkeypatch, tmp_path):
@@ -72,7 +72,7 @@ def test_save_all_empty_list(monkeypatch, tmp_path):
         rows = list(reader)
     
     assert len(rows) == 0
-    expected_fields = ["order_item_id,order_id,food_item_id,quantity,price_per_item"]
+    expected_fields = ["order_item_id","order_id","food_item_id","quantity","price_per_item"]
     assert reader.fieldnames == expected_fields
     
 def test_save_all_fileDNE(monkeypatch, tmp_path):
