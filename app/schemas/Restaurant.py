@@ -27,5 +27,5 @@ class RestaurantUpdate(BaseModel):
     and the restaurant status"""
 class RestaurantResponse(RestaurantBase):
     restaurant_id: int
-    owner_id: int
+    owner_id: str
     restaurant_status: str
