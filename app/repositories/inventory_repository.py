@@ -43,7 +43,7 @@ def get_inventory_by_food_id(food_item_id: int) -> Optional[Inventory]:
             return Inventory(**item)
     return None
 
-def update_inventory_record(food_item_id: int, payload: InventoryUpdate) -> Optional[Inventory]:
+def update_inventory(food_item_id: int, payload: InventoryUpdate) -> Optional[Inventory]:
     """Update the quantity for a specific food item"""
     items = load_all()
     updated_item = None

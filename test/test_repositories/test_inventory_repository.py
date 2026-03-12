@@ -77,7 +77,7 @@ def test_update_inventory_record_success(tmp_path):
         create_mock_csv(test_csv, initial_data)
 
         update_payload = InventoryUpdate(quantity=75)
-        result = inventory_repository.update_inventory_record(300, update_payload)
+        result = inventory_repository.update_inventory(300, update_payload)
 
         assert result.quantity == 75
         other_item = inventory_repository.get_inventory_by_food_id(400)
