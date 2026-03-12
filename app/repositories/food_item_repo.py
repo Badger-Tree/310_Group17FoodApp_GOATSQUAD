@@ -32,3 +32,8 @@ def save_all(items):
         writer = csv.DictWriter(file, fieldnames=FIELDNAMES)
         writer.writeheader()
         writer.writerows(items)
+
+def find_by_name(food_name):
+    """find_by_name() function searches for a food item by its name and returns the first matching item as a dictionary. If no match is found, it returns None."""
+    items = load_all()
+    return [item for item in items if food_name.lower() in item["food_name"].lower()]
