@@ -2,8 +2,9 @@ from fastapi import APIRouter, HTTPException, Header, status
 from typing import List
 from app.schemas.User import CustomerCreate, UserResponse, StaffCreate, UserUpdate
 from app.schemas.Role import UserRole
+from app.services.session_manager_service import get_user_from_session
 from app.services.user_service import  get_user_by_id_service, get_user_by_email_service, register_user_service, update_user_service
-
+from app.schemas.Token import Token
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -35,8 +36,14 @@ def register_staff(payload: StaffCreate):
     Return: UserResponse (email, first_name, last_name, id, role, created_date)"""
     return register_user_service(payload, role=UserRole.STAFF)
 
+# @router.put("/update-user/{userid}", response_model=UserResponse)
+# def update_user(userid: str, payload: UserUpdate):
+#     """Updates the first_name, last_name, and/or password for an account. 
+#     Intake: userid, UserUpdate as payload
+#     Return: UserResponse (email, first_name, last_name, id, role, created_date)"""
+#     return update_user_service(userid, payload)
+
 @router.put("/update-user/{userid}", response_model=UserResponse)
-<<<<<<< HEAD
 def update_user(payload: UserUpdate, token: str = Header(...)):
     """Updates the first_name, last_name, and/or password for an account. 
     Intake: userid, UserUpdate as payload
@@ -44,25 +51,6 @@ def update_user(payload: UserUpdate, token: str = Header(...)):
     session = Token(token=token)
     current_user = get_user_from_session(session)
     current_user_id = current_user.id
-    has_role_service(current_user, UserRole.CUSTOMER)
+    # require_role_service(current_user, UserRole.CUSTOMER)
     
     return update_user_service(current_user_id, payload)
-=======
-def update_user(userid: str, payload: UserUpdate):
-    """Updates the first_name, last_name, and/or password for an account. 
-    Intake: userid, UserUpdate as payload
-    Return: UserResponse (email, first_name, last_name, id, role, created_date)"""
-    return update_user_service(userid, payload)
-
-# @router.put("/update-user/{userid}", response_model=UserResponse)
-# def update_user(payload: UserUpdate, token: str = Header(...)):
-#     """Updates the first_name, last_name, and/or password for an account. 
-#     Intake: userid, UserUpdate as payload
-#     Return: UserResponse (email, first_name, last_name, id, role, created_date)"""
-#     session = Token(token=token)
-#     current_user = get_user_from_session(session)
-#     current_user_id = current_user.id
-#     require_role_service(current_user, UserRole.CUSTOMER)
-    
-#     return update_user_service(current_user_id, payload)
->>>>>>> main
