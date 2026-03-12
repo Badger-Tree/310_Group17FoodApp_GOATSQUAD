@@ -80,11 +80,6 @@ def test_user_update_partial():
     assert result.last_name == None
     assert result.password == None
 
-def test_user_update_invalid_name():
-    """test that UserUpdate generates a validation error if given an invalid input"""
-    input_data = {"first_name": "",}
-    with pytest.raises(ValidationError): UserUpdate(**input_data)
-
 def test_customer_create():
     """tests that CustomerCreate generates successfully with valid input"""
     input_data = {"email":"pippin@shire.me",

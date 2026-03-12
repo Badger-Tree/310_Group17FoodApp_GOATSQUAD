@@ -54,14 +54,9 @@ def update_user_service(userid:str, payload:UserUpdate) -> UserResponse:
                 "first_name":payload.first_name.strip() if payload.first_name else user.get("first_name"), 
                 "last_name" : payload.last_name.strip()if payload.last_name else user.get("last_name"),
                 "password" : payload.password.strip() if payload.password else user.get("password"),
-<<<<<<< HEAD
                 "role" : user.get("role"),
                 "created_date": user.get("created_date"),
                 }
-=======
-                "role" : role,
-                "created_date": user.get("created_date")}
->>>>>>> main
             users[index] = updated
             break
     if not updated:
