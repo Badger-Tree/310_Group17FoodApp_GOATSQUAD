@@ -3,6 +3,8 @@ import pytest
 from fastapi import HTTPException
 from unittest.mock import patch
 
+"""Checks that the function returns the correct dictionary with valid data"""
+
 mock_cart_data = [ 
     {
     "cart_item_id": "92075de6-2b6d-43b8-acef-4b69c3d962f7",
@@ -35,6 +37,8 @@ def test_get_cartItem_by_id(cart_item_id, expected):
         assert result == expected
 
 
+"""Checks that the function raises exception with empty or invalid input strings"""
+
 @pytest.mark.parametrize("cart_item_id", ["", " "])
 def test_get_cartItem_by_id_empty(cart_item_id):
     responseDetail = "cart_item_id cannot be empty"
@@ -45,6 +49,8 @@ def test_get_cartItem_by_id_empty(cart_item_id):
     assert httpExc.value.status_code == statusCode
     assert httpExc.value.detail == responseDetail
    
+
+"""Checks that the function raises exception if the cart_item_id cannot be found"""
    
 @pytest.mark.parametrize("cart_item_id", ["cart_item_id_not_found"])
 def test_get_cartItem_by_wrong_id(cart_item_id):

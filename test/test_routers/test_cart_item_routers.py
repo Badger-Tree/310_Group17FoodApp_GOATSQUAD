@@ -2,6 +2,8 @@ from app.routers.cartItems import get_cart_item_id
 from fastapi import HTTPException
 import pytest
 
+"""Tests successful path where cart_item_id is found"""
+
 def test_get_cart_item_id_valid(mocker):
     mock_router = mocker.patch("app.routers.cartItems.get_cartItem_by_id")
     mock_router.return_value = {"cart_item_id": "300"}
@@ -9,6 +11,7 @@ def test_get_cart_item_id_valid(mocker):
 
     assert result["cart_item_id"] == "300"
 
+"""Tests unsuccessful path where cart_item_id is not found"""
 
 def test_get_cart_item_id_not_found(mocker):
     cart_item_id = "999"

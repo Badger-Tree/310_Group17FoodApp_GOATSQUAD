@@ -3,6 +3,8 @@ import pytest
 from app.schemas.cartItem import CartItemBase, CartItemResponse
 
 
+"""Confirms the model stored each field with valid data"""
+
 def test_CartItemBase_valid(): 
 
     cartItem_data = { 
@@ -17,6 +19,7 @@ def test_CartItemBase_valid():
     assert result.price_per_item == 2.0
 
 
+"""Confirms the model raises exception with invalid data"""
 
 def test_CartItemBase_wrong_value(): 
 
@@ -29,6 +32,7 @@ def test_CartItemBase_wrong_value():
        CartItemBase(**cartItem_data)
 
 
+"""Confirms the model raises exception with missing data"""
 
 def test_CartItemBase_missing_input(): 
 
@@ -40,6 +44,7 @@ def test_CartItemBase_missing_input():
        CartItemBase(**cartItem_data)
 
 
+"""Ensures response contains required fields with valid data"""
 
 
 def test_CartItemResponse_valid(): 
@@ -62,6 +67,8 @@ def test_CartItemResponse_valid():
     assert result.subtotal == 6.0
 
 
+"""Ensures response raises error with invalid data"""
+
 def test_CartItemResponse_wrong_value(): 
 
     cartItem_data = { 
@@ -76,6 +83,8 @@ def test_CartItemResponse_wrong_value():
        CartItemResponse(**cartItem_data)
 
 
+"""Ensures response raises error with missing data"""
+
 def test_CartItemResponse_missing_input(): 
 
     cartItem_data = { 
@@ -87,7 +96,7 @@ def test_CartItemResponse_missing_input():
     with pytest.raises(ValidationError):
        CartItemResponse(**cartItem_data)
 
-
+"""Ensures response raises error with zero data"""
 
 def test_CartItemResponse_zero_value(): 
 
@@ -103,6 +112,7 @@ def test_CartItemResponse_zero_value():
        CartItemResponse(**cartItem_data)
 
 
+"""Ensures response raises error with negative data"""
 
 def test_CartItemResponse_negative_value(): 
 
