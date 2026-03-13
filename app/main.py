@@ -4,7 +4,8 @@ from .routers.food_item import router as food_router
 from app.routers.cart import router as cart_router
 from app.routers.user import router as user_router
 from app.routers.address import router as address_router
-from app.routers.authentication import router as authentication
+from app.routers.inventory_router import router as inventory_router
+
 app = FastAPI()
 
 @app.get("/health")
