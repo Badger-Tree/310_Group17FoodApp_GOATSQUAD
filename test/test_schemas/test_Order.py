@@ -153,8 +153,6 @@ def test_OrderResponse_invalid_status():
                     }
     with pytest.raises(ValidationError): OrderResponse(**input_data)
 
-#def test_OrderResponse_missing_input():
-"""test that OrderResponse creates an error if it receives an input with missing field"""
 def test_OrderResponse_invalid_status():
     """test that OrderResponse creates an error if it receives in invalid status"""
     input_data = {"restaurant_id" : "45",
