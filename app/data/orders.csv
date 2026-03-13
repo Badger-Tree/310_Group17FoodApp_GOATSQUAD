@@ -1,0 +1,2 @@
+order_id,customer_id,restaurant_id,cart_id,delivery_id,status,total_amount,created_date,delivery_address_id
+order123,cust456,rest789,cart101,,APPROVED,26.66,2026-02-20T12:34:56,addr202
