@@ -7,3 +7,4 @@ address_id,user_id,street,city,postal_code,instructions,created_date
 93bc8def-7583-49a3-a680-a13bf0f874c4,1,NEWADDRESS,string,string,string,2026-03-12T22:36:12.280879
 0caa7adf-687c-4e4a-856f-9a745fb9dedb,1,string,string,string,string,2026-03-13T01:17:22.042960
 c822afda-7508-47f6-97a6-a62d3b5619f9,1,ADDRESS,string,string,string,2026-03-13T01:18:08.203512
+95734b0c-025a-44f3-9583-4b2ba38a959a,1,TEST,string,string,string,2026-03-13T01:36:46.788219

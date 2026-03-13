@@ -30,9 +30,6 @@ def create_address_service(payload: AddressCreate, user_id: str) -> AddressRespo
     new_id = str(uuid.uuid4())
     if any(it.get("address_id") == new_id for it in addresses_data):
         raise HTTPException(status_code=409, detail="ID collision; retry.")
-    
-    ##check if the user id exists else we can't add to a user
-
 
     new_address = {
         "address_id" : new_id,
@@ -40,9 +37,10 @@ def create_address_service(payload: AddressCreate, user_id: str) -> AddressRespo
         "street": payload.street.strip(),
         "city": payload.city.strip(),
         "postal_code": payload.postal_code.strip(),
-        "instructions": payload.instructions.strip(),
+        "instructions": payload.instructions.strip() if payload.instructions else None,
         "created_date": datetime.utcnow().isoformat()
     }
+
     addresses_data.append(new_address)
     save_addresses(addresses_data)
     return AddressResponse(**new_address) 
