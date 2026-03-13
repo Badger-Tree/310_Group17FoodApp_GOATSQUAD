@@ -1,0 +1,16 @@
+notification_id,recipient_user_id,notification_type,message,status
+1,10,order,Your order with ID 101 has been placed successfully.,sent
+2,11,payment,Payment was successful! Thank you for your order.,sent
+3,12,delivery,Delivery update for #3: Your courier is nearby.,sent
+4,13,payment,Your payment was declined. Please check your balance.,sent
+5,14,payment,Payment was successful! Thank you for your order.,sent
+6,15,payment,Payment was successful! Thank you for your order.,sent
+7,16,payment,Your payment was declined. Please check your balance.,sent
+8,17,payment,Payment was successful! Thank you for your order.,sent
+9,10,payment,Your payment was declined. Please check your balance.,sent
+10,10,payment,Your payment was declined. Please check your balance.,sent
+11,11,payment,Your payment was declined. Please check your balance.,sent
+12,11,payment,Your payment was declined. Please check your balance.,sent
+13,11,payment,Your payment was declined. Please check your balance.,sent
+14,11,payment,Payment was successful! Thank you for your order.,sent
+15,11,payment,Your payment was declined. Please check your balance.,sent
