@@ -6,11 +6,17 @@ class NotificationType(str, Enum):
     DELIVERY = "delivery"
     PAYMENT = "payment"
 
+class NotificationStatus(str, Enum):
+    SENT = "sent"
+    DELIVERED = "delivered"
+    PENDING = "pending"
+    FAILED = "failed"
+
 class NotificationBase(BaseModel):
     recipient_user_id: str
     notification_type: NotificationType
     message: str
-    status: str = "sent"
+    status: NotificationStatus = NotificationStatus.SENT
 
 class NotificationCreate(NotificationBase):
     pass
