@@ -33,6 +33,7 @@ def create_session_service(email) -> TokenResponse:
     return TokenResponse(**new_token)
 
 def expire_session_service(token:str): 
+    """removes a session from the stored sessions when it is expired or the user logs out"""
     sessions = load_sessions()
     new_sessions = []
     for session in sessions:
@@ -43,6 +44,7 @@ def expire_session_service(token:str):
     save_sessions(new_sessions)
 
 def validate_token_service(token: Token) -> dict:
+    """checks if a session exists and is not expired, returns a dict with the same information as a TokenResponse"""
     sessions = load_sessions()
     for session in sessions:
         if session["token"] == token.token:
@@ -54,6 +56,7 @@ def validate_token_service(token: Token) -> dict:
     raise HTTPException(status_code=404, detail="session not found")
 
 def get_user_from_session(token: Token) -> UserResponse:
+    """gets a userid from the session token and returns the corresponding UserResponse"""
     """Returns the user from a given session"""
     session = validate_token_service(token)
     user = get_user_by_id_service(session["user_id"])
