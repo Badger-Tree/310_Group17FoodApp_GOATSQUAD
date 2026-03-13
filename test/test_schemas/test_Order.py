@@ -3,7 +3,6 @@ from datetime import datetime
 import pytest
 from app.schemas.OrderStatus import OrderStatus
 from app.schemas.Order import  OrderCreate, OrderBase, OrderResponse
-from app.schemas.OrderItem import OrderItemCreate, OrderItemResponse # type: ignore
 
 
 def test_OrderBase_valid_input():
@@ -69,18 +68,6 @@ def test_OrderCreate_invalid_input():
                     }
     with pytest.raises(ValidationError): OrderCreate(**input_data)
 
-# def test_OrderCreate_no_items():
-#     """test that OrderCreate creates an error if it receives an input with no items"""
-#     input_data = {"restaurant_id" : 1,
-#                     "customer_id" : "44",
-#                     "delivery_address_id" : "5",
-#                     "delivery_address" : "268 High Street",
-#                     "cart_id": "999",
-#                     "items": [{
-#                 }]
-#                 }
-#     with pytest.raises(ValidationError): OrderCreate(**input_data)
-    
 def test_OrderCreate_missing_input():
     """test that OrderCreate creates an error if it receives an input with missing field"""
     input_data = {
