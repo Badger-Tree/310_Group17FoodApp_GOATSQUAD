@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.routers.cartItems import router as cartItems_router
-from .routers.food_item import router as food_router
+from app.routers.food_item import router as food_router
 
 from app.routers.user import router as user_router
 from app.routers.address import router as address_router
