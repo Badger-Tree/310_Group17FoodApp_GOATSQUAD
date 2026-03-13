@@ -29,7 +29,6 @@ def test_CartItemBase_wrong_value():
        CartItemBase(**cartItem_data)
 
 
-
 def test_CartItemBase_missing_input(): 
 
     cartItem_data = { 
@@ -38,8 +37,6 @@ def test_CartItemBase_missing_input():
     }
     with pytest.raises(ValidationError):
        CartItemBase(**cartItem_data)
-
-
 
 
 def test_CartItemResponse_valid(): 
@@ -86,8 +83,6 @@ def test_CartItemResponse_missing_input():
     }
     with pytest.raises(ValidationError):
        CartItemResponse(**cartItem_data)
-
-
 
 
 def test_CartItemUpdate_zero_value(): 
