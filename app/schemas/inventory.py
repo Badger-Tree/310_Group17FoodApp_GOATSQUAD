@@ -13,6 +13,3 @@ class InventoryUpdate(BaseModel):
 
 class Inventory(InventoryBase):
     inventory_id: int
-
-    class Config:
-        from_attributes = True

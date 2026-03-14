@@ -20,6 +20,3 @@ class FoodItemUpdate(BaseModel):
 
 class FoodItem(FoodItemBase):
     food_item_id: int
-
-    class Config:
-        from_attributes = True 
