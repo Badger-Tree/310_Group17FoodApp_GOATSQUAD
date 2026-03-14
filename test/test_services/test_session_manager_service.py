@@ -118,7 +118,7 @@ def test_get_user_from_session(mocker):
 
     future = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
     now = datetime.now(timezone.utc).isoformat()
-    mock_session = {"token": "asdf","user_id":"1", "role" : "CUSTOMER", "created" : now,"expires":future}   
+    mock_session = {"token": "asdf","userid":"1", "role" : "CUSTOMER", "created" : now,"expires":future}   
     
     mocker.patch("app.services.session_manager_service.validate_token_service", return_value = mock_session)    
 

@@ -56,7 +56,7 @@ def validate_token_service(token: Token) -> dict:
 def get_user_from_session(token: Token) -> UserResponse:
     """Returns the user from a given session"""
     session = validate_token_service(token)
-    user = get_user_by_id_service(session["user_id"])
+    user = get_user_by_id_service(session["userid"])
     if not user:
         raise HTTPException(status_code=404, detail="user not found")
     return user
