@@ -6,5 +6,66 @@
     "quantity": 5,
     "price_per_item": 3.0,
     "subtotal": 15.0
+  },
+
+   {
+    "cart_item_id": "7950136a-403b-4749-b612-ff0f0f8d2338",
+    "cart_id": "0fe8ea74-fdff-4088-9e27-3ce23b0b3432",
+    "customer_id": "20",
+    "food_item_id": 10,
+    "quantity": 1,
+    "price_per_item": 6.0,
+    "address_id": "Pippin lane",
+    "subtotal": 6.0
+  },
+  {
+    "cart_item_id": "92075de6-2b6d-43b8-acef-4b69c3d962f7",
+    "cart_id": "0fe8ea74-fdff-4088-9e27-3ce23b0b3432",
+    "customer_id": "20",
+    "food_item_id": 34,
+    "quantity": 1,
+    "price_per_item": 4.0,
+    "address_id": "Pippin lane",
+    "subtotal": 4.0
+  },
+  {
+    "cart_item_id": "01927535-b06a-4d23-8ab1-3262dd88e040",
+    "cart_id": "0fe8ea74-fdff-4088-9e27-3ce23b0b3432",
+    "customer_id": "20",
+    "food_item_id": 50,
+    "quantity": 2,
+    "price_per_item": 1.0,
+    "address_id": "Pippin lane",
+    "subtotal": 2.0
+  },
+  {
+    "cart_item_id": "5e4b069e-2efb-4c4f-839b-9d6ba48dc364",
+    "cart_id": "e9fffefe-7287-46e4-a433-05f11c73e4a4",
+    "customer_id": "2",
+    "food_item_id": 20,
+    "quantity": 1,
+    "price_per_item": 4.0,
+    "address_id": "Pippin lane",
+    "subtotal": 4.0
+  },
+  {
+    "cart_item_id": "0120f079-9e09-4c6f-87fa-e767fa79a62b",
+    "cart_id": "e9fffefe-7287-46e4-a433-05f11c73e4a4",
+    "customer_id": "2",
+    "address_id": "3",
+    "food_item_id": 1.0,
+    "quantity": 1,
+    "price_per_item": 15.5,
+    "subtotal": 15.5
+  },
+  {
+    "cart_item_id": "7c67321e-3dda-4a69-bde4-baba0b7c7288",
+    "cart_id": "e9fffefe-7287-46e4-a433-05f11c73e4a4",
+    "customer_id": "2",
+    "address_id": "3",
+    "food_item_id": 1,
+    "quantity": 1,
+    "price_per_item": 15.5,
+    "subtotal": 15.5
   }
 ]

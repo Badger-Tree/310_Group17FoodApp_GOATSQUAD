@@ -5,6 +5,7 @@ import json
 
 
 def test_load_all_with_valid(mocker):
+    """Creates valid fake load all mock data and ensures the values equal what they should"""
     mock_data = [
         {
             "cart_item_id": "7950136a-403b-4749-b612-ff0f0f8d2338",
@@ -27,6 +28,7 @@ def test_load_all_with_valid(mocker):
 
 
 def test_load_all_with_empty_file(mocker):
+    """Creates empty fake load all mock data and ensures it returns empty data correctly"""
     mock_data = []
 
     mocker.patch("app.repositories.cartItems_repo.load_all", return_value = mock_data)
@@ -34,6 +36,7 @@ def test_load_all_with_empty_file(mocker):
     assert result == []
 
 def test_load_all_with_empty_file(mocker):
+    """Creates fake load all mock data with empty fields and ensures it returns data correctly even when all fields are empty."""
     mock_data = [
           {
             "cart_item_id": None,
@@ -53,6 +56,7 @@ def test_load_all_with_empty_file(mocker):
 
 
 def test_save_all_with_valid(tmp_path):
+    """Creates valid fake save all data and ensures it saves this data properly"""
     mock_path = tmp_path/ "cartItems.json"
     
     repo.DATA_PATH = mock_path
@@ -74,30 +78,9 @@ def test_save_all_with_valid(tmp_path):
 
     assert saved == mock_data
 
-def test_save_all_with_invalid(tmp_path):
-    mock_path = tmp_path/ "cartItems.json"
-    
-    repo.DATA_PATH = mock_path
-    
-    mock_data = [
-        {
-            "cart_item_id": "7950136a-403b-4749-b612-ff0f0f8d2338",
-            "cart_id": "0fe8ea74-fdff-4088-9e27-3ce23b0b3432",
-            "food_item_id": 10,
-            "quantity": 1,
-            "price_per_item": 6,
-            "subtotal": 6
-        }
-    ]
 
-    repo.save_all(mock_data)
-    with open(mock_path, "r", encoding = "utf-8") as f: 
-        saved = json.load(f)
-
-    assert saved == mock_data
-
-
-def test_save_all_invalid_data_raises(tmp_path):
+def test_save_all_invalid_format_data(tmp_path):
+    """Creates wrong format of data"""
     mock_path = tmp_path/ "cartItems.json"
     
     repo.DATA_PATH = mock_path

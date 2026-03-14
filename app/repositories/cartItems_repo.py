@@ -17,7 +17,7 @@ def save_all(items: List[Dict[str, Any]]) -> None:
     def decimal_converter(obj):
         if isinstance(obj, Decimal):
             return float(obj)  
-        raise TypeError(f"Object {obj.__class__.__name__} is not JSON serializable")
+        raise TypeError("decimal is not JSON serializable")
     
     with tmp.open("w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2, default=decimal_converter)
