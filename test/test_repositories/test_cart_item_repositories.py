@@ -3,9 +3,9 @@ import app.repositories.cartItems_repo as repo
 import pytest
 import json
 
-"""Checks if the returned data is what we expected with all valid input"""
 
 def test_load_all_with_valid(mocker):
+    """Checks if the returned data is what we expected with all valid input"""
     mock_data = [
         {
             "cart_item_id": "7950136a-403b-4749-b612-ff0f0f8d2338",
@@ -27,10 +27,8 @@ def test_load_all_with_valid(mocker):
     assert result[0]["subtotal"] == 6.0
 
 
-
-"""Checks if there are no cart items in database"""
-
 def test_load_all_with_empty_file(mocker):
+    """Checks if there are no cart items in database"""
     mock_data = []
 
     mocker.patch("app.repositories.cartItems_repo.load_all", return_value = mock_data)
@@ -38,10 +36,8 @@ def test_load_all_with_empty_file(mocker):
     assert result == []
 
 
-
-"""Checks if a cart item exists but all fields are none"""
-
 def test_load_all_with_empty_file(mocker):
+    """Checks if a cart item exists but all fields are none"""
     mock_data = [
           {
             "cart_item_id": None,
@@ -58,9 +54,8 @@ def test_load_all_with_empty_file(mocker):
     assert result == mock_data
 
 
-"""Checks if save all correctly saves data when valid"""
-
 def test_save_all_with_valid(tmp_path):
+    """Checks if save all correctly saves data when valid"""
     mock_path = tmp_path/ "cartItems.json"
     
     repo.DATA_PATH = mock_path
@@ -82,9 +77,9 @@ def test_save_all_with_valid(tmp_path):
 
     assert saved == mock_data
 
-"""Checks if error occurs when invalid data is saved"""
 
 def test_save_all_invalid_data_raises(tmp_path):
+    """Checks if error occurs when invalid data is saved"""
     mock_path = tmp_path/ "cartItems.json"
     
     repo.DATA_PATH = mock_path

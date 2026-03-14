@@ -4,6 +4,8 @@ from app.schemas.cartItem import CartItemResponse
 from app.repositories.cartItems_repo import load_all
 
 def get_cartItem_by_id(cart_item_id: str) -> CartItemResponse:
+    """This gets a cart item by its id and returns a CartItemResponse: (food_item_id,
+        quantity, price_per_item, cart_item_id, cart_id, subtotal"""
     cart_items_data = load_all()
     cart_item_id = str(cart_item_id).strip()
     if not cart_item_id:

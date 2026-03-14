@@ -3,10 +3,8 @@ import pytest
 from app.schemas.cartItem import CartItemBase, CartItemResponse
 
 
-"""Confirms the model stored each field with valid data"""
-
 def test_CartItemBase_valid(): 
-
+    """Confirms the model stored each field with valid data"""
     cartItem_data = { 
         "food_item_id": 1,
         "quantity": 3,
@@ -19,9 +17,8 @@ def test_CartItemBase_valid():
     assert result.price_per_item == 2.0
 
 
-"""Confirms the model raises exception with invalid data"""
-
 def test_CartItemBase_wrong_value(): 
+    """Confirms the model raises exception with invalid data"""
 
     cartItem_data = { 
         "food_item_id": None,
@@ -32,9 +29,9 @@ def test_CartItemBase_wrong_value():
        CartItemBase(**cartItem_data)
 
 
-"""Confirms the model raises exception with missing data"""
 
 def test_CartItemBase_missing_input(): 
+    """Confirms the model raises exception with missing data"""
 
     cartItem_data = { 
         "food_item_id": 1,
@@ -44,10 +41,9 @@ def test_CartItemBase_missing_input():
        CartItemBase(**cartItem_data)
 
 
-"""Ensures response contains required fields with valid data"""
-
 
 def test_CartItemResponse_valid(): 
+    """Ensures response contains required fields with valid data"""
 
     cartItem_data = { 
         "food_item_id": 1,
@@ -67,9 +63,9 @@ def test_CartItemResponse_valid():
     assert result.subtotal == 6.0
 
 
-"""Ensures response raises error with invalid data"""
 
 def test_CartItemResponse_wrong_value(): 
+    """Ensures response raises error with invalid data"""
 
     cartItem_data = { 
         "food_item_id": 1,
@@ -83,9 +79,9 @@ def test_CartItemResponse_wrong_value():
        CartItemResponse(**cartItem_data)
 
 
-"""Ensures response raises error with missing data"""
 
 def test_CartItemResponse_missing_input(): 
+    """Ensures response raises error with missing data"""
 
     cartItem_data = { 
         "food_item_id": 1,
@@ -96,9 +92,9 @@ def test_CartItemResponse_missing_input():
     with pytest.raises(ValidationError):
        CartItemResponse(**cartItem_data)
 
-"""Ensures response raises error with zero data"""
 
 def test_CartItemResponse_zero_value(): 
+    """Ensures response raises error with zero data"""
 
     cartItem_data = { 
         "food_item_id": 1,
@@ -112,9 +108,8 @@ def test_CartItemResponse_zero_value():
        CartItemResponse(**cartItem_data)
 
 
-"""Ensures response raises error with negative data"""
-
 def test_CartItemResponse_negative_value(): 
+    """Ensures response raises error with negative data"""
 
     cartItem_data = { 
         "food_item_id": 1,
