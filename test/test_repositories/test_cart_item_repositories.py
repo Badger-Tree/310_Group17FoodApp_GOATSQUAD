@@ -3,8 +3,14 @@ import app.repositories.cartItems_repo as repo
 import pytest
 import json
 
+<<<<<<< HEAD
 def test_load_all_with_valid(mocker):
     """Creates valid fake load all mock data and ensures the values equal what they should"""
+=======
+
+def test_load_all_with_valid(mocker):
+    """Checks if the returned data is what we expected with all valid input"""
+>>>>>>> feature/get_cart_item_by_id
     mock_data = [
         {
             "cart_item_id": "7950136a-403b-4749-b612-ff0f0f8d2338",
@@ -27,7 +33,11 @@ def test_load_all_with_valid(mocker):
 
 
 def test_load_all_with_empty_file(mocker):
+<<<<<<< HEAD
     """Creates empty fake load all mock data and ensures it returns empty data correctly"""
+=======
+    """Checks if there are no cart items in database"""
+>>>>>>> feature/get_cart_item_by_id
     mock_data = []
 
     mocker.patch("app.repositories.cartItems_repo.load_all", return_value = mock_data)
@@ -35,9 +45,14 @@ def test_load_all_with_empty_file(mocker):
     assert result == []
 
 
+<<<<<<< HEAD
 
 def test_load_all_with_empty_values(mocker):
     """Creates fake load all mock data with empty fields and ensures it returns data correctly even when all fields are empty."""
+=======
+def test_load_all_with_empty_file(mocker):
+    """Checks if a cart item exists but all fields are none"""
+>>>>>>> feature/get_cart_item_by_id
     mock_data = [
           {
             "cart_item_id": None,
@@ -54,10 +69,15 @@ def test_load_all_with_empty_values(mocker):
     assert result == mock_data
 
 
+<<<<<<< HEAD
 
 
 def test_save_all_with_valid(tmp_path):
     """Creates valid fake save all data and ensures it saves this data properly"""
+=======
+def test_save_all_with_valid(tmp_path):
+    """Checks if save all correctly saves data when valid"""
+>>>>>>> feature/get_cart_item_by_id
     mock_path = tmp_path/ "cartItems.json"
     
     repo.DATA_PATH = mock_path
@@ -81,7 +101,11 @@ def test_save_all_with_valid(tmp_path):
 
 
 def test_save_all_invalid_data_raises(tmp_path):
+<<<<<<< HEAD
     """Creates inavlid faje data and ensures it raises an error of invalid data"""
+=======
+    """Checks if error occurs when invalid data is saved"""
+>>>>>>> feature/get_cart_item_by_id
     mock_path = tmp_path/ "cartItems.json"
     
     repo.DATA_PATH = mock_path

@@ -1,4 +1,3 @@
-import uuid
 from typing import List
 from fastapi import HTTPException
 from app.schemas.cart import ListCartResponse, CartResponse
