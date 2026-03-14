@@ -1,0 +1,26 @@
+from fastapi import APIRouter, HTTPException, Header, status
+from app.schemas.Order import OrderCreate, OrderResponse
+from app.schemas.Role import UserRole
+from app.schemas.Token import Token
+from app.services.order_service import cancel_order_customer_service, cancel_order_restaurant_service,accept_order_service
+from typing import List
+from enum import Enum
+from app.schemas.Order import OrderResponse
+from app.services.session_manager_service import get_user_from_session
+from app.services.authorization_service import require_role_multi_service
+
+router = APIRouter(prefix="/orders", tags=["orders"])
+
+@router.put("/cancel_order_customer",response_model = OrderResponse, status_code=status.HTTP_200_OK)
+def cancel_order_customer(orderid:str,token: str = Header(...)):
+    """Allows a customer to cancel an order
+    Input: order id (string)
+    Output: OrderResponse (restaurant_id,customer_id,delivery_address_id,delivery_address,cart_id, order_id, created_date, status, total_amount, delivery_id, items)
+    """
+    session = Token(token=token)
+    current_user = get_user_from_session(session)
+    current_order = get_order_by_order_id_service(orderid)
+    if current_order not in get_orders_by_userid_service(current_user.id):
+        raise HTTPException(status_code=403, detail="not authorized to cancel this order")
+    
+    return cancel_order_customer_service(orderid)
