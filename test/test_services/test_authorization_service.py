@@ -42,4 +42,26 @@ def test_require_role_service_success(mocker):
     with pytest.raises(HTTPException) as testException: require_role_service(mock_user, UserRole.OWNER)
     assert testException.value.status_code ==403
     
+def require_role_multi_service_sucess(mocker):
+    """tests that require_role_multi_service returns None if user's role matches a role in the supplied list"""
+    mock_user = mocker.Mock()
+    mock_user.role = UserRole.CUSTOMER
     
+    result = require_role_service(mock_user, [UserRole.CUSTOMER, UserRole.STAFF])
+    assert result is None
+    
+def require_role_multi_service_fail(mocker):
+    """tests that require_role_multi_service raises an exception if user does not have a role from supplied list"""
+    mock_user = mocker.Mock()
+    mock_user.role = UserRole.CUSTOMER
+    
+    with pytest.raises(HTTPException) as testException: require_role_service(mock_user, [UserRole.OWNER, UserRole.STAFF])
+    assert testException.value.status_code ==403
+    
+def require_role_multi_service_fail(mocker):
+    """tests that require_role_multi_service raises an exception if user does not have a role from an empty list"""
+    mock_user = mocker.Mock()
+    mock_user.role = UserRole.CUSTOMER
+    
+    with pytest.raises(HTTPException) as testException: require_role_service(mock_user, [])
+    assert testException.value.status_code ==403
