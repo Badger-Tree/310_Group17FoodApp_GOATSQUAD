@@ -1,4 +1,5 @@
 import pytest, csv
+from app.repositories import notification_repo
 from app.repositories.notification_repo import load_all, save_all
 from app.schemas.notification import Notification, NotificationType, NotificationStatus
 
@@ -62,3 +63,46 @@ def test_save_all_success(monkeypatch, tmp_path):
     assert rows[0]["notification_type"] == NotificationType.ORDER.value
     assert rows[0]["message"] == "New message"
     assert rows[0]["status"] == NotificationStatus.PENDING.value
+
+def test_create_notification_empty_file(monkeypatch, tmp_path):
+    """Tests that the first notification created gets an id of 1."""
+    mock_path = tmp_path / "notification.csv"
+    monkeypatch.setattr("app.repositories.notification_repo.DATA_PATH", mock_path)
+
+    new_data = {
+        "recipient_user_id": "user-123",
+        "notification_type": "order",
+        "message": "testing for first notification id creation",
+        "status": "pending"
+    }
+
+    result = notification_repo.create_notification(new_data)
+
+    assert result["notification_id"] == 1
+    assert result["message"] == "testing for first notification id creation"
+
+    notifications = notification_repo.load_all()
+    assert len(notifications) == 1
+    assert notifications[0].notification_id == 1
+
+def test_create_notification_increments_id(monkeypatch, tmp_path):
+    """tests that new notifications increment based on existing max id."""
+    mock_path = tmp_path / "notification.csv"
+    mock_path.write_text(
+        "notification_id,recipient_user_id,notification_type,message,status\n"
+        "10,user-123,order,Old message,sent\n"
+    )
+    monkeypatch.setattr("app.repositories.notification_repo.DATA_PATH", mock_path)
+
+    new_data = {
+        "recipient_user_id": "user-456",
+        "notification_type": "delivery",
+        "message": "New message",
+        "status": "pending"
+    }
+
+    result = notification_repo.create_notification(new_data)
+
+    assert result["notification_id"] == 11
+    all_records = notification_repo.load_all()
+    assert len(all_records) == 2
