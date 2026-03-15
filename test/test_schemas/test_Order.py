@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 from app.schemas.OrderStatus import OrderStatus
 from app.schemas.Order import  OrderCreate, OrderBase, OrderResponse
+from app.schemas.OrderItem import OrderItemCreate, OrderItemResponse # type: ignore
 
 
 def test_OrderBase_valid_input():
