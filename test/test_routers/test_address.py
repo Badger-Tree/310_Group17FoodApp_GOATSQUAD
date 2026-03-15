@@ -54,13 +54,12 @@ mock_address_list_response = [{
                     "instructions": "leave at driveway",
                     "created_date": "2025-01-20T11:34:56"
                     }]
-
-
 mock_address_create = {
         "street": "111 Shire Lane",
         "city": "Hobbiton",
         "postal_code": "H0B 1T5",
         "instructions": "leave at driveway"}
+
 
 def test_get_address_by_id_success(mocker):
     """tests that get_address_by_id returns 200 status and address response json given valid data"""
@@ -107,13 +106,14 @@ def  test_create_address_success(mocker):
         "role": "CUSTOMER",
         "created_date": "2026-02-20T12:34:56"
         }
-    payload = mock_address_create
+    
     with patch("app.services.address_service.load_addresses", mock_load_addresses):
         with patch("app.services.address_service.save_addresses", mock_save_addresses):
             with patch("app.routers.address.get_user_from_session", return_value = MockUserResponse(**mock_user_response)):
-                response = client.post("/addresses/new", json = payload,headers={"token":"123"})
+                response = client.post("/addresses/new", json = mock_address_create,headers={"token":"123"})
                 assert response.status_code == 201
-    
+
+
 def  test_create_address_not_authenticated(mocker):
     """tests that get_address_by_id returns 403 status if user is not logged in"""
     class MockUserResponse:
@@ -144,21 +144,68 @@ def test_create_address_missing_token():
     response = client.post("/addresses/new", json = mock_address_create)
     assert response.status_code == 422
 
-def test_update_address(mocker):
-    payload = mock_address_create
-    
+def test_update_address_success(mocker):
+    """tests that update_address will return a 200 status and updated json given valid input"""
+    mock_address_update = {
+                            "street": "222 Shire Lane",
+                            "city": "Hobbiton",
+                            "postal_code": "H0B 1T5",
+                            "instructions": "leave at driveway"
+                            }
+    mock_address_response = {"address_id": "2",
+                            "user_id": "456",
+                            "street": "222 Shire Lane",
+                            "city": "Hobbiton",
+                            "postal_code": "H0B 1T5",
+                            "instructions": "leave at driveway",
+                            "created_date": "2025-01-20T11:34:56"
+                            }
+            
+    with patch("app.services.address_service.load_addresses", mock_load_addresses):
+        with patch("app.services.address_service.save_addresses", mock_save_addresses):
+                response = client.put("/addresses/update/2", json = mock_address_update)
+                assert response.status_code == 200
+                assert response.json()== mock_address_response
+                
+                
+def test_update_address_partial_input(mocker):
+    """tests that update_address will return a 200 status and updated json given valid partial input"""
+    mock_address_update = {
+                            "street": "222 Shire Lane",
+                            }
+    mock_address_response = {"address_id": "2",
+                            "user_id": "456",
+                            "street": "222 Shire Lane",
+                            "city": "Hobbiton",
+                            "postal_code": "H0B 1T5",
+                            "instructions": "leave at driveway",
+                            "created_date": "2025-01-20T11:34:56"
+                            }
+            
+    with patch("app.services.address_service.load_addresses", mock_load_addresses):
+        with patch("app.services.address_service.save_addresses", mock_save_addresses):
+                response = client.put("/addresses/update/2", json = mock_address_update)
+                assert response.status_code == 200
+                assert response.json()== mock_address_response
 
-@router.put("/update/{addressid}", response_model=AddressResponse)
-def update_address(addressid: str, payload: AddressUpdate):
-    """Updates the street, city, postal_code, and/or instructions for an address
-    Intake: AddressUpdate as payload (street, city, postal_code, instructions)
-    Return: AddressResponse (street, city, postal_code, instructions,address_id,user_id, created_date)"""
-    return update_address_service(addressid, payload)
-
-# @router.delete("/delete/{addressid}", status_code=status.HTTP_204_NO_CONTENT)
-# def delete_address(addressid:str):
-#     """Delets a saved address
-#     Intake: Address id as string
-#     Return: None"""
-#     delete_address_service(addressid)
-#     return None
+def test_update_address_address_not_found(mocker):
+    """tests that update_address will return a 404 status if the address to update is not found"""
+    mock_address_update = {
+                            "street": "222 Shire Lane",
+                            }
+    with patch("app.services.address_service.load_addresses", mock_load_addresses):
+        with patch("app.services.address_service.save_addresses", mock_save_addresses):
+                response = client.put("/addresses/update/notfound", json = mock_address_update)
+                assert response.status_code == 404
+def test_delete_address_success(mocker):
+    """tests that delete_address will return a 204 status if a delete was succsesful"""
+    with patch("app.services.address_service.load_addresses", mock_load_addresses):
+        with patch("app.services.address_service.save_addresses", mock_save_addresses):
+                response = client.delete("/addresses/delete/2")
+                assert response.status_code == 204
+def test_delete_address_not_found(mocker):
+    """tests that will return a 404 status if the address to delete is not found"""
+    with patch("app.services.address_service.load_addresses", mock_load_addresses):
+        with patch("app.services.address_service.save_addresses", mock_save_addresses):
+                response = client.delete("/addresses/delete/notfound")
+                assert response.status_code == 404
