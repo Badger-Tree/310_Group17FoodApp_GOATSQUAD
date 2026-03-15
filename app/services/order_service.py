@@ -9,7 +9,7 @@ from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
 from enum import Enum
-from app.services.payment_service import process_refund_service
+from app.services.payment_service import process_payment_service, process_refund_service
 
 def process_order_service(cart_id: str):
     """receives a cart and asks for payment before creating the order and sending for review"""
@@ -18,10 +18,8 @@ def process_order_service(cart_id: str):
     if not cart.cart_items:
         raise HTTPException(status_code=400, detail="cart is empty")
     
-    # make an order id
     order_id = str(uuid.uuid4())
     
-    # get total
     subtotal = 0.00
     for item in cart.cart_items:
         subtotal += item.price_per_item * item.quantity
@@ -35,7 +33,7 @@ def process_order_service(cart_id: str):
                 "total_amount" : total_amount,
                 "created_date" : datetime.now(timezone.utc),
                 "delivery_address_id" : cart.delivery_address_id}
-    # process items from cart
+
     new_items = []
     for item in cart.cart_items:
         new_item = {
@@ -46,8 +44,8 @@ def process_order_service(cart_id: str):
             "price_per_item": item.price_per_item
             }
         new_items.append(new_item)
-    # send to payment
-    paid = process_payment()
+
+    paid = process_payment_service()
     if paid:
         create_order_service(new_order,new_items)
     else:
@@ -55,7 +53,6 @@ def process_order_service(cart_id: str):
         
 def create_order_service(new_order: dict, new_items: list[dict]) -> OrderResponse:
     """Method Creates an Order from a dictionary after if was processed for payment"""
-    # save the new order to db
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -136,7 +133,6 @@ def get_order_status_by_id_service(orderid:str)-> Enum | None:
         
 def cancel_order_customer_service(orderid:str) -> OrderResponse:
     """This method lets a customer cancel an order. It changes order status to CANCELED"""
-    ##this will also need to request payment refund
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -146,7 +142,7 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
             status_enum = OrderStatus(status_str)
             
             if status_enum == OrderStatus.PENDING:
-                refunded = process_refund(order["total_amount"])
+                refunded = process_refund_service(order["total_amount"])
                 if refunded: 
                     order["status"] = OrderStatus.CANCELED.value
                     save_all_orders(order_data)
@@ -216,15 +212,6 @@ def accept_order_service(orderid:str) -> OrderResponse:
 ##################################################################
 # Stub methods that will get replaced when real modules are availble
 ##################################################################
-
-def process_payment(amount: float) -> bool:
-    """This simulates a payment and returns a boolean to indicate if payment was successful"""
-    return random.choice(True, True, True, True,False)
-
-def process_refund(amount: float) -> bool:
-    """This simulates a refund and returns a boolean to indicate if refund was successful"""
-    return random.choice(True, True, True, True,False)
-
 
 def get_cart_by_id(cart_id: str):
     class TempCart:
