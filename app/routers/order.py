@@ -11,7 +11,6 @@ from app.services.authorization_service import require_role_multi_service
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
-
 @router.post("/create_order", response_model=OrderResponse,status_code=status.HTTP_201_CREATED)
 def create_order(payload: OrderCreate):
     """Creates and saves and order given an OrderCreate. Gets order items from cart

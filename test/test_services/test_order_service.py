@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from datetime import datetime
 from app.schemas.Order import OrderCreate
 from app.schemas.OrderStatus import OrderStatus
-from app.services.order_service import cancel_order_restaurant_service,accept_order_service
+from app.services.order_service import cancel_order_restaurant_service,accept_order_service,process_order_service
 
 def test_process_order_service(mocker):
     
@@ -23,7 +23,7 @@ def test_process_order_service(mocker):
             self.price_per_item = price_per_item 
     
     mocker.patch("app.services.order_service.get_cart_by_id", lambda cart_id: Mock_TempCart())
-    mock_payment = mocker.patch("app.services.order_service.process_payment", return_value = True)
+    mock_payment = mocker.patch("app.services.order_service.process_payment_service", return_value = True)
     mock_create_order = mocker.patch("app.services.order_service.create_order_service")
     process_order_service("cart123")
     
