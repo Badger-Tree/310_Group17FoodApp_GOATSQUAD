@@ -32,3 +32,13 @@ def save_all(items):
         writer = csv.DictWriter(file, fieldnames=FIELDNAMES)
         writer.writeheader()
         writer.writerows(rows)
+
+def create_notification(notification_data: dict) -> dict:
+    """Takes a dictionary of notification data, creates a new notification, and saves it to the CSV file."""
+    notifications = load_all()
+    new_id = max([n.notification_id for n in notifications], default=0) + 1
+    notification_data["notification_id"] = new_id
+    
+    notifications.append(notification_data)
+    save_all(notifications)
+    return notification_data
