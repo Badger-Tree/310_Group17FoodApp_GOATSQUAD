@@ -27,32 +27,22 @@ def get_address_by_customer_id_service(customer_id: str) -> List[AddressResponse
         raise HTTPException(status_code=404, detail=f"Customer '{customer_id}' not found")
     return address_responses
     
-def create_address_service(payload: AddressCreate, userid: str) -> AddressResponse:
-    """Function creates a new address record"""
+def create_address_service(payload: AddressCreate, user_id: str) -> AddressResponse:
     addresses_data = load_addresses()
     new_id = str(uuid.uuid4())
     if any(it.get("address_id") == new_id for it in addresses_data):
         raise HTTPException(status_code=409, detail="ID collision; retry.")
-    
-    ##check if the user id exists else we can't add to a user
-    users = load_users()
-    user_exists = False
-    for u in users:
-        if u["id"] == userid:
-            user_exists = True
-            break
-    if not user_exists:
-        raise HTTPException(status_code=404, detail=f"User {payload.user_id} not found")
 
     new_address = {
         "address_id" : new_id,
-        "user_id" : userid,
+        "user_id" : user_id,
         "street": payload.street.strip(),
         "city": payload.city.strip(),
         "postal_code": payload.postal_code.strip(),
-        "instructions": payload.instructions.strip()if payload.instructions else None,
+        "instructions": payload.instructions.strip() if payload.instructions else None,
         "created_date": datetime.utcnow().isoformat()
     }
+
     addresses_data.append(new_address)
     save_addresses(addresses_data)
     return AddressResponse(**new_address) 
