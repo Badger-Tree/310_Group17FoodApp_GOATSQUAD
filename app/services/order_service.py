@@ -9,11 +9,12 @@ from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
 from enum import Enum
+from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status
 from app.services.payment_service import process_payment_service, process_refund_service
 
 def process_order_service(cart_id: str):
-    """receives a cart and asks for payment before creating the order and sending for review"""
-    # this is using a stub to get cart data
+    """receives a cart and asks for payment before creating the order and sending for review. 
+    Note that the service is currently using a stub method to get cart."""
     cart = get_cart_by_id(cart_id)
     if not cart.cart_items:
         raise HTTPException(status_code=400, detail="cart is empty")
@@ -47,9 +48,12 @@ def process_order_service(cart_id: str):
 
     paid = process_payment_service()
     if paid:
-        create_order_service(new_order,new_items)
+        new_order = create_order_service(new_order,new_items)
+        notify_payment_status(new_item.customer_id, new_item.order_id, True)
     else:
+        notify_payment_status(new_item.customer_id, new_item.order_id, False)
         raise HTTPException(status_code=400, detail = "payment not processed order")
+
         
 def create_order_service(new_order: dict, new_items: list[dict]) -> OrderResponse:
     """Method Creates an Order from a dictionary after if was processed for payment"""
@@ -66,9 +70,7 @@ def create_order_service(new_order: dict, new_items: list[dict]) -> OrderRespons
         
     save_all_order_items(order_item_data)
     
-    # send notification to customer, restaurant owner
-    
-    return OrderResponse(order_id= new_order.order_id,
+    new_order_response = OrderResponse(order_id= new_order.order_id,
                          customer_id= new_order.customer_id, 
                          restaurant_id= new_order.restaurant_id,
                          delivery_id = None,
@@ -77,6 +79,9 @@ def create_order_service(new_order: dict, new_items: list[dict]) -> OrderRespons
                          total_amount = new_order.total_amount,
                          created_date = new_order.created_date,
                          items = new_items)
+    
+    notify_order_placed(new_order_response.customer_id, new_order_response.restaurant_id, new_order_response.order_id)
+    return new_order_response
     
 def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
     """Method gets a single OrderResponse object. Takes in an order id (str)"""
@@ -140,19 +145,21 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
         if order.get("order_id") == orderid:   
             status_str = order.get("status")
             status_enum = OrderStatus(status_str)
-            
             if status_enum == OrderStatus.PENDING:
                 refunded = process_refund_service(order["total_amount"])
                 if refunded: 
+                    notify_payment_status(order.customer_id, order.order_id, True)
                     order["status"] = OrderStatus.CANCELED.value
+                    notify_order_status_update(order.customer_id, order.order_id, False)
                     save_all_orders(order_data)
                     items_responses = []
-                    
                     for item in order_item_data:
                         if item.get("order_id") == order.get("order_id"):
                             items_responses.append(OrderItemResponse(**item))
                     return OrderResponse(**order, items = items_responses)
-                raise HTTPException(status_code=400, detail = "refund not processed")
+                else:
+                    notify_payment_status(order.customer_id, order.order_id, False)
+                    raise HTTPException(status_code=400, detail = "refund not processed")
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
     raise HTTPException(status_code=404, detail="Order not found")
@@ -172,14 +179,16 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
                 refunded = process_refund_service(order["total_amount"])
                 if refunded:
                     order["status"] = OrderStatus.CANCELED.value
+                    notify_payment_status(order.customer_id, order.order_id, True)
+                    notify_order_status_update(order.customer_id, order.order_id, False)
                     save_all_orders(order_data)
                     items_responses = []
-                    
                     for item in order_item_data:
                         if item.get("order_id") == order.get("order_id"):
                             items_responses.append(OrderItemResponse(**item))
                     return OrderResponse(**order, items = items_responses)
                 else:
+                    notify_payment_status(order.customer_id, order.order_id, False)
                     raise HTTPException(status_code=400, detail = "refund not processed")
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
