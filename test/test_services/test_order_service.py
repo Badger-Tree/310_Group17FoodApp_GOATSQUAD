@@ -1,7 +1,6 @@
 import pytest
 from fastapi import HTTPException
 from datetime import datetime
-from app.schemas.Order import OrderCreate
 from app.schemas.OrderStatus import OrderStatus
 from app.services.order_service import cancel_order_restaurant_service,accept_order_service,process_order_service
 
@@ -71,49 +70,6 @@ def test_process_order_service_multiple_items(mocker):
     
     mock_payment.assert_called_once()
     mock_create_order.assert_called_once()
-
-# def test_create_order_service_subtotal_multiple_items(monkeypatch):
-#     """tests that create_order_service() will successfully generate a total given multiple order items"""
-#     def mock_load_orders():
-#         return [{}]
-#     def mock_load_order_items():
-#         return []
-#     def mock_save_all_orders(orders):
-#         return orders
-#     def mock_save_all_order_items(order_items):
-#         return order_items
-
-#     class Mock_TempCart:
-#         def __init__(self):
-#             self.cart_id = "cart123"
-#             self.customer_id = "123"
-#             self.restaurant_id = "456"
-#             self.delivery_address_id = "addr1"
-#             self.cart_items = [Mock_TempCartItem(1, 1, 4.00),
-#                             Mock_TempCartItem(2, 2, 5.50),                 
-#             ]
-#     class Mock_TempCartItem:
-#         def __init__(self, food_item_id, quantity, price_per_item):
-#             self.food_item_id = food_item_id
-#             self.quantity = quantity
-#             self.price_per_item = price_per_item 
-#     monkeypatch.setattr("app.services.order_service.load_orders", mock_load_orders)
-#     monkeypatch.setattr("app.services.order_service.load_order_items", mock_load_order_items)
-#     monkeypatch.setattr("app.services.order_service.save_all_orders", mock_save_all_orders)
-#     monkeypatch.setattr("app.services.order_service.save_all_order_items", mock_save_all_order_items)
-#     monkeypatch.setattr("app.services.order_service.get_cart_by_id", lambda cart_id: Mock_TempCart())
-    
-#     input_data = OrderCreate(
-#                 restaurant_id="456",
-#                 customer_id="123",
-#                 cart_id="cart789",
-#                 delivery_address_id="addr1",
-#                 items=[]
-#             )
-
-#     result = create_order_service(input_data)
-#     assert result.total_amount == 4.00+5.5+5.5+1
-
 
 def test_cancel_order_restaurant_service_success(mocker):
     """tests that cancel_order_restaurant_service() will successfully cancel an order given valid order id from restaurant side"""
