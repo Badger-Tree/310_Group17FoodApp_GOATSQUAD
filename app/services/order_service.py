@@ -9,6 +9,7 @@ from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
 from enum import Enum
+from app.services.payment_service import process_refund_service
 
 <<<<<<< HEAD
 def process_order_service(cart_id: str):
@@ -163,13 +164,6 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
 
 def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
     """This method lets a restaurant manager cancel an order. It changes order status to CANCELED"""
-    ##this will also need to request payment refund
-=======
-from app.services.payment_service import process_refund_service
-
-def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
-    """This method lets a restaurant manager cancel an order. It changes order status to CANCELED"""
->>>>>>> main
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -180,11 +174,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
             status_enum = OrderStatus(status_str)
             
             if status_enum == OrderStatus.APPROVED or status_enum == OrderStatus.PENDING or status_enum == OrderStatus.OUT_FOR_DELIVERY or status_enum == OrderStatus.IN_PREPARATION:
-<<<<<<< HEAD
-                refunded = process_refund(order["total_amount"])
-=======
                 refunded = process_refund_service(order["total_amount"])
->>>>>>> main
                 if refunded:
                     order["status"] = OrderStatus.CANCELED.value
                     save_all_orders(order_data)
@@ -223,7 +213,7 @@ def accept_order_service(orderid:str) -> OrderResponse:
             else:
                 raise HTTPException(status_code=400, detail = "Cannot accept order")
     raise HTTPException(status_code=404, detail="Order not found")
-<<<<<<< HEAD
+
 ##################################################################
 # Stub methods that will get replaced when real modules are availble
 ##################################################################
@@ -254,5 +244,3 @@ def get_cart_by_id(cart_id: str):
             self.quantity = quantity
             self.price_per_item = price_per_item
     return TempCart()
-=======
->>>>>>> main
