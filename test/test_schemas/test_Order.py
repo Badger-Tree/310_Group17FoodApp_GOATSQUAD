@@ -3,7 +3,10 @@ from datetime import datetime
 import pytest
 from app.schemas.OrderStatus import OrderStatus
 from app.schemas.Order import  OrderCreate, OrderBase, OrderResponse
+<<<<<<< HEAD
 from app.schemas.OrderItem import OrderItemCreate, OrderItemResponse # type: ignore
+=======
+>>>>>>> main
 
 
 def test_OrderBase_valid_input():
@@ -69,6 +72,7 @@ def test_OrderCreate_invalid_input():
                     }
     with pytest.raises(ValidationError): OrderCreate(**input_data)
 
+<<<<<<< HEAD
 # def test_OrderCreate_no_items():
 #     """test that OrderCreate creates an error if it receives an input with no items"""
 #     input_data = {"restaurant_id" : 1,
@@ -81,6 +85,8 @@ def test_OrderCreate_invalid_input():
 #                 }
 #     with pytest.raises(ValidationError): OrderCreate(**input_data)
     
+=======
+>>>>>>> main
 def test_OrderCreate_missing_input():
     """test that OrderCreate creates an error if it receives an input with missing field"""
     input_data = {
@@ -166,8 +172,11 @@ def test_OrderResponse_invalid_status():
                     }
     with pytest.raises(ValidationError): OrderResponse(**input_data)
 
+<<<<<<< HEAD
 #def test_OrderResponse_missing_input():
 """test that OrderResponse creates an error if it receives an input with missing field"""
+=======
+>>>>>>> main
 def test_OrderResponse_invalid_status():
     """test that OrderResponse creates an error if it receives in invalid status"""
     input_data = {"restaurant_id" : "45",
