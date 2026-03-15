@@ -2,7 +2,7 @@ from fastapi import APIRouter, Header, status
 from typing import List
 from app.schemas.Address import AddressResponse, AddressCreate, AddressUpdate
 from app.services.address_service import get_address_by_id_service, get_address_by_customer_id_service, create_address_service, update_address_service, delete_address_service
-from app.services.session_manager_service import get_user_from_session
+from app.services.session_manager_service import get_user_from_session,validate_token_service
 from app.schemas.Token import Token
 
 router = APIRouter(prefix="/addresses", tags=["addresses"])
