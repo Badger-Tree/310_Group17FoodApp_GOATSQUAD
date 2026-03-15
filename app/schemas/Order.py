@@ -1,18 +1,12 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 from datetime import datetime
-<<<<<<< HEAD
 from app.schemas.OrderItem import OrderItemCreate, OrderItemResponse # type: ignore
 from enum import Enum
 from app.schemas.OrderStatus import OrderStatus
 # from app.schemas.Address import Address
 ## Base Order
-=======
-from app.schemas.OrderItem import OrderItemResponse # type: ignore
-from enum import Enum
-from app.schemas.OrderStatus import OrderStatus
 
->>>>>>> main
 
 class OrderBase(BaseModel):
     """Base pydantic class or order object"""
