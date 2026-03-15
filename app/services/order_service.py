@@ -11,7 +11,6 @@ import uuid
 from enum import Enum
 from app.services.payment_service import process_refund_service
 
-<<<<<<< HEAD
 def process_order_service(cart_id: str):
     """receives a cart and asks for payment before creating the order and sending for review"""
     # this is using a stub to get cart data
