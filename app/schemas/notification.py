@@ -15,7 +15,7 @@ class NotificationStatus(str, Enum):
 class NotificationBase(BaseModel):
     recipient_user_id: str
     notification_type: NotificationType
-    message: str
+    message: str7ae0ac85cdba17c28a6e387ba821e0ce
     status: NotificationStatus = NotificationStatus.SENT
 
 class NotificationCreate(NotificationBase):

@@ -14,3 +14,12 @@ notification_id,recipient_user_id,notification_type,message,status
 13,11,payment,Your payment was declined. Please check your balance.,sent
 14,11,payment,Payment was successful! Thank you for your order.,sent
 15,11,payment,Your payment was declined. Please check your balance.,sent
+16,123,order,Order a5705ec7-066a-4289-bf28-b5ae5891fd89 placed! We'll let you know when it's ready.,pending
+17,456,order,New order received: a5705ec7-066a-4289-bf28-b5ae5891fd89. Please begin preparation.,pending
+18,123,order,Order e7f274c4-039f-4718-a498-426affc1b279 placed! We'll let you know when it's ready.,pending
+19,456,order,New order received: e7f274c4-039f-4718-a498-426affc1b279. Please begin preparation.,pending
+20,1,order,Order 91469a6a-5fcd-4548-9d9c-66087ac57c4b placed! We'll let you know when it's ready.,pending
+21,1,order,New order received: 91469a6a-5fcd-4548-9d9c-66087ac57c4b. Please begin preparation.,pending
+22,1,order,Order b9320235-ab31-456b-9a34-a4059bf85197 placed! We'll let you know when it's ready.,pending
+23,1,order,New order received: b9320235-ab31-456b-9a34-a4059bf85197. Please begin preparation.,pending
+24,1,payment,Payment for order b9320235-ab31-456b-9a34-a4059bf85197 was successful. The restaurant is preparing your meal!,pending
