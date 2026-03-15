@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 from app.routers.address import router
@@ -115,8 +115,37 @@ def  test_create_address_success(mocker):
                 response = client.post("/addresses/new", json = payload,headers={"token":"123"})
                 assert response.status_code == 201
     
+def  test_create_address_not_authenticated(mocker):
+    """tests that get_address_by_id returns 403 status if user is not logged in"""
+    class MockUserResponse:
+        def __init__(self, **kwargs):
+            self.__dict__.update(kwargs)
+    mock_user_response = {
+        "email": "pippin@example.com",
+        "id": "1",
+        "first_name": "peregrin",
+        "last_name": "took",
+        "role": "CUSTOMER",
+        "created_date": "2026-02-20T12:34:56"
+        }
+    payload = mock_address_create
+    with patch("app.services.address_service.load_addresses", mock_load_addresses):
+        with patch("app.services.address_service.save_addresses", mock_save_addresses):
+            with patch("app.routers.user.get_user_from_session", side_effect=HTTPException(status_code=404, detail="User not found")):
+                response = client.post("/addresses/new", json = payload,headers={"token":"123"})
+                assert response.status_code == 404
     
 
+def test_create_address_missing_token():
+    """Tests that FastAPI will throw an exception if there is no token in the header"""  
+    mock_address_create = {
+            "street": "111 Shire Lane",
+            "city": "Hobbiton",
+            "postal_code": "H0B 1T5",
+            "instructions": "leave at driveway"}
+    response = client.post("/addresses/new", json = mock_address_create)
+    assert response.status_code == 422
+    
 
 # @router.post("", response_model=AddressResponse, status_code=201)
 # def create_address(payload: AddressCreate):
