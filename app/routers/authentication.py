@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Header, status
 from app.schemas.Login import LoginRequest
 from app.schemas.Token import Token, TokenResponse
 
@@ -13,6 +13,7 @@ async def login(credentials: LoginRequest):
     return login_service(credentials)
     
 @router.post("/logout")
-def logout(token: Token):
+def logout(token: str = Header(...)):
     """Lets a user log out of the service. Input: Token. Output: dict"""
-    return logout_service(token)
+    session = Token(token=token)
+    return logout_service(session)
