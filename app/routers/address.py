@@ -49,5 +49,3 @@ def delete_address(addressid:str,token: str = Header(...)):
     if validate_token_service(session) is not None:
         delete_address_service(addressid)
         return None
-
-
