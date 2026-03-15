@@ -58,3 +58,19 @@ def notify_payment_status(customer_id: str, order_id: str, is_success: bool):
         "message": message,
         "status": status
     })
+
+def notify_order_status_update(customer_id: str, order_id: str, is_approved: bool):
+    """Notifies customer when restaurant approves or rejects the order."""
+    if is_approved:
+        message = f"Your order {order_id} has been approved by the restaurant. We'll let you know when it's ready!"
+        status = "pending"
+    else:
+        message = f"Unfortunately, your order {order_id} was canceled by the restaurant."
+        status = "failed"
+
+    notification_repo.create_notification({
+        "recipient_user_id": customer_id,
+        "notification_type": "order",
+        "message": message,
+        "status": status
+    })
