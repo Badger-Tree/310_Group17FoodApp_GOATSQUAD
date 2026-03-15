@@ -16,40 +16,43 @@ def process_order_service(cart_id: str):
     """receives a cart and asks for payment before creating the order and sending for review. 
     Note that the service is currently using a stub method to get cart."""
     cart = get_cart_by_id(cart_id)
-
+    if not cart.cart_items:
+        raise HTTPException(status_code=400, detail="cart is empty")
+    
     order_id = str(uuid.uuid4())
     
     subtotal = 0.00
-    for item in cart["cart_items"]:
-        subtotal += item["price_per_item"] * item["quantity"]
+    for item in cart.cart_items:
+        subtotal += item.price_per_item * item.quantity
     total_amount = round(subtotal,2)
-    new_order = { "order_id": order_id,
-                "customer_id": cart["customer_id"],
-                "restaurant_id": cart["restaurant_id"],
-                "cart_id": cart["cart_id"],
+    new_order = {"order_id": order_id,
+                "customer_id": cart.customer_id,
+                "restaurant_id": cart.restaurant_id,
+                "cart_id": cart.cart_id,
                 "delivery_id" : None,
                 "status" : "PENDING",
                 "total_amount" : total_amount,
                 "created_date" : datetime.now(timezone.utc),
-                "delivery_address_id": cart["delivery_address_id"]}
+                "delivery_address_id" : cart.delivery_address_id}
 
     new_items = []
-    for item in cart["cart_items"]:
+    for item in cart.cart_items:
         new_item = {
             "order_item_id": str(uuid.uuid4()),
             "order_id": order_id,
-            "food_item_id": item["food_item_id"],
-            "quantity": item["quantity"],
-            "price_per_item": item["price_per_item"]
-        }
+            "food_item_id":item.food_item_id,
+            "quantity": item.quantity,
+            "price_per_item": item.price_per_item
+            }
         new_items.append(new_item)
 
     paid = process_payment_service(total_amount)
     if paid:
         new_order = create_order_service(new_order,new_items)
-        notify_payment_status(cart["customer_id"], new_item["order_id"], True)
+        notify_payment_status(cart.customer_id, order_id, True)
+        return new_order
     else:
-        notify_payment_status(cart["customer_id"], new_item["order_id"], False)
+        notify_payment_status(cart.customer_id, order_id, False)
         raise HTTPException(status_code=400, detail = "payment not processed order")
 
         
@@ -76,7 +79,7 @@ def create_order_service(new_order: dict, new_items: list[dict]) -> OrderRespons
                         status = OrderStatus.PENDING,
                         total_amount = new_order["total_amount"],
                         created_date = new_order["created_date"],
-                        items = new_items)
+                        items = new_items_response)
     
     notify_order_placed(new_order_response.customer_id, new_order_response.restaurant_id, new_order_response.order_id)
     return new_order_response
@@ -220,36 +223,38 @@ def accept_order_service(orderid:str) -> OrderResponse:
 # Stub methods that will get replaced when real modules are availble
 ##################################################################
 
-# def get_cart_by_id(cart_id: str):
-#     class TempCart:
-#         def __init__(self):
-#             self.cart_id = cart_id
-#             self.customer_id = "123"
-#             self.restaurant_id = "456"
-#             self.delivery_address_id = "1"
-#             self.cart_items = [TempCartItem(1, 1, 4.00),
-#                                TempCartItem(2, 5, 1.20),
-#                                TempCartItem(3, 2, 2.00),                  
-#             ]
-#     class TempCartItem:
-#         def __init__(self, food_item_id, quantity, price_per_item):
-#             self.food_item_id = food_item_id
-#             self.quantity = quantity
-#             self.price_per_item = price_per_item
-#     return TempCart()
+from pydantic import BaseModel
+from typing import List
 
-def get_cart_by_id(cart_id: str):
+class CartItemResponse(BaseModel):
+    food_item_id: int
+    quantity: int
+    price_per_item: float
+
+
+class CartResponse(BaseModel):
+    cart_id: str
+    customer_id: str
+    restaurant_id: str
+    delivery_address_id: str
+    cart_items: List[CartItemResponse]
+    
+def get_cart_by_id(cart_id: str) -> CartResponse:
 
     cart_items = [
-        {"food_item_id": 1, "quantity": 1, "price_per_item": 1.00}
+        CartItemResponse(
+            food_item_id=1,
+            quantity=1,
+            price_per_item=1.00
+        )
     ]
 
-    cart_order = {
-        "cart_id": cart_id,
-        "customer_id": "1",
-        "restaurant_id": "1",
-        "delivery_address_id": "1",
-        "cart_items": cart_items
-    }
+    cart = CartResponse(
+        cart_id=cart_id,
+        customer_id="1",
+        restaurant_id="1",
+        delivery_address_id="1",
+        cart_items=cart_items
+    )
 
-    return cart_order
+    return cart
