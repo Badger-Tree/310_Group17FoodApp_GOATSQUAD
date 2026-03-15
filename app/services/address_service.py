@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Dict, Any
+from typing import List
 from fastapi import HTTPException
 from app.repositories.users_repo_csv import load_all as load_users
 from app.repositories.addresses_repo_csv import load_all  as load_addresses, save_all as save_addresses
@@ -8,6 +8,7 @@ from datetime import datetime
 
 
 def get_address_by_id_service(address_id: str) -> AddressResponse:
+    """Function gets address from csv given an address id"""
     addresses_data = load_addresses()
     for a in addresses_data:
         if a.get("address_id") == address_id:
@@ -15,6 +16,7 @@ def get_address_by_id_service(address_id: str) -> AddressResponse:
     raise HTTPException(status_code=404, detail=f"Address '{address_id}' not found")
 
 def get_address_by_customer_id_service(customer_id: str) -> List[AddressResponse]:
+    """Function gets address from csv given a customer id"""
     addresses_data = load_addresses()
     address_responses = []
     
@@ -25,7 +27,8 @@ def get_address_by_customer_id_service(customer_id: str) -> List[AddressResponse
         raise HTTPException(status_code=404, detail=f"Customer '{customer_id}' not found")
     return address_responses
     
-def create_address_service(payload: AddressCreate) -> AddressResponse:
+def create_address_service(payload: AddressCreate, userid: str) -> AddressResponse:
+    """Function creates a new address record"""
     addresses_data = load_addresses()
     new_id = str(uuid.uuid4())
     if any(it.get("address_id") == new_id for it in addresses_data):
@@ -35,7 +38,7 @@ def create_address_service(payload: AddressCreate) -> AddressResponse:
     users = load_users()
     user_exists = False
     for u in users:
-        if u["id"] == payload.user_id.strip():
+        if u["id"] == userid:
             user_exists = True
             break
     if not user_exists:
@@ -43,20 +46,19 @@ def create_address_service(payload: AddressCreate) -> AddressResponse:
 
     new_address = {
         "address_id" : new_id,
-        "user_id" : payload.user_id.strip(),
+        "user_id" : userid,
         "street": payload.street.strip(),
         "city": payload.city.strip(),
         "postal_code": payload.postal_code.strip(),
-        "instructions": payload.instructions.strip(),
+        "instructions": payload.instructions.strip()if payload.instructions else None,
         "created_date": datetime.utcnow().isoformat()
     }
     addresses_data.append(new_address)
     save_addresses(addresses_data)
     return AddressResponse(**new_address) 
-    
-
 
 def update_address_service(addressid: str, payload: AddressUpdate) -> AddressResponse:
+    """Function updates an address record given an address id and updated fields"""
     addresses_data = load_addresses()
     updated = None
     for index, address in enumerate(addresses_data):
@@ -76,6 +78,7 @@ def update_address_service(addressid: str, payload: AddressUpdate) -> AddressRes
     return AddressResponse(**updated)
 
 def delete_address_service(addressid:str) -> None:
+    """Function updates an address record given an address id"""
     addresses_data = load_addresses()
     found_address = False
     for index, address in enumerate(addresses_data):
@@ -86,4 +89,3 @@ def delete_address_service(addressid:str) -> None:
     if not found_address:
         raise HTTPException(status_code=404, detail=f"Address {addressid} not found")
     save_addresses(addresses_data)
-        
