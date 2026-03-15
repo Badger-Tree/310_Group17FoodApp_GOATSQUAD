@@ -21,12 +21,16 @@ def  get_address_by_customer_id(customer_id: str):
     Return: AddressResponse (street, city, postal_code, instructions,address_id,user_id, created_date)"""
     return get_address_by_customer_id_service(customer_id)
 
-@router.post("", response_model=AddressResponse, status_code=201)
-def create_address(payload: AddressCreate):
+@router.post("/new", response_model=AddressResponse, status_code=201)
+def create_address(payload: AddressCreate, token: str = Header(...)):
     """Creates and saves a new address associated with a customer account
     Intake: AddressCreate as payload(street, city, postal_code, instructions,user_id)
     Return: AddressResponse (street, city, postal_code, instructions,address_id,user_id, created_date)"""
-    return create_address_service(payload)
+    session = Token(token=token)
+    current_user = get_user_from_session(session)
+    current_user_id = current_user.id
+    
+    return create_address_service(payload, current_user_id)
 
 @router.put("/update/{addressid}", response_model=AddressResponse)
 def update_address(addressid: str, payload: AddressUpdate):

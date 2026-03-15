@@ -80,8 +80,7 @@ def test_get_address_by_id_not_found(mocker):
     with patch("app.services.address_service.load_addresses", mock_load_addresses):
             response = client.get("/addresses/by-id/")
             assert response.status_code == 404
-            
-            
+                        
 def test_get_address_by_customer_id_success(mocker):
     """tests that get_address_by_customer_id returns a 200 message and address list of response json given valid customer id input"""
     with patch("app.services.address_service.load_addresses", mock_load_addresses):
@@ -135,7 +134,6 @@ def  test_create_address_not_authenticated(mocker):
                 response = client.post("/addresses/new", json = payload,headers={"token":"123"})
                 assert response.status_code == 404
     
-
 def test_create_address_missing_token():
     """Tests that FastAPI will throw an exception if there is no token in the header"""  
     mock_address_create = {
@@ -145,11 +143,22 @@ def test_create_address_missing_token():
             "instructions": "leave at driveway"}
     response = client.post("/addresses/new", json = mock_address_create)
     assert response.status_code == 422
+
+def test_update_address(mocker):
+    payload = mock_address_create
     
 
-# @router.post("", response_model=AddressResponse, status_code=201)
-# def create_address(payload: AddressCreate):
-#     """Creates and saves a new address associated with a customer account
-#     Intake: AddressCreate as payload(street, city, postal_code, instructions,user_id)
-#     Return: AddressResponse (street, city, postal_code, instructions,address_id,user_id, created_date)"""
-#     return create_address_service(payload)
+@router.put("/update/{addressid}", response_model=AddressResponse)
+def update_address(addressid: str, payload: AddressUpdate):
+    """Updates the street, city, postal_code, and/or instructions for an address
+    Intake: AddressUpdate as payload (street, city, postal_code, instructions)
+    Return: AddressResponse (street, city, postal_code, instructions,address_id,user_id, created_date)"""
+    return update_address_service(addressid, payload)
+
+# @router.delete("/delete/{addressid}", status_code=status.HTTP_204_NO_CONTENT)
+# def delete_address(addressid:str):
+#     """Delets a saved address
+#     Intake: Address id as string
+#     Return: None"""
+#     delete_address_service(addressid)
+#     return None
