@@ -75,3 +75,35 @@ def test_notify_order_delivered(monkeypatch):
     assert created_notifications[0]["recipient_user_id"] == "customer123"
     assert created_notifications[0]["notification_type"] == "delivery"
     assert created_notifications[0]["status"] == "delivered"
+
+def test_notify_payment_status(monkeypatch):
+    """Tests notification for a successful payment"""
+    created_notifications = []
+
+    def mock_create_notification(notification_data):
+        created_notifications.append(notification_data)
+        return notification_data
+    
+    monkeypatch.setattr("app.repositories.notification_repo.create_notification", mock_create_notification)
+    notification_service.notify_payment_status("customer123", "order789", is_success=True)
+
+    assert len(created_notifications) == 1
+    assert created_notifications[0]["recipient_user_id"] == "customer123"
+    assert created_notifications[0]["notification_type"] == "payment"
+    assert created_notifications[0]["status"] == "pending"
+
+def test_notify_payment_status_failed(monkeypatch):
+    """Tests notification for a failed payment"""
+    created_notifications = []
+
+    def mock_create_notification(notification_data):
+        created_notifications.append(notification_data)
+        return notification_data
+    
+    monkeypatch.setattr("app.repositories.notification_repo.create_notification", mock_create_notification)
+    notification_service.notify_payment_status("customer123", "order789", is_success=False)
+
+    assert len(created_notifications) == 1
+    assert created_notifications[0]["recipient_user_id"] == "customer123"
+    assert created_notifications[0]["notification_type"] == "payment"
+    assert created_notifications[0]["status"] == "failed"

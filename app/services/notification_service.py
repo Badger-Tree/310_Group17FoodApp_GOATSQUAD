@@ -43,3 +43,18 @@ def notify_order_delivered(customer_id: str, order_id: str):
         "status": "delivered"
     })
 
+def notify_payment_status(customer_id: str, order_id: str, is_success: bool):
+    """Notifies customer whether their payment went through or failed."""
+    if is_success:
+        message = f"Payment for order {order_id} was successful. The restaurant is preparing your meal!"
+        status = "pending"
+    else:
+        message = f"Payment for order {order_id} failed. Please update your payment information and try again."
+        status = "failed"
+
+    notification_repo.create_notification({
+        "recipient_user_id": customer_id,
+        "notification_type": "payment",
+        "message": message,
+        "status": status
+    })
