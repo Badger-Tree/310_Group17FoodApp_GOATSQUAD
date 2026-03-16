@@ -186,7 +186,7 @@ def test_get_order_by_id_not_found(mock_load_orders,mock_load_order_items):
     """tests that get_order_by_id returns a 404 error if service cannot locate given order order"""
     with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
         with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
-            response = client.get("/orders/get_order_by_id/notfound", )
+            response = client.get("/orders/get_order_by_id/notfound")
             assert response.status_code == 404
             
 def test_get_order_by_restaurant_id_success(mock_load_orders,mock_load_order_items):
