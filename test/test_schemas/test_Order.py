@@ -8,19 +8,18 @@ from app.schemas.OrderItem import OrderItemCreate, OrderItemResponse # type: ign
 
 def test_OrderBase_valid_input():
     """test that OrderBase is created successfully with valid data"""
-    input_data = {"restaurant_id" : "1",
+    input_data = {"restaurant_id" : 1,
                 "customer_id" : "44",
                 "delivery_address_id" : "5",
                 "delivery_address" : "268 High Street"}
     result = OrderBase(**input_data)
-    assert result.restaurant_id == "1"
+    assert result.restaurant_id == 1
     assert result.delivery_address == "268 High Street"
     assert result.customer_id == "44"
 
-
 def test_OrderBase_invalid_input():
     """test that OrderBase creates an error if it receives in invalid input"""
-    input_data = {"restaurant_id" : 45,
+    input_data = {"restaurant_id" : "invalid",
                 "customer_id" : "44",
                 "delivery_address_id" : "5",
                 "delivery_address" : "268 High Street"}
@@ -42,21 +41,21 @@ def test_OrderBase_missing_optional_input():
     
 def test_OrderCreate_valid_input():
     """test that OrderCreate is created successfully with valid data"""
-    input_data = {"restaurant_id" : "1",
+    input_data = {"restaurant_id" : 1,
                 "customer_id" : "44",
                 "delivery_address_id" : "5",
                 "delivery_address" : "268 High Street",
                 "cart_id": "999"
                 }
     result = OrderCreate(**input_data)
-    assert result.restaurant_id == "1"
+    assert result.restaurant_id == 1
     assert result.cart_id == "999"
     assert result.delivery_address == "268 High Street"
     assert result.customer_id == "44"
 
 def test_OrderCreate_invalid_input():
     """test that OrderCreate creates an error if it receives in invalid input"""
-    input_data = {"restaurant_id" : "1",
+    input_data = {"restaurant_id" : 1,
                     "customer_id" : 44,
                     "delivery_address_id" : "5",
                     "delivery_address" : "268 High Street",
@@ -81,7 +80,7 @@ def test_OrderCreate_missing_input():
     
 def test_OrderResponse_valid_input():
     """test that OrderResponse is created successfully with valid data"""
-    input_data = {"restaurant_id" : "45",
+    input_data = {"restaurant_id" : 45,
                 "customer_id" : "44",
                 "delivery_address_id" : "5",
                 "delivery_address" : "268 High Street",
@@ -105,14 +104,14 @@ def test_OrderResponse_valid_input():
     assert len(result.items) == 1
     assert result.items[0].food_item_id == 1
     assert result.items[0].order_item_id == "1"    
-    assert result.restaurant_id == "45"
+    assert result.restaurant_id == 45
     assert result.delivery_address == "268 High Street"
     assert result.customer_id == "44"
     assert result.status == OrderStatus.PENDING
 
 def test_OrderResponse_invalid_input():
     """test that OrderResponse creates an error if it receives in invalid input"""
-    input_data = {"restaurant_id" : "45",
+    input_data = {"restaurant_id" : 45,
                     "customer_id" : "44",
                     "delivery_address_id" : "5",
                     "delivery_address" : "268 High Street",
@@ -134,7 +133,7 @@ def test_OrderResponse_invalid_input():
 
 def test_OrderResponse_invalid_status():
     """test that OrderResponse creates an error if it receives in invalid status"""
-    input_data = {"restaurant_id" : "45",
+    input_data = {"restaurant_id" : 45,
                     "customer_id" : "44",
                     "delivery_address_id" : "5",
                     "delivery_address" : "268 High Street",
@@ -156,7 +155,7 @@ def test_OrderResponse_invalid_status():
 
 def test_OrderResponse_invalid_status():
     """test that OrderResponse creates an error if it receives in invalid status"""
-    input_data = {"restaurant_id" : "45",
+    input_data = {"restaurant_id" : 45,
                     "customer_id" : "44",
                     "delivery_address_id" : "5",
                     "delivery_address" : "268 High Street",
