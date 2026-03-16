@@ -20,7 +20,7 @@ def create_order(cart_id: str,token: str = Header(...)):
     require_role_service(current_user,UserRole.CUSTOMER)
     return process_order_service(cart_id)
 
-@router.get("/get_order_by_id", response_model=OrderResponse, status_code=status.HTTP_200_OK)
+@router.get("/get_order_by_id/{orderid}", response_model=OrderResponse, status_code=status.HTTP_200_OK)
 def get_order_by_id(orderid: str):
     """Finds an order given an order id (string)
     Input: Order id (string)
@@ -28,7 +28,7 @@ def get_order_by_id(orderid: str):
     """
     return get_order_by_order_id_service(orderid)
 
-@router.get("/get_order_by_restaurant", response_model = List[OrderResponse], status_code=status.HTTP_200_OK)
+@router.get("/get_order_by_restaurant/{restaurant_id}", response_model = List[OrderResponse], status_code=status.HTTP_200_OK)
 def get_orders_by_restaurant(restaurant_id:int):
     """Finds any orders associated with a restaurantid (string), return list
     Input: restaurant id (int)
@@ -36,13 +36,13 @@ def get_orders_by_restaurant(restaurant_id:int):
     """
     return get_orders_by_restaurant_service(restaurant_id)
 
-@router.get("/get_order_by_user", response_model = List[OrderResponse], status_code=status.HTTP_200_OK)
-def get_orders_by_userid(userid:str):
+@router.get("/get_order_by_user/{user_id}", response_model = List[OrderResponse], status_code=status.HTTP_200_OK)
+def get_orders_by_userid(user_id:str):
     """Finds any orders associated with a userid (string), return list
     Input: user id (string)
     Output: OrderResponse (restaurant_id,customer_id,delivery_address_id,delivery_address,cart_id, order_id, created_date, status, total_amount, delivery_id, items)
     """
-    return get_orders_by_userid_service(userid)
+    return get_orders_by_userid_service(user_id)
 
 @router.get("/order_status", response_model = Enum, status_code=status.HTTP_200_OK)
 def get_order_status_by_id(orderid:str):

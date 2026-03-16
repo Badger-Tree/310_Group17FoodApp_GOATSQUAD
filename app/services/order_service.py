@@ -95,7 +95,7 @@ def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
                 if item.get("order_id") == orderid:
                     items_response.append(OrderItemResponse(**item))
             return OrderResponse(**order, items=items_response)
-    return None
+    raise HTTPException(status_code=404, detail=f"Order notfound")
 
 def get_orders_by_restaurant_service(restaurantid:int)-> List[OrderResponse]:
     """Method gets list of Order Response objects matching to a restaurant id. Takes in restaurant id"""
