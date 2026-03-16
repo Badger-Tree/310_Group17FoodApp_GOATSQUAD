@@ -1,10 +1,8 @@
-from app.services.session_manager_service import Token, get_user_from_session
-
 from fastapi import APIRouter, Header, status
 from typing import List
 from app.schemas.Address import AddressResponse, AddressCreate, AddressUpdate
 from app.services.address_service import get_address_by_id_service, get_address_by_customer_id_service, create_address_service, update_address_service, delete_address_service
-from app.services.session_manager_service import get_user_from_session
+from app.services.session_manager_service import get_user_from_session,validate_token_service
 from app.schemas.Token import Token
 
 router = APIRouter(prefix="/addresses", tags=["addresses"])
@@ -34,18 +32,20 @@ def create_address(payload: AddressCreate, token: str = Header(...)):
     return create_address_service(payload, current_user_id)
 
 @router.put("/update/{addressid}", response_model=AddressResponse)
-def update_address(addressid: str, payload: AddressUpdate):
+def update_address(addressid: str, payload: AddressUpdate,token: str = Header(...)):
     """Updates the street, city, postal_code, and/or instructions for an address
     Intake: AddressUpdate as payload (street, city, postal_code, instructions)
     Return: AddressResponse (street, city, postal_code, instructions,address_id,user_id, created_date)"""
-    return update_address_service(addressid, payload)
+    session = Token(token=token)
+    if validate_token_service(session) is not None:
+        return update_address_service(addressid, payload)
 
 @router.delete("/delete/{addressid}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_address(addressid:str):
+def delete_address(addressid:str,token: str = Header(...)):
     """Delets a saved address
     Intake: Address id as string
     Return: None"""
-    delete_address_service(addressid)
-    return None
-
-
+    session = Token(token=token)
+    if validate_token_service(session) is not None:
+        delete_address_service(addressid)
+        return None
