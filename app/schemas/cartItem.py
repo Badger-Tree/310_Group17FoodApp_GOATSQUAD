@@ -15,3 +15,7 @@ class CartItemResponse(CartItemBase):
 
 class CartItemAdd(CartItemBase): 
         customer_id: str
+
+class CartItemUpdate(BaseModel):
+        quantity: PositiveInt
+
