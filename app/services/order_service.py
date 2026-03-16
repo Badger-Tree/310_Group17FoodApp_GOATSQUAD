@@ -150,7 +150,7 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
                 if refunded: 
                     notify_refund_issued(order["customer_id"], order["order_id"])
                     order["status"] = OrderStatus.CANCELED.value
-                    notify_order_status_update_customer_cancels(order["customer_id"], order["order_id"], False)
+                    notify_order_status_update_customer_cancels(order["customer_id"], order["order_id"])
                     save_all_orders(order_data)
                     items_responses = []
                     for item in order_item_data:
@@ -158,7 +158,6 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
                             items_responses.append(OrderItemResponse(**item))
                     return OrderResponse(**order, items = items_responses)
                 else:
-                    notify_refund_issued(order["customer_id"], order["order_id"])
                     raise HTTPException(status_code=400, detail = "refund not processed")
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
@@ -223,7 +222,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
                 refunded = process_refund_service(order["total_amount"])
                 if refunded:
                     order["status"] = OrderStatus.CANCELED.value
-                    notify_refund_issued(order["customer_id"], order["order_id"], True)
+                    notify_refund_issued(order["customer_id"], order["order_id"])
                     notify_order_status_update(order["customer_id"], order["order_id"], False)
                     save_all_orders(order_data)
                     items_responses = []
@@ -232,7 +231,6 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
                             items_responses.append(OrderItemResponse(**item))
                     return OrderResponse(**order, items = items_responses)
                 else:
-                    notify_payment_status(order["customer_id"], order["order_id"], False)
                     raise HTTPException(status_code=400, detail = "refund not processed")
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
