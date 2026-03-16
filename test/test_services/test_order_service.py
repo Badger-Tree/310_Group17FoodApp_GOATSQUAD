@@ -9,7 +9,7 @@ def test_process_order_service_success(mocker):
         def __init__(self):
             self.cart_id = "cart123"
             self.customer_id = "123"
-            self.restaurant_id = "456"
+            self.restaurant_id = 456
             self.delivery_address_id = "addr1"
             self.cart_items = [Mock_TempCartItem(1, 1, 4.00),                 
             ]
@@ -33,7 +33,7 @@ def test_process_order_service_empty_cart(mocker):
         def __init__(self):
             self.cart_id = "cart123"
             self.customer_id = "123"
-            self.restaurant_id = "456"
+            self.restaurant_id = 456
             self.delivery_address_id = "addr1"
             self.cart_items = []
 
@@ -52,7 +52,7 @@ def test_process_order_service_multiple_items(mocker):
         def __init__(self):
             self.cart_id = "cart123"
             self.customer_id = "123"
-            self.restaurant_id = "456"
+            self.restaurant_id = 456
             self.delivery_address_id = "addr1"
             self.cart_items = [Mock_TempCartItem(1, 1, 4.00),
                             Mock_TempCartItem(2, 2, 5.50),                 
@@ -76,7 +76,7 @@ def test_cancel_order_restaurant_service_success(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": "rest789",
+                    "restaurant_id": 789,
                     "cart_id": "cart101",
                     "delivery_id": None,
                     "status": "PENDING",
@@ -107,7 +107,7 @@ def test_cancel_order_restaurant_service_refund_failed(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": "rest789",
+                    "restaurant_id": 789,
                     "cart_id": "cart101",
                     "delivery_id": None,
                     "status": "PENDING",
@@ -129,7 +129,7 @@ def test_cancel_order_restaurant_service_order_not_found(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": "rest789",
+                    "restaurant_id": 789,
                     "cart_id": "cart101",
                     "delivery_id": None,
                     "status": "PENDING",
@@ -149,7 +149,7 @@ def test_cancel_order_restaurant_service_completed(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": "rest789",
+                    "restaurant_id": 789,
                     "cart_id": "cart101",
                     "delivery_id": None,
                     "status": "COMPLETED",
@@ -169,7 +169,7 @@ def test_accept_order_service_success(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": "rest789",
+                    "restaurant_id": 789,
                     "cart_id": "cart101",
                     "delivery_id": None,
                     "status": "PENDING",
@@ -195,7 +195,7 @@ def test_accept_order_service_order_not_found(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": "rest789",
+                    "restaurant_id": 789,
                     "cart_id": "cart101",
                     "delivery_id": None,
                     "status": "PENDING",
@@ -213,7 +213,7 @@ def test_accept_order_service_accepted(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": "rest789",
+                    "restaurant_id": 789,
                     "cart_id": "cart101",
                     "delivery_id": None,
                     "status": "IN_PREPARATION",
