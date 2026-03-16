@@ -78,9 +78,6 @@ def test_create_restaurant(monkeypatch):
     assert len(test_restaurants) == 2
     assert test_users[0]["role"] == "OWNER"
 
-
-""" NOT YET UPDATED 
-
 #test updating a restaurant
 from app.schemas.Restaurant import RestaurantUpdate
 
@@ -92,6 +89,16 @@ def test_update_restaurant(monkeypatch):
             "restaurant_name": "Mario's Pizza",
             "cuisine": "Italian",
             "address": "123 Main St",
+            "open_hour": "09:00",
+            "closed_hour": "21:00",
+            "restaurant_status": "active"
+        },
+        {
+            "restaurant_id": "2",
+            "owner_id": "5",
+            "restaurant_name": "Sakura Sushi",
+            "cuisine": "Japanese",
+            "address": "456 Main St",
             "open_hour": "09:00",
             "closed_hour": "21:00",
             "restaurant_status": "active"
@@ -110,6 +117,7 @@ def test_update_restaurant(monkeypatch):
     monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
     monkeypatch.setattr(restaurant_service, "save_restaurants", test_save_restaurants)
 
+
     payload = RestaurantUpdate(
         restaurant_name="Updated Name",
         cuisine="Updated Cuisine",
@@ -119,7 +127,7 @@ def test_update_restaurant(monkeypatch):
         restaurant_status="inactive"
     )
 
-    result = restaurant_service.update_restaurant_service(1, payload)
+    result = restaurant_service.update_restaurant_service(payload, current_user_id="5")
 
     #Assertions
     assert result.restaurant_name == "Updated Name"
@@ -128,6 +136,19 @@ def test_update_restaurant(monkeypatch):
     assert result.open_hour == time(10, 0)
     assert result.closed_hour == time(22, 0)
     assert result.restaurant_status == "inactive"
+
+    assert test_restaurants[1]["restaurant_name"] == "Updated Name"
+    assert test_restaurants[1]["cuisine"] == "Updated Cuisine"
+    assert test_restaurants[1]["address"] == "456 Updated St"
+    assert test_restaurants[1]["open_hour"] == "10:00"
+    assert test_restaurants[1]["closed_hour"] == "22:00"
+    assert test_restaurants[1]["restaurant_status"] == "inactive"
+
+
+
+
+""" NOT YET UPDATED 
+
 
 
 #test deleting a restaurant

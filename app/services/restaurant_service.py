@@ -39,16 +39,13 @@ def create_restaurant_service(payload: RestaurantCreate, current_user_id: str) -
         "restaurant_status": "active"
     }
 
-    restaurants.append(new_restaurant)
-    save_restaurants(restaurants)
-
     #Updating the user role to owner if they create a restaurant
     users = load_users()
     user_found = False
     
     for user in users:
         if user.get("id") == current_user_id:
-            user["role"] = UserRole.OWNER.value
+            user["role"] = UserRole.OWNER.value #update the role to owner
             user_found = True
             break
 
@@ -56,6 +53,9 @@ def create_restaurant_service(payload: RestaurantCreate, current_user_id: str) -
         raise HTTPException(status_code=404, detail=f"User '{current_user_id}' not found")
     
     save_users(users)
+    
+    restaurants.append(new_restaurant)
+    save_restaurants(restaurants)
     
     #return the restaurant response
     return RestaurantResponse(
@@ -69,13 +69,16 @@ def create_restaurant_service(payload: RestaurantCreate, current_user_id: str) -
         restaurant_status = new_restaurant["restaurant_status"]
     )
 
+
+
+
 """Service for updating a restaurant."""
-def update_restaurant_service(restaurant_id: int, payload: RestaurantUpdate) -> RestaurantResponse:
+def update_restaurant_service(payload: RestaurantUpdate, current_user_id: str) -> RestaurantResponse:
     restaurants = load_restaurants()
 
     updated = None
     for i, r in enumerate(restaurants):
-        if int(r["restaurant_id"]) == restaurant_id:
+        if r["owner_id"] == current_user_id:
             if payload.restaurant_name is not None:
                 r["restaurant_name"] = payload.restaurant_name.strip()
             if payload.cuisine is not None:
@@ -94,13 +97,13 @@ def update_restaurant_service(restaurant_id: int, payload: RestaurantUpdate) -> 
             break
 
     if updated is None:
-        raise HTTPException(status_code=404, detail=f"Restaurant {restaurant_id} not found")
+        raise HTTPException(status_code=404, detail=f"Restaurant not found or you do not have permission to update it")
         
     save_restaurants(restaurants)
 
     return RestaurantResponse(
         restaurant_id = int(updated["restaurant_id"]),
-        owner_id = int(updated["owner_id"]),
+        owner_id = str(updated["owner_id"]),
         restaurant_name = updated["restaurant_name"],
         cuisine = updated["cuisine"],
         address = updated["address"],
@@ -109,7 +112,10 @@ def update_restaurant_service(restaurant_id: int, payload: RestaurantUpdate) -> 
         restaurant_status = updated["restaurant_status"]
     )
     
-"""Service for activating a restaurant."""
+ 
+"""NOT UPDATED YET   
+
+"Service for activating a restaurant."
 def activate_restaurant_service(restaurant_id: int) -> RestaurantResponse:
     restaurants = load_restaurants()
 
@@ -139,7 +145,7 @@ def activate_restaurant_service(restaurant_id: int) -> RestaurantResponse:
         restaurant_status = updated["restaurant_status"]
     )
     
-"""Service for deactivating a restaurant"""
+"Service for deactivating a restaurant"
 def deactivate_restaurant_service(restaurant_id: int) -> RestaurantResponse:
     restaurants = load_restaurants()
 
@@ -168,7 +174,7 @@ def deactivate_restaurant_service(restaurant_id: int) -> RestaurantResponse:
         restaurant_status = updated["restaurant_status"]
     )
     
-"""Service for deleting a restaurant."""
+"Service for deleting a restaurant."
 def delete_restaurant_service(restaurant_id: int) -> None:
     restaurants = load_restaurants()
 
@@ -184,7 +190,7 @@ def delete_restaurant_service(restaurant_id: int) -> None:
         
     save_restaurants(restaurants)
 
-"""Service for getting a restaurant by name"""
+"Service for getting a restaurant by name"
 def get_restaurant_by_name_service(search_name: str) -> List[RestaurantResponse]:
     restaurants = load_restaurants()
     results = []
@@ -204,7 +210,7 @@ def get_restaurant_by_name_service(search_name: str) -> List[RestaurantResponse]
             )
     return results
     
-"""Service for getting a restaurant by cuisine"""
+"Service for getting a restaurant by cuisine"
 def get_restaurant_by_cuisine_service(search_cuisine: str) -> List[RestaurantResponse]:
     restaurants = load_restaurants()
     results = []
@@ -224,7 +230,7 @@ def get_restaurant_by_cuisine_service(search_cuisine: str) -> List[RestaurantRes
             )
     return results
     
-"""Service for sorting the restaurants by their name"""
+"Service for sorting the restaurants by their name"
 def sort_restaurants_by_name_service() -> List[RestaurantResponse]:
     restaurants = load_restaurants()
             
@@ -246,3 +252,5 @@ def sort_restaurants_by_name_service() -> List[RestaurantResponse]:
             )
         )
     return results
+    
+    """

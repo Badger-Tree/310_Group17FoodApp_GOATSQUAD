@@ -11,12 +11,12 @@ from app.schemas.Restaurant import RestaurantCreate, RestaurantResponse, Restaur
 from app.services.restaurant_service import (
     create_restaurant_service,
     update_restaurant_service,
-    activate_restaurant_service,
-    deactivate_restaurant_service,
-    delete_restaurant_service,
-    get_restaurant_by_name_service,
-    get_restaurant_by_cuisine_service,
-    sort_restaurants_by_name_service
+    #activate_restaurant_service,
+    #deactivate_restaurant_service,
+    #delete_restaurant_service,
+    #get_restaurant_by_name_service,
+    #get_restaurant_by_cuisine_service,
+    #sort_restaurants_by_name_service
 )
 
 router = APIRouter(prefix="/restaurants", tags=["restaurants"])
@@ -30,11 +30,20 @@ def create_restaurant(payload: RestaurantCreate, token: str = Header(...)):
     current_user = get_user_from_session(session)
     current_user_id = current_user.id
     require_role_service(current_user, UserRole.STAFF)
+
     return create_restaurant_service(payload, current_user_id)
 
+#Update Restaurant
+@router.put("/update/", response_model = RestaurantResponse)
+def update_restaurant(payload: RestaurantUpdate, token: str = Header(...)):
+    session = Token(token=token)
+    current_user = get_user_from_session(session)
+    current_user_id = current_user.id
+    return update_restaurant_service(payload, current_user_id)
 
 
 """NOT UPDATED YET
+
 #Get restaurant by name
 @router.get("/search/name/{search_name}", response_model = List[RestaurantResponse])
 def get_restaurant_by_name(search_name: str):
@@ -62,10 +71,6 @@ def activate_restaurant(restaurant_id: int):
 def deactivate_restaurant(restaurant_id: int):
     return deactivate_restaurant_service(restaurant_id)
 
-#Update Restaurant
-@router.put("/{restaurant_id}", response_model = RestaurantResponse)
-def update_restaurant(restaurant_id: int, payload: RestaurantUpdate):
-    return update_restaurant_service(restaurant_id, payload)
 
 #Delete restaurant
 @router.delete("/{restaurant_id}")
