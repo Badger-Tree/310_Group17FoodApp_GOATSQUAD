@@ -1,16 +1,13 @@
-from pydantic import BaseModel
-from typing import List, Optional
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 from datetime import datetime
-from app.schemas.Address import AddressResponse, Address
 from app.schemas.Role import UserRole
 
-
 ## Base User
-
 class UserBase(BaseModel):
-    email: str
-    first_name: str
-    last_name: str
+    email: EmailStr
+    first_name: str = Field(min_length=1)
+    last_name: str = Field(min_length=1)
     
 class UserResponse(UserBase):
     id: str
@@ -25,8 +22,8 @@ class UserUpdate(BaseModel):
     role: Optional[UserRole] = None
     
 class CustomerCreate(UserBase):
-    password: str
+    password: str = Field(min_length=5)
 
 class StaffCreate(UserBase):
-    password: str
+    password: str = Field(min_length=5)
     

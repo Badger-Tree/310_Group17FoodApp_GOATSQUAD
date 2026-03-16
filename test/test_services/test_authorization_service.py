@@ -18,7 +18,7 @@ def test_has_role_servicesuccess(mocker):
     assert result == True  
     
     
-def test_has_role_servicesuccess(mocker):
+def test_has_role_service_fail(mocker):
     """tests that has_role will return false if a given user does not have a has a given role"""
     mock_user = mocker.Mock()
     mock_user.role = UserRole.CUSTOMER

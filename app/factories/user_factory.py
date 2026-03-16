@@ -5,7 +5,6 @@ from app.schemas.Role import UserRole
 from app.schemas.User import CustomerCreate, StaffCreate
 
 
-##abstract methods
 class UserFactory(ABC):
     @abstractmethod
     def create_user(self, payload) -> dict:
@@ -13,6 +12,7 @@ class UserFactory(ABC):
 
     @staticmethod
     def create_base_user(payload, role: UserRole) -> dict:
+        """abstract class to create a base user, used by CustomerFactory and StaffFactory to create those specific types"""
         new_user = {"id":str(uuid.uuid4()), 
                     "email":payload.email.strip(), 
                     "first_name":payload.first_name.strip(), 
@@ -22,15 +22,14 @@ class UserFactory(ABC):
                     "created_date": datetime.now(timezone.utc).isoformat()}
         return new_user
 
-##concrete methods, could also put these in their own file like in prof's hotel demo?
 class CustomerFactory(UserFactory):
     def create_user(self, payload: CustomerCreate) -> dict:
+        """creates an instance of a customer"""
         user = self.create_base_user(payload, UserRole.CUSTOMER)
-        # removed since saved_address isn't a list in the new user csv
-        # user["saved_addresses"] = []
         return user
 
 class StaffFactory(UserFactory):
     def create_user(self, payload: StaffCreate) -> dict:
+        """creates an instance of a staff user"""
         user = self.create_base_user(payload, UserRole.STAFF)
         return user
