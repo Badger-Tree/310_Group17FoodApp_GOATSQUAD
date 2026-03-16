@@ -65,7 +65,7 @@ def mock_cart():
     return CartResponse(
         cart_id="1",
         customer_id="1",
-        restaurant_id="1",
+        restaurant_id=1,
         delivery_address_id="1",
         cart_items=cart_items
     )
@@ -77,7 +77,7 @@ def mock_empty_cart():
     return CartResponse(
         cart_id="1",
         customer_id="1",
-        restaurant_id="1",
+        restaurant_id=1,
         delivery_address_id="1",
         cart_items=cart_items
     )
@@ -88,7 +88,7 @@ def mock_load_orders():
     return [{
         "order_id": "order123",
         "customer_id": "cust456",
-        "restaurant_id": "rest789",
+        "restaurant_id": 1,
         "cart_id": "cart101",
         "delivery_id": None,
         "status": "PENDING",
@@ -133,7 +133,6 @@ def mock_staff_response():
         role=UserRole.OWNER,
         created_date=datetime(2026, 2, 20, 12, 34, 56))
     
-    
 @pytest.fixture
 def mock_orders():
     return [
@@ -149,8 +148,7 @@ def mock_orders():
         "total_amount": 26.66
     }
 ]
-    
-        
+      
 def test_create_order_success(mock_customer_response, mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items,mock_cart ):
     """Tests that create_order will route valid input to process_order_service and return expected json with a 201 code """
     with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
@@ -189,8 +187,7 @@ def test_create_order_empty_order(mock_customer_response, mock_load_orders,mock_
                                     response = client.post("/orders/create_order/1",headers={"token":"123"})
                                     assert response.status_code == 400
                                     mock_notfiy.assert_not_called()
-                                    
-                                        
+                                                                        
 def test_create_order_not_authorized(mock_staff_response):
     """Tests that create_order will throw a 403 error if the user does not have CUSTOMER role"""                
     with patch("app.routers.order.get_user_from_session", return_value = mock_staff_response):
@@ -207,7 +204,7 @@ def test_get_order_by_id_succecss(mock_customer_response, mock_load_orders,mock_
     with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
         with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
             with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
-                response = client.get("/orders/get_order_by_id/order123", )
+                response = client.get("/orders/get_order_by_id/order123")
                 assert response.status_code == 200
                 response_data = response.json()
                 assert "order_id" in response_data
@@ -229,3 +226,40 @@ def test_get_order_by_id_not_found(mock_customer_response, mock_load_orders,mock
                 response = client.get("/orders/get_order_by_id/notfound", )
                 assert response.status_code == 404
                 
+
+def test_get_order_by_restaurant_id_succecss(mock_customer_response, mock_load_orders,mock_load_order_items):
+    """tests that get_order_by_restaurant_id an order response and 200 message if given valid data"""
+    with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
+        with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
+            with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+                response = client.get("/orders/get_order_by_restaurant/rest789")
+                assert response.status_code == 200
+                # response_data = response.json()
+                # assert response_data["order_id"] in response_data
+                # assert "customer_id" in response_data
+                # assert "restaurant_id" in response_data[0]
+                # assert "delivery_address_id" in response_data
+                # assert "status" in response_data
+                # assert "total_amount" in response_data
+                # assert "items" in response_data
+                # assert response_data["customer_id"] == "cust456"
+                # assert response_data["total_amount"] == 26.66
+                # assert response_data["status"] == "PENDING"
+
+# def test_get_order_by_restaurant_id_not_found(mock_customer_response, mock_load_orders,mock_load_order_items):
+#     """tests that get_order_by_restaurant_id returns a 404 error if service cannot locate given order order"""
+#     with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
+#         with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
+#             with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+#                 response = client.get("/orders/get_order_by_restaurant/2")
+#                 assert response.status_code == 404
+
+
+
+# @router.get("/get_order_by_restaurant/{restaurant_id}", response_model = List[OrderResponse], status_code=status.HTTP_200_OK)
+# def get_orders_by_restaurant(restaurant_id:int):
+#     """Finds any orders associated with a restaurantid (string), return list
+#     Input: restaurant id (int)
+#     Output: OrderResponse (restaurant_id,customer_id,delivery_address_id,delivery_address,cart_id, order_id, created_date, status, total_amount, delivery_id, items)
+#     """
+#     return get_orders_by_restaurant_service(restaurant_id)
