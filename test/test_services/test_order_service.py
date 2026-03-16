@@ -11,7 +11,7 @@ def test_cancel_order_restaurant_service_success(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": "rest789",
+                    "restaurant_id": 789,
                     "cart_id": "cart101",
                     "delivery_id": None,
                     "status": "PENDING",
@@ -31,7 +31,7 @@ def test_cancel_order_restaurant_service_refund_failed(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": "rest789",
+                    "restaurant_id": 789,
                     "cart_id": "cart101",
                     "delivery_id": None,
                     "status": "PENDING",
@@ -88,7 +88,7 @@ def test_accept_order_service_success(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": "rest789",
+                    "restaurant_id": 789,
                     "cart_id": "cart101",
                     "delivery_id": None,
                     "status": "PENDING",
