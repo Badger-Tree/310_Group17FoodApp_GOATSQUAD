@@ -23,7 +23,7 @@ def test_OrderItemBase_invalid_data():
     with pytest.raises(ValidationError): OrderItemBase(**input_data)
 
 
-# def test_OrderItemBase_missing_data():
+def test_OrderItemBase_missing_data():
     """test that OrderItemBase creates an error if it receives an input with missing field"""
     input_data = {"food_item_id": 123,
                 "price_per_item" : 5.99}
@@ -76,7 +76,7 @@ def test_OrderItemResponse_invalid_data():
                 "order_id" : "987"}
     with pytest.raises(ValidationError): OrderItemResponse(**input_data)
 
-# def test_OrderItemResponse_missing_data():
+def test_OrderItemResponse_missing_data():
     """test that OrderItemResponse creates an error if it receives an input with missing field"""
     input_data = {"food_item_id": 123,
                 "quantity" : 1,

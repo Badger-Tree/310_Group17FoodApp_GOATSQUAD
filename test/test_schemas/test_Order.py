@@ -108,9 +108,9 @@ def test_OrderResponse_valid_input():
     assert result.customer_id == "44"
     assert result.status == OrderStatus.PENDING
 
-def test_OrderResponse_invalid_status():
-    """test that OrderResponse creates an error if it receives in invalid status"""
-    input_data = {"restaurant_id" : "45",
+def test_OrderResponse_invalid_input():
+    """test that OrderResponse creates an error if it receives in invalid input"""
+    input_data = {"restaurant_id" : 45,
                     "customer_id" : "44",
                     "delivery_address_id" : "5",
                     "delivery_address" : "268 High Street",
@@ -122,8 +122,9 @@ def test_OrderResponse_invalid_status():
                         "quantity": 1,
                         "price_per_item": 88.88
                     }],
-                    "order_id" : "333",
+                    "order_id" : 333,
                     "created_date" : "2024-02-20T12:34:56",
+                    "total_amount" : 89.88,
                     "delivery_id" : "6",
                     "status" : "PENDING"
                     }
