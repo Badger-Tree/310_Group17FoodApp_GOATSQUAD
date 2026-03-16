@@ -168,3 +168,9 @@ notification_id,recipient_user_id,notification_type,message,status
 167,1,payment,Payment for order 1187894b-45e0-4eac-b78a-46f6dc802e9e was successful. The restaurant is preparing your meal!,pending
 168,123,payment,Payment for order adbc4837-6cdd-4aec-83f8-c1a345b419d7 was successful. The restaurant is preparing your meal!,pending
 169,123,payment,Payment for order e751a1b4-a878-4f3d-876e-ceeccedfd5ab was successful. The restaurant is preparing your meal!,pending
+170,1,payment,Payment for order 2ed94038-e30b-4266-adf7-5d63ed2d189f was successful. The restaurant is preparing your meal!,pending
+171,123,payment,Payment for order 5d102a77-b8e1-4eeb-aa7a-1447fe534c44 was successful. The restaurant is preparing your meal!,pending
+172,123,payment,Payment for order 944bd0d9-79de-48e9-a8f4-b8f4a669d9f7 was successful. The restaurant is preparing your meal!,pending
+173,1,payment,Payment for order 0c8eb942-f6ad-418d-903e-38c1518a62b9 was successful. The restaurant is preparing your meal!,pending
+174,123,payment,Payment for order 39796a2b-1667-4274-88de-b62c8299ff63 was successful. The restaurant is preparing your meal!,pending
+175,123,payment,Payment for order c1b9056b-3602-48ba-8839-0eb428584733 was successful. The restaurant is preparing your meal!,pending

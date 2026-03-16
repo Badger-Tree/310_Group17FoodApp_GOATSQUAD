@@ -102,37 +102,6 @@ def test_cancel_order_restaurant_service_success(mocker):
     result = cancel_order_restaurant_service("order123")
     assert result.order_id == ("order123")
     
-def test_cancel_order_restaurant_service_success(mocker):
-    """tests that cancel_order_restaurant_service() will successfully cancel an order given valid order id from restaurant side"""
-    mock_orders= [{
-                    "order_id": "order123",
-                    "customer_id": "cust456",
-                    "restaurant_id": "rest789",
-                    "cart_id": "cart101",
-                    "delivery_id": None,
-                    "status": "PENDING",
-                    "total_amount": 26.66,
-                    "created_date": datetime(2026, 2, 20, 12, 34, 56),
-                    "delivery_address_id": "addr202"
-        }]
-    def mock_save_orders(input):
-        return input
-    
-    mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
-    mocker.patch("app.services.order_service.save_all_orders", mock_save_orders)
-    mocker.patch("app.services.order_service.process_refund_service", return_value = True)
-    mocker.patch("app.services.order_service.notify_payment_status", return_value=None)
-    mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
-    mocker.patch("app.services.order_service.load_order_items", return_value=[{
-        "order_id": "order123",
-        "order_item_id" : "1",
-        "food_item_id": 1,
-        "quantity": 2,
-        "price_per_item": 13.33
-    }])
-    result = cancel_order_restaurant_service("order123")
-    assert result.order_id == ("order123")
-    
 def test_cancel_order_restaurant_service_refund_failed(mocker):
     """tests that cancel_order_restaurant_service() will successfully cancel an order given valid order id from restaurant side"""
     mock_orders= [{
