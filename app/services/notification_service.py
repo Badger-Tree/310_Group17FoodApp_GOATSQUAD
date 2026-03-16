@@ -92,3 +92,9 @@ def notify_refund_issued(customer_id: str, order_id: str):
         "message": f"A refund has been issued for your canceled order {order_id}. It may take a few business days to reflect in your account.",
         "status": "pending"
     })
+
+def get_user_inbox(user_id: str):
+    """Returns a list of notifications from csv for the specific user."""
+    all_notifications = notification_repo.load_all()
+    user_notifications = [n for n in all_notifications if n.recipient_user_id == user_id]
+    return user_notifications
