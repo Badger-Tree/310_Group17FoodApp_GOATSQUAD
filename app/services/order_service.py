@@ -235,7 +235,7 @@ class CartItemResponse(BaseModel):
 class CartResponse(BaseModel):
     cart_id: str
     customer_id: str
-    restaurant_id: str
+    restaurant_id: int
     delivery_address_id: str
     cart_items: List[CartItemResponse]
     

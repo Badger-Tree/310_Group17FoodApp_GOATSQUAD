@@ -82,13 +82,12 @@ def mock_empty_cart():
         cart_items=cart_items
     )
     
-    
 @pytest.fixture
 def mock_load_orders():
     return [{
         "order_id": "order123",
         "customer_id": "cust456",
-        "restaurant_id": 1,
+        "restaurant_id": 789,
         "cart_id": "cart101",
         "delivery_id": None,
         "status": "PENDING",
@@ -232,8 +231,14 @@ def test_get_order_by_restaurant_id_succecss(mock_customer_response, mock_load_o
     with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
         with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
             with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
-                response = client.get("/orders/get_order_by_restaurant/rest789")
+                response = client.get("/orders/get_order_by_restaurant/789")
                 assert response.status_code == 200
+                response_data = response.json()
+                assert isinstance(response_data, list)
+                assert len(response_data) == 1
+                assert response_data[0]["restaurant_id"] == 789
+                assert response_data[0]["order_id"] == "order123"
+                
                 # response_data = response.json()
                 # assert response_data["order_id"] in response_data
                 # assert "customer_id" in response_data
