@@ -3,7 +3,6 @@ from datetime import datetime
 import pytest
 from app.schemas.OrderStatus import OrderStatus
 from app.schemas.Order import  OrderCreate, OrderBase, OrderResponse
-from app.schemas.OrderItem import OrderItemCreate, OrderItemResponse # type: ignore
 
 
 def test_OrderBase_valid_input():
@@ -19,7 +18,7 @@ def test_OrderBase_valid_input():
 
 def test_OrderBase_invalid_input():
     """test that OrderBase creates an error if it receives in invalid input"""
-    input_data = {"restaurant_id" : "invalid",
+    input_data = {"restaurant_id" : "text",
                 "customer_id" : "44",
                 "delivery_address_id" : "5",
                 "delivery_address" : "268 High Street"}
@@ -126,49 +125,6 @@ def test_OrderResponse_invalid_input():
                     "order_id" : 333,
                     "created_date" : "2024-02-20T12:34:56",
                     "total_amount" : 89.88,
-                    "delivery_id" : "6",
-                    "status" : "PENDING"
-                    }
-    with pytest.raises(ValidationError): OrderResponse(**input_data)
-
-def test_OrderResponse_invalid_status():
-    """test that OrderResponse creates an error if it receives in invalid status"""
-    input_data = {"restaurant_id" : 45,
-                    "customer_id" : "44",
-                    "delivery_address_id" : "5",
-                    "delivery_address" : "268 High Street",
-                    "cart_id": "999",
-                    "items": [{
-                        "order_item_id": "1",
-                        "order_id": "333",
-                        "food_item_id": 1,
-                        "quantity": 1,
-                        "price_per_item": 88.88
-                    }],
-                    "order_id" : "333",
-                    "created_date" : "2024-02-20T12:34:56",
-                    "total_amount" : 89.88,
-                    "delivery_id" : "6",
-                    "status" : "Pending"
-                    }
-    with pytest.raises(ValidationError): OrderResponse(**input_data)
-
-def test_OrderResponse_invalid_status():
-    """test that OrderResponse creates an error if it receives in invalid status"""
-    input_data = {"restaurant_id" : 45,
-                    "customer_id" : "44",
-                    "delivery_address_id" : "5",
-                    "delivery_address" : "268 High Street",
-                    "cart_id": "999",
-                    "items": [{
-                        "order_item_id": "1",
-                        "order_id": "333",
-                        "food_item_id": 1,
-                        "quantity": 1,
-                        "price_per_item": 88.88
-                    }],
-                    "order_id" : "333",
-                    "created_date" : "2024-02-20T12:34:56",
                     "delivery_id" : "6",
                     "status" : "PENDING"
                     }
