@@ -191,7 +191,9 @@ def test_process_order_service_success(mocker):
             self.food_item_id = food_item_id
             self.quantity = quantity
             self.price_per_item = price_per_item 
-    
+            
+    mocker.patch("app.services.order_service.notify_order_placed")
+    mocker.patch("app.services.order_service.notify_payment_status")
     mocker.patch("app.services.order_service.get_cart_by_id", lambda cart_id: Mock_TempCart())
     mock_payment = mocker.patch("app.services.order_service.process_payment_service", return_value = True)
     mock_create_order = mocker.patch("app.services.order_service.create_order_service")
@@ -211,6 +213,8 @@ def test_process_order_service_empty_cart(mocker):
             self.cart_items = []
 
     mocker.patch("app.services.order_service.get_cart_by_id", lambda cart_id: Mock_TempCart())
+    mocker.patch("app.services.order_service.notify_order_placed")
+    mocker.patch("app.services.order_service.notify_payment_status")
     mock_payment = mocker.patch("app.services.order_service.process_payment_service", return_value = True)
     mock_create_order = mocker.patch("app.services.order_service.create_order_service")
     with pytest.raises(HTTPException) as testException: process_order_service("cart123")
@@ -236,6 +240,8 @@ def test_process_order_service_multiple_items(mocker):
             self.quantity = quantity
             self.price_per_item = price_per_item 
     
+    mocker.patch("app.services.order_service.notify_order_placed")
+    mocker.patch("app.services.order_service.notify_payment_status")
     mocker.patch("app.services.order_service.get_cart_by_id", lambda cart_id: Mock_TempCart())
     mock_payment = mocker.patch("app.services.order_service.process_payment_service", return_value = True)
     mock_create_order = mocker.patch("app.services.order_service.create_order_service")
@@ -259,7 +265,7 @@ def test_cancel_order_restaurant_service_success(mocker):
         }]
     def mock_save_orders(input):
         return input
-    
+    mocker.patch("app.services.order_service.notify_order_placed")
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders", mock_save_orders)
     mocker.patch("app.services.order_service.process_refund_service", return_value = True)
@@ -294,6 +300,8 @@ def test_cancel_order_restaurant_service_refund_failed(mocker):
     mocker.patch("app.services.order_service.notify_payment_status", return_value=None)
     mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
     
+    
+    
     with pytest.raises(HTTPException) as testException: cancel_order_restaurant_service("order123")
     assert testException.value.status_code ==400
     
@@ -314,6 +322,7 @@ def test_cancel_order_restaurant_service_order_not_found(mocker):
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.notify_payment_status", return_value=None)
     mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
+    mocker.patch("app.services.order_service.notify_payment_status")
     with pytest.raises(HTTPException) as testException: cancel_order_restaurant_service("order1")
     assert testException.value.status_code ==404
 
@@ -334,6 +343,7 @@ def test_cancel_order_restaurant_service_completed(mocker):
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.notify_payment_status", return_value=None)
     mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
+    mocker.patch("app.services.order_service.notify_payment_status")
     with pytest.raises(HTTPException) as testException: cancel_order_restaurant_service("order123")
     assert testException.value.status_code ==400
 
@@ -360,6 +370,7 @@ def test_accept_order_service_success(mocker):
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.load_order_items", return_value = mock_order_items)
     mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
+    mocker.patch("app.services.order_service.notify_payment_status")
     result = accept_order_service("order123")
     assert result.status == OrderStatus.APPROVED   
     
@@ -376,9 +387,10 @@ def test_accept_order_service_order_not_found(mocker):
                     "created_date": "2026-02-20T12:34:56",
                     "delivery_address_id": "addr202"
         }]
+    mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
+    mocker.patch("app.services.order_service.notify_payment_status")
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     with pytest.raises(HTTPException) as testException: accept_order_service("order1")
-    mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
     assert testException.value.status_code ==404
 
 def test_accept_order_service_accepted(mocker):
@@ -396,7 +408,8 @@ def test_accept_order_service_accepted(mocker):
         }]
     
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
-
+    mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
+    mocker.patch("app.services.order_service.notify_payment_status")
     with pytest.raises(HTTPException) as testException: accept_order_service("order1")
     assert testException.value.status_code ==404
 
