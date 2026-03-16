@@ -35,7 +35,7 @@ def test_get_cartItem_by_id_valid(cart_item_id, expected):
     """Checks that the function returns the correct dictionary with valid data"""
     with patch("app.services.cartItems_service.load_all", return_value=mock_cart_data):
         result = get_cartItem_by_id(cart_item_id)
-        assert result == expected
+        assert result.model_dump() == expected
 
 
 @pytest.mark.parametrize("cart_item_id", ["", " "])

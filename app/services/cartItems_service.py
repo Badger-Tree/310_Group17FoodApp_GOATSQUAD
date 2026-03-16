@@ -9,17 +9,35 @@ from app.services.session_manager_service import get_user_from_session
 from app.services.user_service import get_user_by_id_service
 from app.schemas.Token import Token
 
-def get_cartItem_by_id(cart_item_id: str) -> CartItemResponse:
-    """Gets a cart item by its id and returns a CartItemResponse: (food_item_id,
-        quantity, price_per_item, cart_item_id, cart_id, subtotal"""
-    cart_items_data = load_all()
-    cart_item_id = str(cart_item_id).strip()
-    if not cart_item_id:
-        raise HTTPException(status_code=400, detail="cart_item_id cannot be empty")
-    for it in cart_items_data:
-        if it.get("cart_item_id") == cart_item_id:
-            return CartItemResponse(**it).model_dump()
+def load_all_data(): 
+    cart_items = load_all()
+    return cart_items
+
+def load_cart_item_id(cart_item_id: str): 
+    cart_items = load_all_data()
+    found_cart_item = False
+    for c in cart_items: 
+        if c["cart_item_id"] == cart_item_id: 
+            found_cart_item = True
+            return c
+    if not found_cart_item:
+        raise_exception_404(cart_item_id)
+
+def raise_exception_404(cart_item_id): 
     raise HTTPException(status_code=404, detail=f"Item '{cart_item_id}' not found")
+
+def raise_exception_400(): 
+    raise HTTPException(status_code=400, detail="cart_item_id cannot be empty")
+
+
+def get_cartItem_by_id(cart_item_id: str) -> CartItemResponse:
+    """Gets a cart item by its id and returns a CartItemResponse"""
+    cart_item_id = str(cart_item_id).strip()
+    if not cart_item_id: 
+        raise_exception_400()
+    cart_item = load_cart_item_id(cart_item_id)
+    return CartItemResponse(**cart_item)
+    
 
 def add_cart_item(item):
     """Adds an item to a cart and returns information of a new cart item"""
