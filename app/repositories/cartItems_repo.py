@@ -6,12 +6,15 @@ from decimal import Decimal
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "cartItems.json"
 
 def load_all() -> List[Dict[str, Any]]:
+   """Loads all cart items from the json file. If the file does not exist, it returns an empty list"""
    if not DATA_PATH.exists():
        return []
    with DATA_PATH.open("r", encoding="utf-8") as f:
        return json.load(f)
 
+
 def save_all(items: List[Dict[str, Any]]) -> None:
+    """Saves a list of cart items to the json file"""
     tmp = DATA_PATH.with_suffix(".tmp")
 
     def decimal_converter(obj):

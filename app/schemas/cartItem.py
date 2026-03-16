@@ -18,4 +18,4 @@ class CartItemAdd(CartItemBase):
 
 class CartItemUpdate(BaseModel):
         quantity: PositiveInt
-        price_per_item: Decimal
+
