@@ -87,12 +87,6 @@ def test_get_address_by_id_not_found(mock_load_addresses):
     with patch("app.services.address_service.load_addresses", return_value=mock_load_addresses):
             response = client.get("/addresses/by-id/notfound")
             assert response.status_code == 404
-            
-def test_get_address_by_id_not_found(mock_load_addresses):
-    """tests that get_address_by_id throws a 404 exception if given no address input"""
-    with patch("app.services.address_service.load_addresses", return_value = mock_load_addresses):
-            response = client.get("/addresses/by-id/")
-            assert response.status_code == 404
                         
 def test_get_address_by_customer_id_success(mock_load_addresses, mock_address_list_response):
     """tests that get_address_by_customer_id returns a 200 message and address list of response json given valid customer id input"""
