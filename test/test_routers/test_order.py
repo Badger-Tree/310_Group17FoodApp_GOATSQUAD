@@ -200,81 +200,79 @@ def test_create_order_no_token():
           
 def test_get_order_by_id_succecss(mock_customer_response, mock_load_orders,mock_load_order_items):
     """tests that get_order_by_id retrns an order response and 200 message if given valid data"""
-    with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
-        with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
-            with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
-                response = client.get("/orders/get_order_by_id/order123")
-                assert response.status_code == 200
-                response_data = response.json()
-                assert "order_id" in response_data
-                assert "customer_id" in response_data
-                assert "restaurant_id" in response_data
-                assert "delivery_address_id" in response_data
-                assert "status" in response_data
-                assert "total_amount" in response_data
-                assert "items" in response_data
-                assert response_data["customer_id"] == "cust456"
-                assert response_data["total_amount"] == 26.66
-                assert response_data["status"] == "PENDING"
+    with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
+        with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+            response = client.get("/orders/get_order_by_id/order123")
+            assert response.status_code == 200
+            response_data = response.json()
+            assert "order_id" in response_data
+            assert "customer_id" in response_data
+            assert "restaurant_id" in response_data
+            assert "delivery_address_id" in response_data
+            assert "status" in response_data
+            assert "total_amount" in response_data
+            assert "items" in response_data
+            assert response_data["customer_id"] == "cust456"
+            assert response_data["total_amount"] == 26.66
+            assert response_data["status"] == "PENDING"
 
 def test_get_order_by_id_not_found(mock_customer_response, mock_load_orders,mock_load_order_items):
     """tests that get_order_by_id returns a 404 error if service cannot locate given order order"""
-    with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
-        with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
-            with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
-                response = client.get("/orders/get_order_by_id/notfound", )
-                assert response.status_code == 404
-                
+    with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
+        with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+            response = client.get("/orders/get_order_by_id/notfound", )
+            assert response.status_code == 404
+            
 def test_get_order_by_restaurant_id_success(mock_customer_response, mock_load_orders,mock_load_order_items):
     """tests that get_order_by_restaurant_id returns an order response and 200 message if given valid data"""
-    with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
-        with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
-            with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
-                response = client.get("/orders/get_order_by_restaurant/789")
-                assert response.status_code == 200
-                response_data = response.json()
-                assert isinstance(response_data, list)
-                assert len(response_data) == 1
-                assert response_data[0]["restaurant_id"] == 789
-                assert response_data[0]["order_id"] == "order123"
+    with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
+        with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+            response = client.get("/orders/get_order_by_restaurant/789")
+            assert response.status_code == 200
+            response_data = response.json()
+            assert isinstance(response_data, list)
+            assert len(response_data) == 1
+            assert response_data[0]["restaurant_id"] == 789
+            assert response_data[0]["order_id"] == "order123"
                 
 def test_get_order_by_restaurant_id_no_orders(mock_customer_response, mock_load_orders,mock_load_order_items):
     """tests that get_order_by_restaurant_id returns an empty list and 200 message if given valid data that does not match results"""
-    with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
-        with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
-            with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
-                response = client.get("/orders/get_order_by_restaurant/000")
-                assert response.status_code == 200
-                response_data = response.json()
-                assert isinstance(response_data, list)
-                assert len(response_data) == 0
+    with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
+        with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+            response = client.get("/orders/get_order_by_restaurant/000")
+            assert response.status_code == 200
+            response_data = response.json()
+            assert isinstance(response_data, list)
+            assert len(response_data) == 0
 
 def test_get_order_userid_success(mock_customer_response, mock_load_orders,mock_load_order_items):
     """tests that get_order_by_userid returns an order response and 200 message if given valid data"""
-    with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
-        with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
-            with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
-                response = client.get("/orders/get_order_by_user/cust456")
-                assert response.status_code == 200
-                response_data = response.json()
-                assert isinstance(response_data, list)
-                assert len(response_data) == 1
-                assert response_data[0]["restaurant_id"] == 789
-                assert response_data[0]["order_id"] == "order123"
+    with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
+        with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+            response = client.get("/orders/get_order_by_user/cust456")
+            assert response.status_code == 200
+            response_data = response.json()
+            assert isinstance(response_data, list)
+            assert len(response_data) == 1
+            assert response_data[0]["restaurant_id"] == 789
+            assert response_data[0]["order_id"] == "order123"
                 
 def test_get_order_by_userid_no_orders(mock_customer_response, mock_load_orders,mock_load_order_items):
     """tests that get_order_by_userid returns an empty list and 200 message if given valid data that does not match results"""
-    with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
-        with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
-            with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
-                response = client.get("/orders/get_order_by_user/nocust")
-                assert response.status_code == 200
-                response_data = response.json()
-                assert isinstance(response_data, list)
-                assert len(response_data) == 0
+    with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
+        with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+            response = client.get("/orders/get_order_by_user/nocust")
+            assert response.status_code == 200
+            response_data = response.json()
+            assert isinstance(response_data, list)
+            assert len(response_data) == 0
    
-def test_get_order_status_by_id_success
-
+# def test_get_order_status_by_id_success():
+    
+    
+# def test_get_order_status_by_id_order_not_found():
+    
+# def test_get_order_status_by_id_invalid_order():
 
 # @router.get("/order_status", response_model = Enum, status_code=status.HTTP_200_OK)
 # def get_order_status_by_id(orderid:str):
