@@ -8,7 +8,7 @@ from app.schemas.OrderStatus import OrderStatus
 
 class OrderBase(BaseModel):
     """Base pydantic class or order object"""
-    restaurant_id: int = Field(min_length=1)
+    restaurant_id: int
     customer_id:str = Field(min_length=1)
     delivery_address_id: Optional[str] = Field(default=None)
     delivery_address: Optional[str] = Field(default=None)
