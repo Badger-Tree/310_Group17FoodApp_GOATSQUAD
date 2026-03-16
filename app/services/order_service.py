@@ -127,14 +127,14 @@ def get_orders_by_userid_service(userid:str)-> List[OrderResponse]:
             order_responses.append(OrderResponse(**order, items = items_responses))
     return order_responses
 
-def get_order_status_by_id_service(orderid:str)-> Enum | None:
+def get_order_status_by_id_service(orderid:str)-> Enum:
     """Method gets a single order mathcing an order id (str)"""
     order_data = load_orders()
     for order in order_data:
         if order.get("order_id") == orderid:
             status_str = order.get("status")
             return OrderStatus(status_str)
-    return None
+    raise HTTPException(status_code=404, detail="Order not found")
         
 def cancel_order_customer_service(orderid:str) -> OrderResponse:
     """This method lets a customer cancel an order. It changes order status to CANCELED"""
