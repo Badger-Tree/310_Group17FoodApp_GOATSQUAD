@@ -52,6 +52,7 @@ notification_id,recipient_user_id,notification_type,message,status
 51,123,payment,Payment for order d57681f7-7a49-4390-b090-21cf80c1a12d was successful. The restaurant is preparing your meal!,pending
 52,123,payment,Payment for order ff093c1a-71ef-4db5-9b7b-16b539b16ea8 was successful. The restaurant is preparing your meal!,pending
 53,123,payment,Payment for order 963c7c93-81c8-4ca5-ba0b-a7b1bee84a48 was successful. The restaurant is preparing your meal!,pending
+<<<<<<< HEAD
 54,123,payment,Payment for order 1da49385-7c35-41b5-b09e-f1545cc3e45e was successful. The restaurant is preparing your meal!,pending
 55,123,payment,Payment for order fb6f0dde-60ae-4bcc-a422-46f6e89c1cf1 was successful. The restaurant is preparing your meal!,pending
 56,123,payment,Payment for order 5dda3b6d-f07c-47ca-ab48-0fb47e1ebca9 was successful. The restaurant is preparing your meal!,pending
@@ -473,3 +474,5 @@ notification_id,recipient_user_id,notification_type,message,status
 472,cust456,order,"Unfortunately, your order order123 was canceled by the restaurant.",failed
 473,123,payment,Payment for order 7e28c773-45e1-4eb9-a304-1f5d62ca951c was successful. The restaurant is preparing your meal!,pending
 474,123,payment,Payment for order 0642d33d-f059-4d14-a1ca-58dd476f840e was successful. The restaurant is preparing your meal!,pending
+=======
+>>>>>>> a07cf2b3e006fe19f177f6e3f7ded97de44c90b2
