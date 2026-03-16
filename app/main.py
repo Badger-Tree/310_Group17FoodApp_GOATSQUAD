@@ -16,7 +16,7 @@ def health():
 
 @app.get("/")
 def root():
-    return {"message": "FastAPI is running!"}
+    return {"message": "GoatSquad is Live!"}
 
 app.include_router(authentication_router)
 app.include_router(cartItems_router)
