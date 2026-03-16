@@ -1,15 +1,21 @@
 from typing import List
 from fastapi import HTTPException
 from dateutil import parser
+from enum import Enum
 
 
 """This is pulling the csv file and the functions from the restaurant file in repositories. """
 from app.repositories.restaurants_repo_csv import load_all as load_restaurants, save_all as save_restaurants
 """This is getting the restaurant schema and the the other classes in that file"""
 from app.schemas.Restaurant import RestaurantCreate, RestaurantUpdate, RestaurantResponse
+"""Import the user services"""
+from app.services.user_service import update_user_service
+"""Importing the users csv and the role schema to update the user role during restaurant creation"""
+from app.repositories.users_repo_csv import load_all as load_users, save_all as save_users
+from app.schemas.Role import UserRole
 
 """Service for creating a restaurant"""
-def create_restaurant_service(payload: RestaurantCreate) -> RestaurantResponse:
+def create_restaurant_service(payload: RestaurantCreate, current_user_id: str) -> RestaurantResponse:
     restaurants = load_restaurants()
 
     #Auto-increment the restaurant id
@@ -24,7 +30,7 @@ def create_restaurant_service(payload: RestaurantCreate) -> RestaurantResponse:
     
     new_restaurant = {
         "restaurant_id": str(new_id),
-        "owner_id": str(payload.owner_id),
+        "owner_id": str(current_user_id),
         "restaurant_name": payload.restaurant_name.strip(),
         "cuisine": payload.cuisine.strip(),
         "address": payload.address.strip(),
@@ -36,10 +42,25 @@ def create_restaurant_service(payload: RestaurantCreate) -> RestaurantResponse:
     restaurants.append(new_restaurant)
     save_restaurants(restaurants)
 
+    #Updating the user role to owner if they create a restaurant
+    users = load_users()
+    user_found = False
+    
+    for user in users:
+        if user.get("id") == current_user_id:
+            user["role"] = UserRole.OWNER.value
+            user_found = True
+            break
+
+    if not user_found:
+        raise HTTPException(status_code=404, detail=f"User '{current_user_id}' not found")
+    
+    save_users(users)
+    
     #return the restaurant response
     return RestaurantResponse(
         restaurant_id = new_id,
-        owner_id = payload.owner_id,
+        owner_id = current_user_id,
         restaurant_name = new_restaurant["restaurant_name"],
         cuisine = new_restaurant["cuisine"],
         address = new_restaurant["address"],

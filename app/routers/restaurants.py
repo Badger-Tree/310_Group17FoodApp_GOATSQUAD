@@ -1,9 +1,11 @@
-<<<<<<< HEAD
-from fastapi import APIRouter, status
-=======
 from fastapi import APIRouter, status, Header
->>>>>>> 8344d257b87e0c176a794649d1b3ef5a0a3a6b21
 from typing import List
+from app.services.authorization_service import require_role_service
+from app.services.session_manager_service import get_user_from_session,validate_token_service
+from app.schemas.Token import Token
+from app.schemas.Role import UserRole
+from enum import Enum
+from app.services.user_service import update_user_service
 
 from app.schemas.Restaurant import RestaurantCreate, RestaurantResponse, RestaurantUpdate
 from app.services.restaurant_service import (
@@ -21,6 +23,18 @@ router = APIRouter(prefix="/restaurants", tags=["restaurants"])
 
 """This is where I will keep the endpoints"""
 
+#Create restaurant
+@router.post("/", response_model = RestaurantResponse, status_code = 201)
+def create_restaurant(payload: RestaurantCreate, token: str = Header(...)):
+    session = Token(token=token)
+    current_user = get_user_from_session(session)
+    current_user_id = current_user.id
+    require_role_service(current_user, UserRole.STAFF)
+    return create_restaurant_service(payload, current_user_id)
+
+
+
+"""NOT UPDATED YET
 #Get restaurant by name
 @router.get("/search/name/{search_name}", response_model = List[RestaurantResponse])
 def get_restaurant_by_name(search_name: str):
@@ -36,15 +50,7 @@ def get_restaurant_by_cuisine(search_cuisine: str):
 def sort_restaurants_by_name():
     return sort_restaurants_by_name_service()
 
-#Create restaurant
-@router.post("/", response_model = RestaurantResponse)
-<<<<<<< HEAD
-def create_restaurant(payload: RestaurantCreate):
-    return create_restaurant_service(payload)
-=======
-def create_restaurant(payload: RestaurantCreate, user_id: int = Header(...)):
-    return create_restaurant_service(payload, owner_id = user_id)
->>>>>>> 8344d257b87e0c176a794649d1b3ef5a0a3a6b21
+
 
 #Activate restaurant
 @router.put("/activate/{restaurant_id}", response_model = RestaurantResponse)
@@ -67,3 +73,5 @@ def delete_restaurant(restaurant_id: int):
     delete_restaurant_service(restaurant_id)
     return {"message": f"Restaurant with id {restaurant_id} has been deleted."}
 
+
+    """
