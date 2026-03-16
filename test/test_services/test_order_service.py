@@ -9,7 +9,7 @@ def test_process_order_service_success(mocker):
         def __init__(self):
             self.cart_id = "cart123"
             self.customer_id = "123"
-            self.restaurant_id = "456"
+            self.restaurant_id = 456
             self.delivery_address_id = "addr1"
             self.cart_items = [Mock_TempCartItem(1, 1, 4.00),                 
             ]
@@ -33,7 +33,7 @@ def test_process_order_service_empty_cart(mocker):
         def __init__(self):
             self.cart_id = "cart123"
             self.customer_id = "123"
-            self.restaurant_id = "456"
+            self.restaurant_id = 456
             self.delivery_address_id = "addr1"
             self.cart_items = []
 
@@ -52,7 +52,7 @@ def test_process_order_service_multiple_items(mocker):
         def __init__(self):
             self.cart_id = "cart123"
             self.customer_id = "123"
-            self.restaurant_id = "456"
+            self.restaurant_id = 456
             self.delivery_address_id = "addr1"
             self.cart_items = [Mock_TempCartItem(1, 1, 4.00),
                             Mock_TempCartItem(2, 2, 5.50),                 
