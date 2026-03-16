@@ -9,7 +9,7 @@ from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
 from enum import Enum
-from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status
+from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status,notify_refund_issued,notify_order_status_update_customer_cancels
 from app.services.payment_service import process_payment_service, process_refund_service
 
 def process_order_service(cart_id: str):
@@ -148,9 +148,9 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
             if status_enum == OrderStatus.PENDING:
                 refunded = process_refund_service(order["total_amount"])
                 if refunded: 
-                    notify_payment_status(order["customer_id"], order["order_id"], True)
+                    notify_refund_issued(order["customer_id"], order["order_id"])
                     order["status"] = OrderStatus.CANCELED.value
-                    notify_order_status_update(order["customer_id"], order["order_id"], False)
+                    notify_order_status_update_customer_cancels(order["customer_id"], order["order_id"], False)
                     save_all_orders(order_data)
                     items_responses = []
                     for item in order_item_data:
@@ -158,7 +158,7 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
                             items_responses.append(OrderItemResponse(**item))
                     return OrderResponse(**order, items = items_responses)
                 else:
-                    notify_payment_status(order["customer_id"], order["order_id"], False)
+                    notify_refund_issued(order["customer_id"], order["order_id"])
                     raise HTTPException(status_code=400, detail = "refund not processed")
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
@@ -223,7 +223,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
                 refunded = process_refund_service(order["total_amount"])
                 if refunded:
                     order["status"] = OrderStatus.CANCELED.value
-                    notify_payment_status(order["customer_id"], order["order_id"], True)
+                    notify_refund_issued(order["customer_id"], order["order_id"], True)
                     notify_order_status_update(order["customer_id"], order["order_id"], False)
                     save_all_orders(order_data)
                     items_responses = []
