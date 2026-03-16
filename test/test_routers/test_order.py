@@ -198,7 +198,7 @@ def test_create_order_no_token():
     response = client.post("/orders/create_order/1")
     assert response.status_code == 422
           
-def test_get_order_by_id_succecss(mock_customer_response, mock_load_orders,mock_load_order_items):
+def test_get_order_by_id_succecss(mock_load_orders,mock_load_order_items):
     """tests that get_order_by_id retrns an order response and 200 message if given valid data"""
     with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
         with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
@@ -216,14 +216,14 @@ def test_get_order_by_id_succecss(mock_customer_response, mock_load_orders,mock_
             assert response_data["total_amount"] == 26.66
             assert response_data["status"] == "PENDING"
 
-def test_get_order_by_id_not_found(mock_customer_response, mock_load_orders,mock_load_order_items):
+def test_get_order_by_id_not_found(mock_load_orders,mock_load_order_items):
     """tests that get_order_by_id returns a 404 error if service cannot locate given order order"""
     with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
         with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
             response = client.get("/orders/get_order_by_id/notfound", )
             assert response.status_code == 404
             
-def test_get_order_by_restaurant_id_success(mock_customer_response, mock_load_orders,mock_load_order_items):
+def test_get_order_by_restaurant_id_success(mock_load_orders,mock_load_order_items):
     """tests that get_order_by_restaurant_id returns an order response and 200 message if given valid data"""
     with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
         with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
@@ -235,7 +235,7 @@ def test_get_order_by_restaurant_id_success(mock_customer_response, mock_load_or
             assert response_data[0]["restaurant_id"] == 789
             assert response_data[0]["order_id"] == "order123"
                 
-def test_get_order_by_restaurant_id_no_orders(mock_customer_response, mock_load_orders,mock_load_order_items):
+def test_get_order_by_restaurant_id_no_orders(mock_load_orders,mock_load_order_items):
     """tests that get_order_by_restaurant_id returns an empty list and 200 message if given valid data that does not match results"""
     with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
         with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
@@ -245,7 +245,7 @@ def test_get_order_by_restaurant_id_no_orders(mock_customer_response, mock_load_
             assert isinstance(response_data, list)
             assert len(response_data) == 0
 
-def test_get_order_userid_success(mock_customer_response, mock_load_orders,mock_load_order_items):
+def test_get_order_userid_success(mock_load_orders,mock_load_order_items):
     """tests that get_order_by_userid returns an order response and 200 message if given valid data"""
     with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
         with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
@@ -257,7 +257,7 @@ def test_get_order_userid_success(mock_customer_response, mock_load_orders,mock_
             assert response_data[0]["restaurant_id"] == 789
             assert response_data[0]["order_id"] == "order123"
                 
-def test_get_order_by_userid_no_orders(mock_customer_response, mock_load_orders,mock_load_order_items):
+def test_get_order_by_userid_no_orders(mock_load_orders,mock_load_order_items):
     """tests that get_order_by_userid returns an empty list and 200 message if given valid data that does not match results"""
     with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
         with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
@@ -267,7 +267,8 @@ def test_get_order_by_userid_no_orders(mock_customer_response, mock_load_orders,
             assert isinstance(response_data, list)
             assert len(response_data) == 0
    
-# def test_get_order_status_by_id_success():
+def test_get_order_status_by_id_success():
+    """"""
     
     
 # def test_get_order_status_by_id_order_not_found():
