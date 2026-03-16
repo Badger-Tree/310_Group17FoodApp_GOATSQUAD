@@ -1,0 +1,61 @@
+Date: March 12, 2026
+Type: Team Meeting
+Attendees: Ailish, Colleen, Megan, Hitesh
+
+Key Discussion Points:
+  1. Leftover tasks for M3
+  2. How to integrate and connect the modules together
+  3. Dockerize
+
+What was accomplished during the meeting:
+  1. Sharing each others codes and progress.
+  2. Clarifying modules and methods with each other.
+  3. Plan next steps.
+
+Responsibilities:
+
+General:
+- Testing
+- Code review
+- Making sure the sprint backlog is organized and followed
+
+Tesh:
+- Implementing continuous integration
+- Implementing the restaurant module
+- Create the scrum documents
+
+Colleen:
+- Implementing user registration module
+- Implementing orders module
+- Implementing session manager
+- Implementing authorization and authentication
+- Implementing tests to main
+
+Megan:
+- Implementing continuous integration
+- Implementing food item and inventory module
+- Implementing notification module
+
+Ailish:
+- Implementing cart module
+- Implementing payment module
+- Implementing part of Delivery module
+
+Discussion during the meeting:
+- What's working well?
+  1. We are doing well.
+  2. Good communication both in github and in discord.
+  3. Good organization.
+  4. It's been helpful talking through each other's code and problems.
+- What needs improvement
+  1. More work on github. More PRs, breaking up features into smaller components.
+  
+Action Items (Things to get done as a group) and Responsibilities:
+  1. Continue testing our modules with different testing techniques.
+  2. Break down code to multiple functions and PRs.
+  3. Work on leftover modules.
+  4. API documentation.
+  5. Ask the TA on how to create API documentation / what does API documentation look like
+  6. Ask the TA on how to dockerize our project.
+  7. Ask TA about how to make test reports for deliverables
+  8. Create a folder with screenshots for test execution documentation

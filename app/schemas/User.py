@@ -1,23 +1,18 @@
-from pydantic import BaseModel
-from typing import List, Optional
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 from datetime import datetime
-from app.schemas.Address import AddressResponse, Address
 from app.schemas.Role import UserRole
 
-
 ## Base User
-
 class UserBase(BaseModel):
-    email: str
-    first_name: str
-    last_name: str
+    email: EmailStr
+    first_name: str = Field(min_length=1)
+    last_name: str = Field(min_length=1)
     
 class UserResponse(UserBase):
     id: str
     role: UserRole
     created_date: datetime
-    # removed since refactor to keep addresses and users separate
-    # saved_addresses: Optional[List[AddressResponse]] = None
     
 class UserUpdate(BaseModel):
     email: Optional[str] = None
@@ -25,14 +20,10 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = None
     password: Optional[str] = None
     role: Optional[UserRole] = None
-    # removing address from the update since address is managed through address enopint
-    # saved_addresses: Optional[List[Address]] = None
-## Customer
     
 class CustomerCreate(UserBase):
-    password: str
+    password: str = Field(min_length=5)
 
-## Staff
 class StaffCreate(UserBase):
-    password: str
+    password: str = Field(min_length=5)
     

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from fastapi import APIRouter, status
+=======
+from fastapi import APIRouter, status, Header
+>>>>>>> 8344d257b87e0c176a794649d1b3ef5a0a3a6b21
 from typing import List
 
 from app.schemas.Restaurant import RestaurantCreate, RestaurantResponse, RestaurantUpdate
@@ -34,8 +38,13 @@ def sort_restaurants_by_name():
 
 #Create restaurant
 @router.post("/", response_model = RestaurantResponse)
+<<<<<<< HEAD
 def create_restaurant(payload: RestaurantCreate):
     return create_restaurant_service(payload)
+=======
+def create_restaurant(payload: RestaurantCreate, user_id: int = Header(...)):
+    return create_restaurant_service(payload, owner_id = user_id)
+>>>>>>> 8344d257b87e0c176a794649d1b3ef5a0a3a6b21
 
 #Activate restaurant
 @router.put("/activate/{restaurant_id}", response_model = RestaurantResponse)
