@@ -9,7 +9,7 @@ from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
 from enum import Enum
-from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status
+from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status,notify_refund_issued,notify_order_status_update_customer_cancels
 from app.services.payment_service import process_payment_service, process_refund_service
 
 def process_order_service(cart_id: str):
@@ -95,7 +95,7 @@ def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
                 if item.get("order_id") == orderid:
                     items_response.append(OrderItemResponse(**item))
             return OrderResponse(**order, items=items_response)
-    return None
+    raise HTTPException(status_code=404, detail=f"Order notfound")
 
 def get_orders_by_restaurant_service(restaurantid:int)-> List[OrderResponse]:
     """Method gets list of Order Response objects matching to a restaurant id. Takes in restaurant id"""
@@ -127,14 +127,14 @@ def get_orders_by_userid_service(userid:str)-> List[OrderResponse]:
             order_responses.append(OrderResponse(**order, items = items_responses))
     return order_responses
 
-def get_order_status_by_id_service(orderid:str)-> Enum | None:
+def get_order_status_by_id_service(orderid:str)-> Enum:
     """Method gets a single order mathcing an order id (str)"""
     order_data = load_orders()
     for order in order_data:
         if order.get("order_id") == orderid:
             status_str = order.get("status")
             return OrderStatus(status_str)
-    return None
+    raise HTTPException(status_code=404, detail="Order not found")
         
 def cancel_order_customer_service(orderid:str) -> OrderResponse:
     """This method lets a customer cancel an order. It changes order status to CANCELED"""
@@ -148,9 +148,9 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
             if status_enum == OrderStatus.PENDING:
                 refunded = process_refund_service(order["total_amount"])
                 if refunded: 
-                    notify_payment_status(order["customer_id"], order["order_id"], True)
+                    notify_refund_issued(order["customer_id"], order["order_id"])
                     order["status"] = OrderStatus.CANCELED.value
-                    notify_order_status_update(order["customer_id"], order["order_id"], False)
+                    notify_order_status_update_customer_cancels(order["customer_id"], order["order_id"])
                     save_all_orders(order_data)
                     items_responses = []
                     for item in order_item_data:
@@ -158,7 +158,6 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
                             items_responses.append(OrderItemResponse(**item))
                     return OrderResponse(**order, items = items_responses)
                 else:
-                    notify_payment_status(order["customer_id"], order["order_id"], False)
                     raise HTTPException(status_code=400, detail = "refund not processed")
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
@@ -223,7 +222,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
                 refunded = process_refund_service(order["total_amount"])
                 if refunded:
                     order["status"] = OrderStatus.CANCELED.value
-                    notify_payment_status(order["customer_id"], order["order_id"], True)
+                    notify_refund_issued(order["customer_id"], order["order_id"])
                     notify_order_status_update(order["customer_id"], order["order_id"], False)
                     save_all_orders(order_data)
                     items_responses = []
@@ -232,7 +231,6 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
                             items_responses.append(OrderItemResponse(**item))
                     return OrderResponse(**order, items = items_responses)
                 else:
-                    notify_payment_status(order["customer_id"], order["order_id"], False)
                     raise HTTPException(status_code=400, detail = "refund not processed")
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
@@ -279,7 +277,7 @@ class CartItemResponse(BaseModel):
 class CartResponse(BaseModel):
     cart_id: str
     customer_id: str
-    restaurant_id: str
+    restaurant_id: int
     delivery_address_id: str
     cart_items: List[CartItemResponse]
     
