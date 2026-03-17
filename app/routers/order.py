@@ -20,7 +20,7 @@ def create_order(cart_id: str,token: str = Header(...)):
     require_role_service(current_user,UserRole.CUSTOMER)
     return process_order_service(cart_id)
 
-@router.get("/get_order_by_id", response_model=OrderResponse, status_code=status.HTTP_200_OK)
+@router.get("/get_order_by_id/{orderid}", response_model=OrderResponse, status_code=status.HTTP_200_OK)
 def get_order_by_id(orderid: str):
     """Finds an order given an order id (string)
     Input: Order id (string)
@@ -28,7 +28,7 @@ def get_order_by_id(orderid: str):
     """
     return get_order_by_order_id_service(orderid)
 
-@router.get("/get_order_by_restaurant", response_model = List[OrderResponse], status_code=status.HTTP_200_OK)
+@router.get("/get_order_by_restaurant/{restaurant_id}", response_model = List[OrderResponse], status_code=status.HTTP_200_OK)
 def get_orders_by_restaurant(restaurant_id:int):
     """Finds any orders associated with a restaurantid (string), return list
     Input: restaurant id (int)
@@ -36,50 +36,49 @@ def get_orders_by_restaurant(restaurant_id:int):
     """
     return get_orders_by_restaurant_service(restaurant_id)
 
-@router.get("/get_order_by_user", response_model = List[OrderResponse], status_code=status.HTTP_200_OK)
-def get_orders_by_userid(userid:str):
+@router.get("/get_order_by_user/{user_id}", response_model = List[OrderResponse], status_code=status.HTTP_200_OK)
+def get_orders_by_userid(user_id:str):
     """Finds any orders associated with a userid (string), return list
     Input: user id (string)
     Output: OrderResponse (restaurant_id,customer_id,delivery_address_id,delivery_address,cart_id, order_id, created_date, status, total_amount, delivery_id, items)
     """
-    return get_orders_by_userid_service(userid)
+    return get_orders_by_userid_service(user_id)
 
-@router.get("/order_status", response_model = Enum, status_code=status.HTTP_200_OK)
-def get_order_status_by_id(orderid:str):
+@router.get("/order_status/{order_id}", response_model = Enum, status_code=status.HTTP_200_OK)
+def get_order_status_by_id(order_id:str):
     """Returns an order status enum given an order id str
     Input: order id (string)
     Output: OrderStatus (PENDING,APPROVED,CANCELED,IN_PREPARATION,OUT_FOR_DELIVERY,COMPLETED)
     """
-    return get_order_status_by_id_service(orderid)
+    return get_order_status_by_id_service(order_id)
 
-@router.put("/cancel_order_customer",response_model = OrderResponse, status_code=status.HTTP_200_OK)
-def cancel_order_customer(orderid:str,token: str = Header(...)):
+@router.put("/cancel_order_customer/{order_id}",response_model = OrderResponse, status_code=status.HTTP_200_OK)
+def cancel_order_customer(order_id:str,token: str = Header(...)):
     """Allows a customer to cancel an order. Input: order id (string). Output: OrderResponse"""
-    session = Token(token)
+    session = Token(token=token)
     current_user = get_user_from_session(session)
-    require_role_service(current_user.role,UserRole.CUSTOMER)
-    return cancel_order_customer_service(orderid)
+    require_role_service(current_user,UserRole.CUSTOMER)
+    return cancel_order_customer_service(order_id)
 
-@router.put("/cancel_order_restaurant",response_model = OrderResponse, status_code=status.HTTP_200_OK)
-def cancel_order_restaurant(orderid:str,token: str = Header(...)):
+@router.put("/cancel_order_restaurant/{order_id}",response_model = OrderResponse, status_code=status.HTTP_200_OK)
+def cancel_order_restaurant(order_id:str,token: str = Header(...)):
     """Allows a restauarant manager or owner to cancel an order
     Input: order id (string)
-    Output: OrderResponse (restaurant_id,customer_id,delivery_address_id,delivery_address,cart_id, order_id, created_date, status, total_amount, delivery_id, items)
+    Output: OrderResponse 
     """
     session = Token(token=token)
     current_user = get_user_from_session(session)
     require_role_multi_service(current_user, [UserRole.MANAGER, UserRole.OWNER])
-    
-    return cancel_order_restaurant_service(orderid)
+    return cancel_order_restaurant_service(order_id)
 
-@router.put("/accept_order",response_model = OrderResponse, status_code=status.HTTP_200_OK)
-def accept_order(orderid:str,token: str = Header(...)):
+@router.put("/accept_order/{order_id}",response_model = OrderResponse, status_code=status.HTTP_200_OK)
+def accept_order(order_id:str,token: str = Header(...)):
     """Allows a restauarant manager or owner to accept an order. Order status changes to Accepted.
     Input: order id (string)
-    Output: OrderResponse (restaurant_id,customer_id,delivery_address_id,delivery_address,cart_id, order_id, created_date, status, total_amount, delivery_id, items)
+    Output: OrderResponse
     """
     session = Token(token=token)
     current_user = get_user_from_session(session)
     require_role_multi_service(current_user, [UserRole.MANAGER, UserRole.OWNER])
     
-    return accept_order_service(orderid)
+    return accept_order_service(order_id)
