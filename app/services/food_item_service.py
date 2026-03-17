@@ -1,5 +1,5 @@
 from ..schemas.food_item import FoodItemCreate, FoodItemUpdate
-from ..repositories.food_item_repo import load_all, save_all, find_by_name
+from ..repositories.food_item_repo import load_all, save_all
 
 def list_food_items():
     """list_food_items() retrieves all food items and returns as a list of dictionaries."""
