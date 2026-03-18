@@ -112,9 +112,16 @@ def test_get_user_from_session(mocker,mock_user_response,mock_sessions):
     assert result.id == "1"
     assert result.role == UserRole.CUSTOMER
 
-def test_get_session_from_token(mocker,mock_sessions):
+def test_get_session_from_token_success(mocker,mock_sessions):
+    """tests that get_session_from_token will return a Response given a valid token"""
     mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
     result = get_session_from_token("abc123")
     assert result.token == "abc123"
     assert result.user_id == "1"
     assert result.role == UserRole.CUSTOMER
+    
+def test_get_session_from_token_success(mocker,mock_sessions):
+    """tests that get_session_from_token will return an error if given an invalid token"""
+    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
+    with pytest.raises(HTTPException) as testException: get_session_from_token("notoken")
+    assert testException.value.status_code ==401
