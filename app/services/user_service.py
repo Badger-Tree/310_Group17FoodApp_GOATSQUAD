@@ -25,6 +25,7 @@ def get_user_by_email_service(email: str) -> UserResponse:
 
 def register_user_service(payload: CustomerCreate | StaffCreate, role: UserRole) -> UserResponse:
     """This function creates an account for a user as staff or customer"""
+    # TODO refactor into create vs save users
     users = load_users()
     for user in users:
         if user["email"].lower() == payload.email.strip().lower():
@@ -36,9 +37,8 @@ def register_user_service(payload: CustomerCreate | StaffCreate, role: UserRole)
     else:raise HTTPException(status_code=400, detail=f"User role not found")
     new_user = factory.create_user(payload)
 
-    for user in users:
-        if user["id"] == new_user["id"]:
-            raise HTTPException(status_code=409, detail="ID collision; retry.")
+    if (new_user["role"] == "CUSTOMER"):
+        create_cart(new_user["id"])
     users.append(new_user)
     save_all_users(users)
     return UserResponse(**new_user)
@@ -63,3 +63,11 @@ def update_user_service(userid:str, payload:UserUpdate) -> UserResponse:
         raise HTTPException(status_code=404, detail=f"User {userid} not found")
     save_all_users(users)
     return UserResponse(**updated)
+
+#######
+# STUB
+#######
+
+def create_cart(user_id:str):
+    """this is a temp method so that register_user_service() will run while create_cart() is in development"""
+    return

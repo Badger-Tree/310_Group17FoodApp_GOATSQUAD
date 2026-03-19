@@ -112,7 +112,8 @@ def test_register_user_service_customer_success(monkeypatch):
                     "created_date": "2026-02-20T12:34:56"}
     def mock_load_users():
         return []
-
+    def mock_create_cart(id: str):
+        return
     saved_users = []
     def mock_save_all_users(users):
         nonlocal saved_users
@@ -121,6 +122,7 @@ def test_register_user_service_customer_success(monkeypatch):
     monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
     monkeypatch.setattr("app.services.user_service.save_all_users", mock_save_all_users)
     monkeypatch.setattr("app.services.user_service.CustomerFactory", MockCustomerFactory)
+    monkeypatch.setattr("app.services.user_service.create_cart",mock_create_cart)
     payload = CustomerCreate(
         email="test@example.com",
         first_name="Test",
