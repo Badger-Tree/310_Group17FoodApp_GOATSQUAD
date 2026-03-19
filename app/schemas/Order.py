@@ -13,8 +13,6 @@ class OrderBase(BaseModel):
     restaurant_id: int
     customer_id:str = Field(min_length=1)
     delivery_address_id: Optional[str] = Field(default=None)
-    delivery_address: Optional[str] = Field(default=None)
-    # delivery_address will be an Adress object after merging
     
 class OrderCreate(OrderBase):
     """Extension of base order used to structure/orgnaize data used to mkae an order"""
