@@ -76,6 +76,17 @@ def mock_load_orders():
         "total_amount": 26.66,
         "created_date": datetime(2026, 2, 20, 12, 34, 56),
         "delivery_address_id": "addr202"
+        },
+        {
+        "order_id": "order789",
+        "customer_id": "cust456",
+        "restaurant_id": 789,
+        "cart_id": "cart101",
+        "delivery_id": None,
+        "status": "COMPLETED",
+        "total_amount": 26.66,
+        "created_date": datetime(2026, 2, 20, 12, 34, 56),
+        "delivery_address_id": "addr202"
         }
             ]
 
@@ -99,7 +110,7 @@ def mock_save_all_order_items(*args, **kwargs):
 
 @pytest.fixture
 def mock_customer_response():
-    return UserResponse(id="1",
+    return UserResponse(id="cust456",
         email="pippin@example.com",
         first_name="peregrin",
         last_name="took",
@@ -115,7 +126,6 @@ def mock_staff_response():
         role=UserRole.OWNER,
         created_date=datetime(2026, 2, 20, 12, 34, 56))
       
-
 def test_create_order_success(mock_customer_response, mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items,mock_cart):
     """Tests that create_order will route valid input to process_order_service and return expected json with a 201 code """
     with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
@@ -196,7 +206,7 @@ def test_get_order_by_restaurant_id_success(mock_load_orders,mock_load_order_ite
             assert response.status_code == 200
             response_data = response.json()
             assert isinstance(response_data, list)
-            assert len(response_data) == 2
+            assert len(response_data) == 3
             assert response_data[0]["restaurant_id"] == 789
             assert response_data[0]["order_id"] == "order123"
                 
@@ -218,7 +228,7 @@ def test_get_order_userid_success(mock_load_orders,mock_load_order_items):
             assert response.status_code == 200
             response_data = response.json()
             assert isinstance(response_data, list)
-            assert len(response_data) == 1
+            assert len(response_data) == 2
             assert response_data[0]["restaurant_id"] == 789
             assert response_data[0]["order_id"] == "order123"
                 
@@ -298,9 +308,25 @@ def test_cancel_order_customer_order_approved(mock_customer_response,mock_load_o
                     with patch("app.services.order_service.save_all_orders", return_value = mock_save_orders):
                         with patch("app.services.order_service.save_all_order_items", return_value = mock_save_all_order_items):
                             with patch("app.services.order_service.process_refund_service", return_value = True):
-                                        response = client.put("/orders/cancel_order_customer/order456",headers={"token":"123"})
+                                        response = client.put("/orders/cancel_order_customer/order789",headers={"token":"123"})
                                         assert response.status_code == 400
     
+def test_cancel_order_customer_wrong_customer(mock_customer_response,mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items):
+    """tests that cancel_order_customer will return a 403 error a customer tries to cancel an order that isn't theirs"""
+    with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
+            with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
+                with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+                    with patch("app.services.order_service.save_all_orders", return_value = mock_save_orders):
+                        with patch("app.services.order_service.save_all_order_items", return_value = mock_save_all_order_items):
+                            with patch("app.services.order_service.process_refund_service", return_value = True):
+                                        response = client.put("/orders/cancel_order_customer/order456",headers={"token":"123"})
+                                        assert response.status_code == 403
+def test_cancel_order_customer_not_authenticated():
+    """tests that cancel_order_customer will return a 401 error if user is not authorized to cancel order"""
+    with patch("app.routers.order.get_user_from_session", side_effect=HTTPException(status_code=401, detail="User not found")):
+        response = client.put("/orders/cancel_order_restaurant/order123",headers={"token":"123"})
+        assert response.status_code == 401
+        
 def test_cancel_order_restaurant_success(mock_staff_response,mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items):
     """test that cancel_order_staff will return an OrderResponse and 200 message if given valid input"""
     with patch("app.routers.order.get_user_from_session", return_value = mock_staff_response):
@@ -316,12 +342,6 @@ def test_cancel_order_restaurant_success(mock_staff_response,mock_load_orders,mo
                                                 assert response.status_code == 200
                                                 response_data = response.json()
                                                 assert response_data["status"] == "CANCELED"
-
-def test_cancel_order_customer_not_authenticated():
-    """tests that cancel_order_customer will return a 401 error if user is not authorized to cancel order"""
-    with patch("app.routers.order.get_user_from_session", side_effect=HTTPException(status_code=401, detail="User not found")):
-        response = client.put("/orders/cancel_order_restaurant/order123",headers={"token":"123"})
-        assert response.status_code == 401
     
 def test_cancel_order_restaurant_not_authorized(mock_customer_response):
     """tests that cancel_order_restaurant will return a 403 error if user is not authorized to cancel order"""
