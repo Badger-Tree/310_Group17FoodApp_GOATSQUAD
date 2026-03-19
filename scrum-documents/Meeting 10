@@ -1,0 +1,67 @@
+Date: March 19, 2026
+Type: Team Meeting
+Attendees: Ailish, Colleen, Megan, Hitesh
+
+Key Discussion Points:
+  1. Leftover tasks for M3
+  2. How to integrate and connect the modules together
+    a. Will drop delivery status from delivery object and track status in order status in order
+    b. user_service.create_user() will call cart_service.create_cart() to make a cart when a new customer registers
+    c. order_service.accept_order() will call delivery_service.create_delivery() when an order is accepted by the restarant
+    d. add_item_to_cart() will get the user from the session and then then use get_cart_by_user() to pass the cart ot the add_item_tocart() service
+    e. order_service.cancel_order_restaurant() will call delivery_service.cancel_delivery()
+  3. Checking each other's code
+
+What was accomplished during the meeting:
+  1. Sharing each others codes and progress.
+  2. Clarifying modules and methods with each other.
+  3. Plan next steps.
+
+Responsibilities:
+
+General:
+- Testing
+- Code review
+- Making sure the sprint backlog is organized and followed
+
+Tesh:
+- Improve continuous integration when possible
+- Implementing the restaurant module
+- Implementing delivery module
+- Create the scrum documents
+
+Colleen:
+- Implementing user registration module
+- Implementing orders module
+- Implementing session manager
+- Implementing authorization and authentication
+- Implementing tests to main
+
+Megan:
+- Implementing continuous integration
+- Implementing food item and inventory module
+- Implementing notification module
+- Implementing docker setup
+
+Ailish:
+- Implementing cart module
+- Implementing payment module
+- Implementing part of Delivery module
+
+Discussion during the meeting:
+- What's working well?
+  1. Good teamwork and communication.
+  2. Better at github
+  3. Good organization.
+  4. It's been helpful talking through each other's code and problems.
+- What needs improvement
+  1. Organization
+  
+Action Items (Things to get done as a group) and Responsibilities:
+  1. Continue testing our modules with different testing techniques. Make sure to include testing on failure conditions.
+  2. Break down code to multiple functions and PRs.
+  3. Work on leftover modules.
+  4. API documentation.
+  5. Create a folder for test execution documentation
+
+
