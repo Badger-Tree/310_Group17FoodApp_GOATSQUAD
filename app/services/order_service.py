@@ -9,22 +9,34 @@ from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
 from enum import Enum
+from app.services.address_service import get_address_by_id_service
 from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status,notify_refund_issued,notify_order_status_update_customer_cancels
 from app.services.payment_service import process_payment_service, process_refund_service
 
-def process_order_service(cart_id: str):
+def process_order_service(cart_id: str, address_id:str):
     """receives a cart and asks for payment before creating the order and sending for review. 
     Note that the service is currently using a stub method to get cart."""
+    
+     # validate cart 
     cart = get_cart_by_id(cart_id)
+    if not cart:
+        raise HTTPException(status_code=404, detail="cart not found")
     if not cart.cart_items:
-        raise HTTPException(status_code=400, detail="cart is empty")
+        raise HTTPException(status_code=400, detail="empty cart")
     
-    order_id = str(uuid.uuid4())
+    # validate_address
+    address = get_address_by_id_service(address_id)
+    if not cart.cart_items:
+        raise HTTPException(status_code=404, detail="address not found")
     
+    # calculate subtotal
     subtotal = 0.00
     for item in cart.cart_items:
         subtotal += item.price_per_item * item.quantity
     total_amount = round(subtotal,2)
+    
+    # build order
+    order_id = str(uuid.uuid4())
     new_order = {"order_id": order_id,
                 "customer_id": cart.customer_id,
                 "restaurant_id": cart.restaurant_id,
@@ -33,8 +45,8 @@ def process_order_service(cart_id: str):
                 "status" : "PENDING",
                 "total_amount" : total_amount,
                 "created_date" : datetime.now(timezone.utc),
-                "delivery_address_id" : cart.delivery_address_id}
-
+                "delivery_address_id" : address_id}
+    # build order items
     new_items = []
     for item in cart.cart_items:
         new_item = {
@@ -46,8 +58,10 @@ def process_order_service(cart_id: str):
             }
         new_items.append(new_item)
 
+    # handle payment
     paid = process_payment_service(total_amount)
     if paid:
+    # save order and create response
         new_order = create_order_service(new_order,new_items)
         notify_payment_status(cart.customer_id, order_id, True)
         return new_order
@@ -57,19 +71,20 @@ def process_order_service(cart_id: str):
  
 def create_order_service(new_order: dict, new_items: list[dict]) -> OrderResponse:
     """Method Creates an Order from a dictionary after if was processed for payment"""
+    # save order
     order_data = load_orders()
-    order_item_data = load_order_items()
-    
     order_data.append(new_order)
     save_all_orders(order_data)
     
+    # save order items
+    order_item_data = load_order_items()
     new_items_response = []
     for item in new_items:
         order_item_data.append(item)
         new_items_response.append(OrderItemResponse(**item))
-        
     save_all_order_items(order_item_data)
     
+    # make order response
     new_order_response =OrderResponse(order_id= new_order["order_id"],
                         customer_id= new_order["customer_id"],
                         restaurant_id= new_order["restaurant_id"],
@@ -79,7 +94,7 @@ def create_order_service(new_order: dict, new_items: list[dict]) -> OrderRespons
                         total_amount = new_order["total_amount"],
                         created_date = new_order["created_date"],
                         items = new_items_response)
-    
+    # notify
     notify_order_placed(new_order_response.customer_id, new_order_response.restaurant_id, new_order_response.order_id)
     return new_order_response
     

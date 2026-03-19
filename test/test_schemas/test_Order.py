@@ -9,33 +9,29 @@ def test_OrderBase_valid_input():
     """test that OrderBase is created successfully with valid data"""
     input_data = {"restaurant_id" : 1,
                 "customer_id" : "44",
-                "delivery_address_id" : "5",
-                "delivery_address" : "268 High Street"}
+                "delivery_address_id" : "5"}
     result = OrderBase(**input_data)
     assert result.restaurant_id == 1
-    assert result.delivery_address == "268 High Street"
+    assert result.delivery_address_id == "5"
     assert result.customer_id == "44"
 
 def test_OrderBase_invalid_input():
     """test that OrderBase creates an error if it receives in invalid input"""
     input_data = {"restaurant_id" : "text",
                 "customer_id" : "44",
-                "delivery_address_id" : "5",
-                "delivery_address" : "268 High Street"}
+                "delivery_address_id" : "5"}
     with pytest.raises(ValidationError): OrderBase(**input_data)
 
 def test_OrderBase_missing_input():
     """test that OrderBase creates an error if it receives an input with missing field"""
     input_data = {"customer_id" : "44",
-                "delivery_address_id" : "5",
-                "delivery_address" : "268 High Street"}
+                "delivery_address_id" : "5"}
     with pytest.raises(ValidationError): OrderBase(**input_data)
 
 def test_OrderBase_missing_optional_input():
     """test that OrderBase creates an error if it receives an input with missing optional field"""
     input_data = {"customer_id" : "44",
-                "delivery_address_id" : "5",
-                "delivery_address" : "268 High Street"}
+                "delivery_address_id" : "5"}
     with pytest.raises(ValidationError): OrderBase(**input_data)
     
 def test_OrderCreate_valid_input():
@@ -43,13 +39,12 @@ def test_OrderCreate_valid_input():
     input_data = {"restaurant_id" : 1,
                 "customer_id" : "44",
                 "delivery_address_id" : "5",
-                "delivery_address" : "268 High Street",
                 "cart_id": "999"
                 }
     result = OrderCreate(**input_data)
     assert result.restaurant_id == 1
     assert result.cart_id == "999"
-    assert result.delivery_address == "268 High Street"
+    assert result.delivery_address_id == "5"
     assert result.customer_id == "44"
 
 def test_OrderCreate_invalid_input():
@@ -57,7 +52,6 @@ def test_OrderCreate_invalid_input():
     input_data = {"restaurant_id" : 1,
                     "customer_id" : 44,
                     "delivery_address_id" : "5",
-                    "delivery_address" : "268 High Street",
                     "cart_id": "999",
                     "items": [{
                         "food_item_id": 1,
@@ -72,7 +66,6 @@ def test_OrderCreate_missing_input():
     input_data = {
                     "customer_id" : "44",
                     "delivery_address_id" : "5",
-                    "delivery_address" : "268 High Street",
                     "cart_id": "999"
                     }
     with pytest.raises(ValidationError): OrderCreate(**input_data)
@@ -82,7 +75,6 @@ def test_OrderResponse_valid_input():
     input_data = {"restaurant_id" : 45,
                 "customer_id" : "44",
                 "delivery_address_id" : "5",
-                "delivery_address" : "268 High Street",
                 "cart_id": "999",
                 "items": [{
                     "order_item_id": "1",
@@ -104,7 +96,6 @@ def test_OrderResponse_valid_input():
     assert result.items[0].food_item_id == 1
     assert result.items[0].order_item_id == "1"    
     assert result.restaurant_id == 45
-    assert result.delivery_address == "268 High Street"
     assert result.customer_id == "44"
     assert result.status == OrderStatus.PENDING
 
@@ -113,7 +104,6 @@ def test_OrderResponse_invalid_input():
     input_data = {"restaurant_id" : 45,
                     "customer_id" : "44",
                     "delivery_address_id" : "5",
-                    "delivery_address" : "268 High Street",
                     "cart_id": "999",
                     "items": [{
                         "order_item_id": "1",
