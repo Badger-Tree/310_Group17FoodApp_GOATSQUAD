@@ -36,12 +36,14 @@ def register_staff(payload: StaffCreate):
     Return: UserResponse (email, first_name, last_name, id, role, created_date)"""
     return register_user_service(payload, role=UserRole.STAFF)
 
-@router.put("/update-user/", response_model=UserResponse)
-def update_user(payload: UserUpdate, token: str = Header(...)):
+@router.put("/update-user/{user_id}", response_model=UserResponse)
+def update_user(user_id: str, payload: UserUpdate, token: str = Header(...)):
     """Updates the first_name, last_name, and/or password for an logged-in account. 
     Intake: userid, UserUpdate as payload
     Return: UserResponse (email, first_name, last_name, id, role, created_date)"""
     session = Token(token=token)
     current_user = get_user_from_session(session)
     current_user_id = current_user.id
+    if current_user_id != user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized")
     return update_user_service(current_user_id, payload)

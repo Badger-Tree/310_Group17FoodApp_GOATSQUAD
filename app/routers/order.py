@@ -58,6 +58,11 @@ def cancel_order_customer(order_id:str,token: str = Header(...)):
     session = Token(token=token)
     current_user = get_user_from_session(session)
     require_role_service(current_user,UserRole.CUSTOMER)
+    current_order = get_order_by_order_id_service(order_id)
+    if not current_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if current_user.id != current_order.customer_id:
+        raise HTTPException(status_code=403, detail="Unauthorized")
     return cancel_order_customer_service(order_id)
 
 @router.put("/cancel_order_restaurant/{order_id}",response_model = OrderResponse, status_code=status.HTTP_200_OK)
@@ -69,6 +74,7 @@ def cancel_order_restaurant(order_id:str,token: str = Header(...)):
     session = Token(token=token)
     current_user = get_user_from_session(session)
     require_role_multi_service(current_user, [UserRole.MANAGER, UserRole.OWNER])
+    # TODO: check if user_id from session is in get_staff_by_restaurant
     return cancel_order_restaurant_service(order_id)
 
 @router.put("/accept_order/{order_id}",response_model = OrderResponse, status_code=status.HTTP_200_OK)
@@ -80,5 +86,5 @@ def accept_order(order_id:str,token: str = Header(...)):
     session = Token(token=token)
     current_user = get_user_from_session(session)
     require_role_multi_service(current_user, [UserRole.MANAGER, UserRole.OWNER])
-    
+    # TODO: check if user_id from session is in get_staff_by_restaurant
     return accept_order_service(order_id)
