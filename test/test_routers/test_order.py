@@ -300,8 +300,8 @@ def test_cancel_order_customer_order_not_found(mock_customer_response,mock_load_
                                         response = client.put("/orders/cancel_order_customer/noorder",headers={"token":"123"})
                                         assert response.status_code == 404
 
-def test_cancel_order_customer_order_approved(mock_customer_response,mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items):
-    """tests that cancel_order_customer will return a 400 error if order is already approved"""
+def test_cancel_order_customer_order_accepted(mock_customer_response,mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items):
+    """tests that cancel_order_customer will return a 400 error if order is already accepted"""
     with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
             with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
                 with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
@@ -360,8 +360,8 @@ def test_cancel_order_restaurant_order_not_found(mock_staff_response,mock_load_o
                                         response = client.put("/orders/cancel_order_restaurant/noorder",headers={"token":"123"})
                                         assert response.status_code == 404
   
-def test_cancel_order_restaurant_order_approved(mock_staff_response,mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items):
-    """tests that cancel_order_restaurant will return a 400 error if order is already approved"""
+def test_cancel_order_restaurant_order_accepted(mock_staff_response,mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items):
+    """tests that cancel_order_restaurant will return a 400 error if order is already accepted"""
     with patch("app.routers.order.get_user_from_session", return_value = mock_staff_response):
             with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
                 with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
@@ -390,7 +390,7 @@ def test_accept_order_success(mock_staff_response, mock_load_orders,mock_load_or
                         assert "items" in response_data
                         assert response_data["customer_id"] == "cust456"
                         assert response_data["total_amount"] == 26.66
-                        assert response_data["status"] == "APPROVED"
+                        assert response_data["status"] == "ACCEPTED"
                         mock_order_notfiy.assert_called_once()
                                                             
 def test_accept_order_success_order_not_found(mock_staff_response, mock_load_orders,mock_load_order_items,mock_save_orders):
