@@ -248,7 +248,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
             status_str = order.get("status")
             status_enum = OrderStatus(status_str)
             
-            if status_enum == OrderStatus.APPROVED or status_enum == OrderStatus.PENDING or status_enum == OrderStatus.OUT_FOR_DELIVERY or status_enum == OrderStatus.IN_PREPARATION:
+            if status_enum == OrderStatus.ACCEPTED or status_enum == OrderStatus.PENDING or status_enum == OrderStatus.OUT_FOR_DELIVERY:
                 refunded = process_refund_service(order["total_amount"])
                 if refunded:
                     order["status"] = OrderStatus.CANCELED.value
@@ -267,7 +267,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
     raise HTTPException(status_code=404, detail="Order not found")
 
 def accept_order_service(orderid:str) -> OrderResponse:
-    """Method used by restaurant manager to accept an order. It changes order status from PENDING to APPROVED"""
+    """Method used by restaurant manager to accept an order. It changes order status from PENDING to ACCEPTED"""
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -278,7 +278,7 @@ def accept_order_service(orderid:str) -> OrderResponse:
             status_enum = OrderStatus(status_str)
             
             if status_enum == OrderStatus.PENDING:
-                order["status"] = OrderStatus.APPROVED.value
+                order["status"] = OrderStatus.ACCEPTED.value
                 notify_order_status_update(order["customer_id"], order["order_id"], True)
                 save_all_orders(order_data)
                 items_responses = []
