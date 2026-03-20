@@ -448,8 +448,8 @@ def test_set_order_status_service_success(mocker):
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders", mock_save_orders)
     
-    result = set_order_status_service("order123",OrderStatus.APPROVED)
-    assert result.status == OrderStatus.APPROVED
+    result = set_order_status_service("order123",OrderStatus.ACCEPTED)
+    assert result.status == OrderStatus.ACCEPTED
 
 def test_set_order_status_service_order_not_found(mocker):
     """tests that set_order_status will raise a 404 error if the order is not found"""
@@ -471,7 +471,7 @@ def test_set_order_status_service_order_not_found(mocker):
     
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders")
-    with pytest.raises(HTTPException) as testException: set_order_status_service("noorder",OrderStatus.APPROVED)
+    with pytest.raises(HTTPException) as testException: set_order_status_service("noorder",OrderStatus.ACCEPTED)
     assert testException.value.status_code ==404
     
 def test_cancel_order_customer_success(mocker):
