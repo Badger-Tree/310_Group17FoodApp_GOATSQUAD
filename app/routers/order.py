@@ -12,13 +12,13 @@ from app.schemas.Token import Token
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
-@router.post("/create_order/{cart_id}", response_model=OrderResponse,status_code=status.HTTP_201_CREATED)
-def create_order(cart_id: str,token: str = Header(...)):
+@router.post("/create_order/{cart_id}/{address_id}", response_model=OrderResponse,status_code=status.HTTP_201_CREATED)
+def create_order(cart_id: str,address_id:str,token: str = Header(...)):
     """Creates and saves an order for a customer. Gets a cart_id from path paramater. Output: OrderResponse"""
     session = Token(token=token)
     current_user = get_user_from_session(session)
     require_role_service(current_user,UserRole.CUSTOMER)
-    return process_order_service(cart_id)
+    return process_order_service(cart_id,address_id)
 
 @router.get("/get_order_by_id/{orderid}", response_model=OrderResponse, status_code=status.HTTP_200_OK)
 def get_order_by_id(orderid: str):
