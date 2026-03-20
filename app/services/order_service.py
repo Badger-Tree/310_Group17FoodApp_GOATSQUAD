@@ -1,5 +1,5 @@
 import random
-from typing import List
+from typing import List, Optional
 from fastapi import HTTPException
 from datetime import datetime, timezone
 from app.repositories.orders_repo import load_all as load_orders, save_all as save_all_orders
@@ -71,6 +71,7 @@ def process_order_service(cart_id: str, address_id:str):
  
 def create_order_service(new_order: dict, new_items: list[dict]) -> OrderResponse:
     """Method Creates an Order from a dictionary after if was processed for payment"""
+
     # save order
     order_data = load_orders()
     order_data.append(new_order)
@@ -265,6 +266,10 @@ def accept_order_service(orderid:str) -> OrderResponse:
             if status_enum == OrderStatus.PENDING:
                 order["status"] = OrderStatus.ACCEPTED.value
                 notify_order_status_update(order["customer_id"], order["order_id"], True)
+                # create delivery
+                delivery = create_delivery_service(order)
+                order["delivery_id"] = delivery.delivery_id
+
                 save_all_orders(order_data)
                 items_responses = []
                 
@@ -280,7 +285,7 @@ def accept_order_service(orderid:str) -> OrderResponse:
 # Stub methods that will get replaced when real modules are availble
 ##################################################################
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 
 class CartItemResponse(BaseModel):
@@ -320,3 +325,22 @@ def get_cart_by_id(cart_id: str) -> CartResponse:
     )
 
     return cart
+
+
+    
+class DeliveryResponse(BaseModel):
+    """this is a stub so I can create a delivery before delivery module is created"""
+    order_id: str
+    courier_id: Optional[str]
+    delivery_id: str
+    address_id: str
+    
+def create_delivery_service(order: dict) -> DeliveryResponse:
+    """this is a stub so I can send order to create delivery before delivery module is created"""
+    new_delivery_id = str(uuid.uuid4())
+    return DeliveryResponse(
+            order_id= order["order_id"],
+            courier_id= None,
+            delivery_id= new_delivery_id,
+            address_id= order["delivery_address_id"]
+        )
