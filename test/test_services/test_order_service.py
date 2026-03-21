@@ -472,7 +472,7 @@ def test_accept_order_service_success(mocker):
     mocker.patch("app.services.order_service.load_order_items", return_value = mock_order_items)
     mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
     result = accept_order_service("order123")
-    assert result.status == OrderStatus.APPROVED   
+    assert result.status == OrderStatus.ACCEPTED 
     
 def test_accept_order_service_order_not_found(mocker):
     """tests that accept_order_service() will generate an error if order is not found by order id"""
