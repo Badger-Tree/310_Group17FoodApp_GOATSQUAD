@@ -313,7 +313,7 @@ def test_cancel_order_restaurant_service_success(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "345",
                     "status": "PENDING",
                     "total_amount": 26.66,
                     "created_date": datetime(2026, 2, 20, 12, 34, 56),
