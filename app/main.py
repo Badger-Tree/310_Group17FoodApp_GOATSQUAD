@@ -24,3 +24,4 @@ app.include_router(address_router)
 app.include_router(food_router)
 app.include_router(inventory_router)
 app.include_router(order_router)
+
