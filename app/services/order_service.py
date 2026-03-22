@@ -30,7 +30,7 @@ def validate_address(address_id) -> AddressResponse:
         raise HTTPException(status_code=404, detail="address not found")
     return address
 
-def calculate_total(cart: CartResponse):
+def calculate_total(cart):
     """Calculates the total cost of an order given a cart"""
     subtotal = 0.00
     for item in cart.cart_items:
