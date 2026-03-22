@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from datetime import datetime, timezone
 from app.repositories.orders_repo import load_all as load_orders, save_all as save_all_orders
 from app.repositories.order_items_repo import load_all as load_order_items, save_all as save_all_order_items
+from app.schemas.Address import AddressResponse
 from app.schemas.Order import OrderResponse
 from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
@@ -22,19 +23,22 @@ def validate_cart(cart_id) -> CartResponse:
         raise HTTPException(status_code=400, detail="empty cart")
     return cart
     
-def validate_address(address_id) -> CartResponse:
+def validate_address(address_id) -> AddressResponse:
+    """"checks if an address exists, returns AddressResponse or exception"""
     address = get_address_by_id_service(address_id)
     if not address:
         raise HTTPException(status_code=404, detail="address not found")
     return address
 
 def calculate_total(cart: CartResponse):
+    """Calculates the total cost of an order given a cart"""
     subtotal = 0.00
     for item in cart.cart_items:
         subtotal += item.price_per_item * item.quantity
     return round(subtotal,2)
 
 def build_order(cart, total_amount, address_id)->dict:
+    """Builds a dictionary with cart and calculated fields needed for an order"""
     order_id = str(uuid.uuid4())
     new_order = {"order_id": order_id,
                 "customer_id": cart.customer_id,
@@ -48,6 +52,7 @@ def build_order(cart, total_amount, address_id)->dict:
     return new_order
 
 def build_order_items(cart, order_id):
+    """builds a list of order items from a cart and given order_id"""
     new_items = []
     for item in cart.cart_items:
         new_item = {
@@ -61,6 +66,7 @@ def build_order_items(cart, order_id):
     return new_items
 
 def handle_payment(order_dict) -> bool:
+    """sends an order for payment and then notified customer on result"""
     paid = process_payment_service(order_dict["total_amount"])
     if paid:
         notify_payment_status(order_dict["customer_id"], order_dict["order_id"], True)
@@ -70,17 +76,17 @@ def handle_payment(order_dict) -> bool:
         raise HTTPException(status_code=400, detail = "payment not processed order")
         
 
-def process_order_service(cart_id: str, address_id:str):
+def process_order_service(cart_id: str, address_id:str) -> OrderResponse:
     """receives a cart and asks for payment before creating the order and sending for review. 
     Note that the service is currently using a stub method to get cart."""
     cart = validate_cart(cart_id)
     address = validate_address(address_id)
     total_amount = calculate_total(cart)
-    order_dict = build_order(cart, total_amount,address["address_id"])
+    order_dict = build_order(cart, total_amount,address.address_id)
     order_items_dict = build_order_items(cart, order_dict["order_id"])
     handle_payment(order_dict)
     new_order = create_order_service(order_dict,order_items_dict)
- 
+    return new_order
  
 def create_order_service(new_order: dict, new_items: list[dict]) -> OrderResponse:
     """Method Creates an Order from a dictionary after if was processed for payment"""
