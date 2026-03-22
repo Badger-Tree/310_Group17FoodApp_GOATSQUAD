@@ -3,7 +3,7 @@ import pytest
 from fastapi import HTTPException
 from datetime import datetime
 from app.schemas.OrderStatus import OrderStatus
-from app.services.order_service import accept_order_service, cancel_order_customer_service, get_order_by_order_id_service, get_order_status_by_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service,cancel_order_restaurant_service, cancel_order_restaurant_service, accept_order_service, process_order_service, set_order_status_service
+from app.services.order_service import accept_order_service, cancel_order_customer_service, get_order_by_order_id_service, get_order_status_by_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service,cancel_order_restaurant_service, process_order_service, set_order_status_service
 
 mock_address_response = AddressResponse(address_id= "7",
             user_id= "cust456",

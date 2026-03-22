@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from datetime import datetime, timezone
 from app.repositories.orders_repo import load_all as load_orders, save_all as save_all_orders
 from app.repositories.order_items_repo import load_all as load_order_items, save_all as save_all_order_items
-from app.schemas.Order import OrderResponse, OrderCreate
+from app.schemas.Order import OrderResponse
 from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
