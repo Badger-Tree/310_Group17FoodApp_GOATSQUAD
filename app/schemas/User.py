@@ -15,11 +15,9 @@ class UserResponse(UserBase):
     created_date: datetime
     
 class UserUpdate(BaseModel):
-    email: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     password: Optional[str] = None
-    role: Optional[UserRole] = None
     
 class CustomerCreate(UserBase):
     password: str = Field(min_length=5)
