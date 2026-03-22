@@ -1,30 +1,42 @@
 import random
-from typing import List
+from typing import List, Optional
 from fastapi import HTTPException
 from datetime import datetime, timezone
 from app.repositories.orders_repo import load_all as load_orders, save_all as save_all_orders
 from app.repositories.order_items_repo import load_all as load_order_items, save_all as save_all_order_items
-from app.schemas.Order import OrderResponse, OrderCreate
+from app.schemas.Order import OrderResponse
 from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
 from enum import Enum
+from app.services.address_service import get_address_by_id_service
 from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status,notify_refund_issued,notify_order_status_update_customer_cancels
 from app.services.payment_service import process_payment_service, process_refund_service
 
-def process_order_service(cart_id: str):
+def process_order_service(cart_id: str, address_id:str):
     """receives a cart and asks for payment before creating the order and sending for review. 
     Note that the service is currently using a stub method to get cart."""
+    
+     # validate cart 
     cart = get_cart_by_id(cart_id)
+    if not cart:
+        raise HTTPException(status_code=404, detail="cart not found")
     if not cart.cart_items:
-        raise HTTPException(status_code=400, detail="cart is empty")
+        raise HTTPException(status_code=400, detail="empty cart")
     
-    order_id = str(uuid.uuid4())
+    # validate_address
+    address = get_address_by_id_service(address_id)
+    if not cart.cart_items:
+        raise HTTPException(status_code=404, detail="address not found")
     
+    # calculate subtotal
     subtotal = 0.00
     for item in cart.cart_items:
         subtotal += item.price_per_item * item.quantity
     total_amount = round(subtotal,2)
+    
+    # build order
+    order_id = str(uuid.uuid4())
     new_order = {"order_id": order_id,
                 "customer_id": cart.customer_id,
                 "restaurant_id": cart.restaurant_id,
@@ -33,8 +45,8 @@ def process_order_service(cart_id: str):
                 "status" : "PENDING",
                 "total_amount" : total_amount,
                 "created_date" : datetime.now(timezone.utc),
-                "delivery_address_id" : cart.delivery_address_id}
-
+                "delivery_address_id" : address_id}
+    # build order items
     new_items = []
     for item in cart.cart_items:
         new_item = {
@@ -46,8 +58,10 @@ def process_order_service(cart_id: str):
             }
         new_items.append(new_item)
 
+    # handle payment
     paid = process_payment_service(total_amount)
     if paid:
+    # save order and create response
         new_order = create_order_service(new_order,new_items)
         notify_payment_status(cart.customer_id, order_id, True)
         return new_order
@@ -57,19 +71,21 @@ def process_order_service(cart_id: str):
  
 def create_order_service(new_order: dict, new_items: list[dict]) -> OrderResponse:
     """Method Creates an Order from a dictionary after if was processed for payment"""
+
+    # save order
     order_data = load_orders()
-    order_item_data = load_order_items()
-    
     order_data.append(new_order)
     save_all_orders(order_data)
     
+    # save order items
+    order_item_data = load_order_items()
     new_items_response = []
     for item in new_items:
         order_item_data.append(item)
         new_items_response.append(OrderItemResponse(**item))
-        
     save_all_order_items(order_item_data)
     
+    # make order response
     new_order_response =OrderResponse(order_id= new_order["order_id"],
                         customer_id= new_order["customer_id"],
                         restaurant_id= new_order["restaurant_id"],
@@ -79,7 +95,7 @@ def create_order_service(new_order: dict, new_items: list[dict]) -> OrderRespons
                         total_amount = new_order["total_amount"],
                         created_date = new_order["created_date"],
                         items = new_items_response)
-    
+    # notify
     notify_order_placed(new_order_response.customer_id, new_order_response.restaurant_id, new_order_response.order_id)
     return new_order_response
     
@@ -135,7 +151,22 @@ def get_order_status_by_id_service(orderid:str)-> Enum:
             status_str = order.get("status")
             return OrderStatus(status_str)
     raise HTTPException(status_code=404, detail="Order not found")
-        
+
+def set_order_status_service(order_id:str, new_status:OrderStatus) -> OrderResponse:
+    """allows a service to change the status of an order"""
+    order_data = load_orders()
+    order_item_data = load_order_items()
+    for order in order_data:
+        if order.get("order_id") == order_id:
+            order["status"] = new_status.value
+            items_response = []
+            for item in order_item_data:
+                if item.get("order_id") == order_id:
+                    items_response.append(OrderItemResponse(**item))
+            save_all_orders(order_data)
+            return OrderResponse(**order, items=items_response)
+    raise HTTPException(status_code=404, detail=f"Order notfound")       
+
 def cancel_order_customer_service(orderid:str) -> OrderResponse:
     """This method lets a customer cancel an order. It changes order status to CANCELED"""
     order_data = load_orders()
@@ -218,7 +249,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
             status_str = order.get("status")
             status_enum = OrderStatus(status_str)
             
-            if status_enum == OrderStatus.APPROVED or status_enum == OrderStatus.PENDING or status_enum == OrderStatus.OUT_FOR_DELIVERY or status_enum == OrderStatus.IN_PREPARATION:
+            if status_enum == OrderStatus.ACCEPTED or status_enum == OrderStatus.PENDING or status_enum == OrderStatus.OUT_FOR_DELIVERY:
                 refunded = process_refund_service(order["total_amount"])
                 if refunded:
                     order["status"] = OrderStatus.CANCELED.value
@@ -237,7 +268,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
     raise HTTPException(status_code=404, detail="Order not found")
 
 def accept_order_service(orderid:str) -> OrderResponse:
-    """Method used by restaurant manager to accept an order. It changes order status from PENDING to APPROVED"""
+    """Method used by restaurant manager to accept an order. It changes order status from PENDING to ACCEPTED"""
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -248,8 +279,12 @@ def accept_order_service(orderid:str) -> OrderResponse:
             status_enum = OrderStatus(status_str)
             
             if status_enum == OrderStatus.PENDING:
-                order["status"] = OrderStatus.APPROVED.value
+                order["status"] = OrderStatus.ACCEPTED.value
                 notify_order_status_update(order["customer_id"], order["order_id"], True)
+                # create delivery
+                delivery = create_delivery_service(order)
+                order["delivery_id"] = delivery.delivery_id
+
                 save_all_orders(order_data)
                 items_responses = []
                 
@@ -265,7 +300,7 @@ def accept_order_service(orderid:str) -> OrderResponse:
 # Stub methods that will get replaced when real modules are availble
 ##################################################################
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 
 class CartItemResponse(BaseModel):
@@ -305,3 +340,22 @@ def get_cart_by_id(cart_id: str) -> CartResponse:
     )
 
     return cart
+
+
+    
+class DeliveryResponse(BaseModel):
+    """this is a stub so I can create a delivery before delivery module is created"""
+    order_id: str
+    courier_id: Optional[str]
+    delivery_id: str
+    address_id: str
+    
+def create_delivery_service(order: dict) -> DeliveryResponse:
+    """this is a stub so I can send order to create delivery before delivery module is created"""
+    new_delivery_id = str(uuid.uuid4())
+    return DeliveryResponse(
+            order_id= order["order_id"],
+            courier_id= None,
+            delivery_id= new_delivery_id,
+            address_id= order["delivery_address_id"]
+        )
