@@ -11,6 +11,7 @@ from app.schemas.OrderStatus import OrderStatus
 import uuid
 from enum import Enum
 from app.services.address_service import get_address_by_id_service
+from app.services.inventory_service import check_availability
 from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status,notify_refund_issued,notify_order_status_update_customer_cancels
 from app.services.payment_service import process_payment_service, process_refund_service
 
@@ -42,8 +43,8 @@ def get_cart_by_id(cart_id: str) -> CartResponse:
             price_per_item=1.00
         ),
         CartItemResponse(
-            food_item_id=2,
-            quantity=2,
+            food_item_id=45,
+            quantity=45,
             price_per_item=1.00
         )]
 
@@ -135,12 +136,18 @@ def handle_payment(order_dict) -> bool:
     else:
         notify_payment_status(order_dict["customer_id"], order_dict["order_id"], False)
         raise HTTPException(status_code=400, detail = "payment not processed order")
-        
+
+def validate_item_inventory(cart):
+    for item in cart.cart_items:
+        is_available = check_availability(item.food_item_id, item.quantity)
+        if is_available == False:
+            raise HTTPException(status_code=422, detail="insufficient inventory")
 
 def process_order_service(cart_id: str, address_id:str) -> OrderResponse:
     """receives a cart and asks for payment before creating the order and sending for review. 
     Note that the service is currently using a stub method to get cart."""
     cart = validate_cart(cart_id)
+    validate_item_inventory(cart)
     address = validate_address(address_id)
     total_amount = calculate_total(cart)
     order_dict = build_order(cart, total_amount,address.address_id)

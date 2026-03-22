@@ -205,6 +205,7 @@ def test_process_order_service_success(mocker):
     mocker.patch("app.services.order_service.get_cart_by_id", lambda cart_id: Mock_TempCart())
     mocker.patch("app.services.order_service.get_address_by_id_service", return_value = mock_address_response)
     mock_payment = mocker.patch("app.services.order_service.process_payment_service", return_value = True)
+    mocker.patch("app.services.order_service.check_availability", return_value = True)
     
     mock_create_order = mocker.patch("app.services.order_service.create_order_service")
     result = process_order_service("cart123","7")
@@ -275,12 +276,13 @@ def test_process_order_service_address_not_found(mocker):
     mock_create_order = mocker.patch("app.services.order_service.create_order_service")
     mocker.patch("app.services.order_service.get_address_by_id_service", side_effect=HTTPException(status_code=404))
     
-    with pytest.raises(HTTPException) as testException: process_order_service("cart123","nocart")
+    with pytest.raises(HTTPException) as testException: process_order_service("cart123","1")
     assert testException.value.status_code ==404
     mock_payment.assert_not_called()
     mock_create_order.assert_not_called()
 
 def test_process_order_service_multiple_items(mocker):
+    """tests that an order process can handle orders successfully with multiple items"""
     class Mock_TempCart:
         def __init__(self):
             self.cart_id = "cart123"
@@ -305,7 +307,34 @@ def test_process_order_service_multiple_items(mocker):
     result = process_order_service("cart123","7")
     mock_payment.assert_called_once()
     mock_create_order.assert_called_once()
-
+    
+def test_process_order_service_insufficient_inventory(mocker):
+    """tests that process_order_service will not process an order if there is insufficient item inventory"""
+    class Mock_TempCart:
+        def __init__(self):
+            self.cart_id = "cart123"
+            self.customer_id = "123"
+            self.restaurant_id = 456
+            self.cart_items = [Mock_TempCartItem(1, 1, 4.00),                 
+            ]
+    class Mock_TempCartItem:
+        def __init__(self, food_item_id, quantity, price_per_item):
+            self.food_item_id = food_item_id
+            self.quantity = quantity
+            self.price_per_item = price_per_item 
+            
+    mocker.patch("app.services.order_service.notify_order_placed")
+    mocker.patch("app.services.order_service.notify_payment_status")
+    mocker.patch("app.services.order_service.get_cart_by_id", lambda cart_id: Mock_TempCart())
+    mock_address = mocker.patch("app.services.order_service.get_address_by_id_service", return_value = mock_address_response)
+    mock_payment = mocker.patch("app.services.order_service.process_payment_service", return_value = False)
+    mocker.patch("app.services.order_service.check_availability", return_value = False)
+    
+    with pytest.raises(HTTPException) as testException: process_order_service("cart123","nocart")
+    assert testException.value.status_code ==422
+    mock_payment.assert_not_called()
+    mock_address.assert_not_called()
+    
 def test_cancel_order_restaurant_service_success(mocker):
     """tests that cancel_order_restaurant_service() will successfully cancel an order given valid order id from restaurant side"""
     mock_orders= [{
