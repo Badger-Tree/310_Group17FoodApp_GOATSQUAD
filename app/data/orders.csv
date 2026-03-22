@@ -3,5 +3,9 @@ order_id,customer_id,restaurant_id,cart_id,delivery_id,status,total_amount,creat
 order123,cust456,789,cart101,bd7b99de-2a3a-400c-b1f0-fa5e4d4908fc,ACCEPTED,26.66,2026-02-20T12:34:56,addr202
 =======
 order_id,customer_id,restaurant_id,cart_id,delivery_id,status,total_amount,created_date,delivery_address_id
+<<<<<<< HEAD
 order123,cust456,789,cart101,,APPROVED,26.66,2026-02-20T12:34:56,addr202
 >>>>>>> d5cad1b9 (This code includes: creating a cart for the first time from user, getting the cart_id by the customer_id, adding a cart item to the cart)
+=======
+order123,cust456,789,cart101,48670504-8f82-4ed6-bdc6-63d163090945,ACCEPTED,26.66,2026-02-20T12:34:56,addr202
+>>>>>>> cee0f17e (Added the ulid into requirements to try to resolve github error)
