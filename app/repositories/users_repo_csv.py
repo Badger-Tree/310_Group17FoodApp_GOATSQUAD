@@ -1,3 +1,4 @@
+from http.client import HTTPException
 from pathlib import Path
 import csv, os
 from typing import List, Dict, Any
@@ -42,13 +43,14 @@ def find_by_email_repo(email: str) -> dict[str,Any] | None:
             return user
     return None
 
-def add_user_repo(user:dict):
+def add_user_repo(new_user:dict):
     users = load_all()
-    if any(u["id"] == user["id"] for u in users):
-        raise ValueError("User ID already exists")
-    users.append(user)
+    for user in users:
+        if user["id"] == new_user["id"]:
+            raise ValueError("duplicate user id")
+    users.append(new_user)
     save_all(users)
-    return user
+    return new_user
 
 def update_user_repo(user_id: str, updated_fields:dict) -> dict | None:
     users = load_all()
