@@ -14,6 +14,67 @@ from app.services.address_service import get_address_by_id_service
 from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status,notify_refund_issued,notify_order_status_update_customer_cancels
 from app.services.payment_service import process_payment_service, process_refund_service
 
+
+##################################################################
+# Stub methods that will get replaced when real modules are availble
+##################################################################
+
+from pydantic import BaseModel, Field
+from typing import List
+
+class CartItemResponse(BaseModel):
+    food_item_id: int
+    quantity: int
+    price_per_item: float
+
+class CartResponse(BaseModel):
+    cart_id: str
+    customer_id: str
+    restaurant_id: int
+    delivery_address_id: str
+    cart_items: List[CartItemResponse]
+    
+def get_cart_by_id(cart_id: str) -> CartResponse:
+    cart_items = [
+        CartItemResponse(
+            food_item_id=1,
+            quantity=1,
+            price_per_item=1.00
+        ),
+        CartItemResponse(
+            food_item_id=2,
+            quantity=2,
+            price_per_item=1.00
+        )]
+
+    cart = CartResponse(
+        cart_id=cart_id,
+        customer_id="1",
+        restaurant_id="1",
+        delivery_address_id="1",
+        cart_items=cart_items)
+    return cart
+    
+class DeliveryResponse(BaseModel):
+    """this is a stub so I can create a delivery before delivery module is created"""
+    order_id: str
+    courier_id: Optional[str]
+    delivery_id: str
+    address_id: str
+    
+def create_delivery_service(order: dict) -> DeliveryResponse:
+    """this is a stub so I can send order to create delivery before delivery module is created"""
+    new_delivery_id = str(uuid.uuid4())
+    return DeliveryResponse(
+            order_id= order["order_id"],
+            courier_id= None,
+            delivery_id= new_delivery_id,
+            address_id= order["delivery_address_id"])
+#######################
+# end of stub methods #
+#######################
+
+
 def validate_cart(cart_id) -> CartResponse:
     """Checks if a cart exists and returns either an exception or a CartResponse"""
     cart = get_cart_by_id(cart_id)
@@ -315,66 +376,3 @@ def accept_order_service(orderid:str) -> OrderResponse:
                 raise HTTPException(status_code=400, detail = "Cannot accept order")
     raise HTTPException(status_code=404, detail="Order not found")
 
-##################################################################
-# Stub methods that will get replaced when real modules are availble
-##################################################################
-
-from pydantic import BaseModel, Field
-from typing import List
-
-class CartItemResponse(BaseModel):
-    food_item_id: int
-    quantity: int
-    price_per_item: float
-
-
-class CartResponse(BaseModel):
-    cart_id: str
-    customer_id: str
-    restaurant_id: int
-    delivery_address_id: str
-    cart_items: List[CartItemResponse]
-    
-def get_cart_by_id(cart_id: str) -> CartResponse:
-
-    cart_items = [
-        CartItemResponse(
-            food_item_id=1,
-            quantity=1,
-            price_per_item=1.00
-        ),
-        CartItemResponse(
-            food_item_id=2,
-            quantity=2,
-            price_per_item=1.00
-        )
-    ]
-
-    cart = CartResponse(
-        cart_id=cart_id,
-        customer_id="1",
-        restaurant_id="1",
-        delivery_address_id="1",
-        cart_items=cart_items
-    )
-
-    return cart
-
-
-    
-class DeliveryResponse(BaseModel):
-    """this is a stub so I can create a delivery before delivery module is created"""
-    order_id: str
-    courier_id: Optional[str]
-    delivery_id: str
-    address_id: str
-    
-def create_delivery_service(order: dict) -> DeliveryResponse:
-    """this is a stub so I can send order to create delivery before delivery module is created"""
-    new_delivery_id = str(uuid.uuid4())
-    return DeliveryResponse(
-            order_id= order["order_id"],
-            courier_id= None,
-            delivery_id= new_delivery_id,
-            address_id= order["delivery_address_id"]
-        )
