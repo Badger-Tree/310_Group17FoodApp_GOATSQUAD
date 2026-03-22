@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers.cartItems import router as cartItems_router
+from app.routers.cart_router import router as cart_router
 from .routers.food_item import router as food_router
 from app.routers.authentication import router as authentication_router
 from app.routers.user import router as user_router
@@ -18,7 +18,7 @@ def root():
     return {"message": "GoatSquad is Live!"}
 
 app.include_router(authentication_router)
-app.include_router(cartItems_router)
+app.include_router(cart_router)
 app.include_router(user_router)
 app.include_router(address_router)
 app.include_router(food_router)
