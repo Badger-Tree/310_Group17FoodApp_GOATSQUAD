@@ -124,7 +124,7 @@ def mock_staff_response():
         email="pippin@example.com",
         first_name="peregrin",
         last_name="took",
-        role=UserRole.OWNER,
+        role=UserRole.STAFF,
         created_date=datetime(2026, 2, 20, 12, 34, 56))
       
 @pytest.fixture
