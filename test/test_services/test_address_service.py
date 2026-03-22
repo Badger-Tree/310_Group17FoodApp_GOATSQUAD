@@ -139,7 +139,7 @@ def test_create_address_service_success(monkeypatch):
 
     def mock_uuid():
         return "test-user-id132"
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
     monkeypatch.setattr("app.services.address_service.load_addresses", mock_load_addresses)
     monkeypatch.setattr("app.services.address_service.save_addresses", mock_save_addresses)
     monkeypatch.setattr("app.services.address_service.uuid.uuid4", mock_uuid)
@@ -199,7 +199,7 @@ def test_create_address_service_partial_input(monkeypatch):
 
     def mock_uuid():
         return "test-user-id132"
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
     monkeypatch.setattr("app.services.address_service.load_addresses", mock_load_addresses)
     monkeypatch.setattr("app.services.address_service.save_addresses", mock_save_addresses)
     monkeypatch.setattr("app.services.address_service.uuid.uuid4", mock_uuid)

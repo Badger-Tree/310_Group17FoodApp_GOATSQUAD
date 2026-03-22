@@ -27,3 +27,34 @@ def save_all(items: List[Dict[str, Any]]) -> None:
         writer.writerows(items)
         
     os.replace(tmp, DATA_PATH)
+    
+def find_by_id_repo(user_id: str) -> dict[str,Any] | None:
+    users = load_all()
+    for user in users: 
+        if user.get("id") == user_id:
+            return user
+    return None
+
+def find_by_email_repo(email: str) -> dict[str,Any] | None:
+    user_data = load_all()
+    for user in user_data: 
+        if user.get("email").lower() == email.lower():
+            return user
+    return None
+
+def add_user_repo(user:dict):
+    users = load_all()
+    if any(u["id"] == user["id"] for u in users):
+        raise ValueError("User ID already exists")
+    users.append(user)
+    save_all(users)
+    return user
+
+def update_user_repo(user_id: str, updated_fields:dict) -> dict | None:
+    users = load_all()
+    for user in users:
+        if user["id"] == user_id:
+            user.update(updated_fields)
+            save_all(users)
+            return user
+    return None
