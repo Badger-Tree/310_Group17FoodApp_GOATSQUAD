@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from datetime import datetime, timezone
 from app.repositories.orders_repo import load_all as load_orders, save_all as save_all_orders
 from app.repositories.order_items_repo import load_all as load_order_items, save_all as save_all_order_items
-from app.schemas.Order import OrderResponse, OrderCreate
+from app.schemas.Order import OrderResponse
 from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
@@ -151,7 +151,22 @@ def get_order_status_by_id_service(orderid:str)-> Enum:
             status_str = order.get("status")
             return OrderStatus(status_str)
     raise HTTPException(status_code=404, detail="Order not found")
-        
+
+def set_order_status_service(order_id:str, new_status:OrderStatus) -> OrderResponse:
+    """allows a service to change the status of an order"""
+    order_data = load_orders()
+    order_item_data = load_order_items()
+    for order in order_data:
+        if order.get("order_id") == order_id:
+            order["status"] = new_status.value
+            items_response = []
+            for item in order_item_data:
+                if item.get("order_id") == order_id:
+                    items_response.append(OrderItemResponse(**item))
+            save_all_orders(order_data)
+            return OrderResponse(**order, items=items_response)
+    raise HTTPException(status_code=404, detail=f"Order notfound")       
+
 def cancel_order_customer_service(orderid:str) -> OrderResponse:
     """This method lets a customer cancel an order. It changes order status to CANCELED"""
     order_data = load_orders()
