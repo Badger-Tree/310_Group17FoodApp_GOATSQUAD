@@ -13,10 +13,8 @@ def has_role_service(user: UserResponse, role: UserRole) -> bool:
         return False
 
 def require_role_service(user: UserResponse, role: UserRole):
-    """Used to check if a user has a specific role and raises forbidden exception if not. 
+    """Used to check if a user has a specific role (singular) and raises forbidden exception if not. 
     Input: UserResponse.
     Output: none"""
     if user.role != role:
         raise HTTPException(status_code=403, detail="Unauthorized")
-    
-    

@@ -18,7 +18,7 @@ def test_has_role_servicesuccess(mocker):
     assert result == True  
     
     
-def test_has_role_servicesuccess(mocker):
+def test_has_role_service_fail(mocker):
     """tests that has_role will return false if a given user does not have a has a given role"""
     mock_user = mocker.Mock()
     mock_user.role = UserRole.CUSTOMER
@@ -34,12 +34,11 @@ def test_require_role_service_success(mocker):
     result = require_role_service(mock_user, UserRole.CUSTOMER)
     assert result is None
 
-def test_require_role_service_success(mocker):
+def test_require_role_service_fail(mocker):
     """tests that require_role_service raises an exception if user does not have required role"""
     mock_user = mocker.Mock()
     mock_user.role = UserRole.CUSTOMER
     
     with pytest.raises(HTTPException) as testException: require_role_service(mock_user, UserRole.OWNER)
     assert testException.value.status_code ==403
-    
     
