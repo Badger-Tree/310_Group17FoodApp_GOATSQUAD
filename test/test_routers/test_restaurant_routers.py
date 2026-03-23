@@ -167,5 +167,159 @@ def test_delete_restaurant_success(mock_user_session):
     assert response.json() == {"message": "Restaurant has been deleted."}
     assert current_user.id == "2"
     mock_delete.assert_called_once_with("2")
-    
 
+    #DELETE TEST: FAILURE CONDITIONS
+def test_delete_restaurant_failure(mock_user_session):
+
+    #Helper class to turn dictionary data into an object, to try to access the attributes with dot notation since it's was accessed that way in the router
+    class MockUserResponse:
+        def __init__(self, **kwargs): #kwargs will collect the name value pairs
+            self.__dict__.update(kwargs)  #save the name value pairs as attributes of the object
+
+    current_user = MockUserResponse(**mock_user_session) 
+
+    with patch("app.routers.restaurants.get_user_from_session", return_value=current_user):
+        with patch("app.routers.restaurants.delete_restaurant_service", side_effect=HTTPException(status_code=404, detail="Unauthorized")) as mock_delete:
+            response = client.delete(
+                "/restaurants/delete",
+                headers={"token" : "valid_token"}
+            )
+
+    assert response.status_code == 404
+
+    
+    assert response.json() == {"detail": "Unauthorized"}
+    assert current_user.id == "2"
+    mock_delete.assert_called_once_with(current_user.id)
+    
+#GET RESTAURANT BY NAME TEST: SUCCESS CONDITIONS
+def test_get_restaurant_by_name_success():
+    mock_result = [
+        {
+            "restaurant_id": 1,
+            "owner_id": "2",
+            "restaurant_name": "Pasta Palace",
+            "cuisine": "Italian",
+            "address": "123 Test St",
+            "open_hour": "11:00:00", #FastAPI makes the date time in this format even though a user enters it as 11:00
+            "closed_hour": "22:00:00",
+            "restaurant_status": "active"
+        }
+    ]
+
+    with patch("app.routers.restaurants.get_restaurant_by_name_service", return_value=mock_result) as mock_service:
+        response = client.get("/restaurants/search/name/Pasta Palace")
+
+        assert response.status_code == 200
+        assert response.json() == mock_result
+        mock_service.assert_called_once_with("Pasta Palace")
+
+#GET RESTAURANT BY NAME TEST: FAILURE CONDITION NO RESTAURANT FOUND
+def test_get_restaurant_by_name_failure():
+    mock_result = []
+
+    with patch("app.routers.restaurants.get_restaurant_by_name_service", return_value=mock_result) as mock_service:
+        response = client.get("/restaurants/search/name/unknown")
+
+        assert response.status_code == 200
+        assert response.json() == []
+        mock_service.assert_called_once_with("unknown")
+
+#GET RESTAURANT BY CUISINE TEST: SUCCESS
+
+def test_get_restaurant_by_cuisine_success():
+    mock_result = [
+        {
+            "restaurant_id": 1,
+            "owner_id": "2",
+            "restaurant_name": "Pasta Palace",
+            "cuisine": "Italian",
+            "address": "123 Test St",
+            "open_hour": "11:00:00", #FastAPI makes the date time in this format even though a user enters it as 11:00
+            "closed_hour": "22:00:00",
+            "restaurant_status": "active"
+        },
+        {
+            "restaurant_id": 2,
+            "owner_id": "3",
+            "restaurant_name": "Sakura Sushi",
+            "cuisine": "Japanese",
+            "address": "456 Test Ave",
+            "open_hour": "10:00:00", #FastAPI makes the date time in this format even though a user enters it as 10:00
+            "closed_hour": "21:00:00",
+            "restaurant_status": "active"
+        }
+    ]
+
+    with patch("app.routers.restaurants.get_restaurant_by_cuisine_service", return_value=mock_result) as mock_service:
+        response = client.get("/restaurants/search/cuisine/Japanese")
+
+        assert response.status_code == 200
+        assert response.json() == mock_result
+        mock_service.assert_called_once_with("Japanese")
+
+#GET RESTAURANT BY CUISINE TEST: FAILURE CONDITION NO RESTAURANT FOUND
+
+def test_get_restaurant_by_cuisine_failure():
+    mock_result = []
+
+    with patch("app.routers.restaurants.get_restaurant_by_cuisine_service", return_value=mock_result) as mock_service:
+        response = client.get("/restaurants/search/cuisine/Mexican")
+
+        assert response.status_code == 200
+        assert response.json() == mock_result
+        mock_service.assert_called_once_with("Mexican")
+
+#SORT RESTAURANTS BY NAME TEST: SUCCESS CONDITIONS
+def test_sort_restaurants_by_name_success():
+    mock_result = [
+        {
+            "restaurant_id": 1,
+            "owner_id": "2",
+            "restaurant_name": "Pasta Palace",
+            "cuisine": "Italian",
+            "address": "123 Test St",
+            "open_hour": "11:00:00", #FastAPI makes the date time in this format even though a user enters it as 11:00
+            "closed_hour": "22:00:00",
+            "restaurant_status": "active"
+        },
+        {
+            "restaurant_id": 2,
+            "owner_id": "3",
+            "restaurant_name": "Sakura Sushi",
+            "cuisine": "Japanese",
+            "address": "456 Test Ave",
+            "open_hour": "10:00:00", #FastAPI makes the date time in this format even though a user enters it as 10:00
+            "closed_hour": "21:00:00",
+            "restaurant_status": "active"
+        },
+        {
+            "restaurant_id": 3,
+            "owner_id": "4",
+            "restaurant_name": "Taco Town",
+            "cuisine": "Mexican",
+            "address": "789 Test Blvd",
+            "open_hour": "09:00:00", #FastAPI makes the date time in this format even though a user enters it as 9:00
+            "closed_hour": "20:00:00",
+            "restaurant_status": "active"
+        }
+    ]
+
+    with patch("app.routers.restaurants.sort_restaurants_by_name_service", return_value=mock_result) as mock_service:
+        response = client.get("/restaurants/sort/name")
+
+        assert response.status_code == 200
+        assert response.json() == mock_result
+        mock_service.assert_called_once()
+
+
+#SORT RESTAURANTS BY NAME TEST: FAILURE CONDITIONS
+def test_sort_restaurants_by_name_failure():
+    mock_result = []
+
+    with patch("app.routers.restaurants.sort_restaurants_by_name_service", return_value=mock_result) as mock_service:
+        response = client.get("/restaurants/sort/name")
+
+        assert response.status_code == 200
+        assert response.json() == mock_result
+        mock_service.assert_called_once()

@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from unittest import result
 from datetime import time
 import pytest
@@ -144,14 +145,7 @@ def test_update_restaurant(monkeypatch):
     assert test_restaurants[1]["closed_hour"] == "22:00"
     assert test_restaurants[1]["restaurant_status"] == "inactive"
 
-
-
-
-""" NOT YET UPDATED 
-
-
-
-#test deleting a restaurant
+#test deleting a restaurant success
 def test_delete_restaurant(monkeypatch):
     test_restaurants = [
         {
@@ -178,10 +172,278 @@ def test_delete_restaurant(monkeypatch):
     monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
     monkeypatch.setattr(restaurant_service, "save_restaurants", test_save_restaurants)
 
-    restaurant_service.delete_restaurant_service(1)
+    restaurant_service.delete_restaurant_service("1")
 
     #Assertions
     assert len(test_restaurants) == 0
+
+#test deleting a restaurant failure
+def test_delete_restaurant_failure(monkeypatch):
+    test_restaurants = [
+        {
+            "restaurant_id": "1",
+            "owner_id": "1",
+            "restaurant_name": "Mario's Pizza",
+            "cuisine": "Italian",
+            "address": "123 Main St",
+            "open_hour": "09:00",
+            "closed_hour": "21:00",
+            "restaurant_status": "active"
+        }
+    ]
+
+    #mock loading the restaurants
+    def test_load_restaurants():
+        return test_restaurants
+    
+    #mock saving restaurants
+    def test_save_restaurants(data):
+        test_restaurants[:] = data
+    
+    #this lets us temporarily modify the original function with our test ones
+    monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
+    monkeypatch.setattr(restaurant_service, "save_restaurants", test_save_restaurants)
+
+
+    #I am expecting the code inside this pytest wrapper to raise this exception and save the info to exc_info.
+    with pytest.raises(HTTPException) as exc_info:
+        restaurant_service.delete_restaurant_service("2")
+
+    #Assertions
+    assert len(test_restaurants) == 1
+    assert test_restaurants[0]["restaurant_id"] == "1"
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Restaurant not found or you do not have permission to delete it"
+
+#test getting a restaurant by name success
+def test_get_restaurant_by_name(monkeypatch):
+    test_restaurants = [
+        {
+            "restaurant_id": "1",
+            "owner_id": "1",
+            "restaurant_name": "Mario's Pizza",
+            "cuisine": "Italian",
+            "address": "123 Main St",
+            "open_hour": "09:00",
+            "closed_hour": "21:00",
+            "restaurant_status": "active"
+        }
+    ]
+
+    #mock loading the restaurants
+    def test_load_restaurants():
+        return test_restaurants
+    
+    #this lets us temporarily modify the original function with our test ones
+    monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
+
+    result = restaurant_service.get_restaurant_by_name_service("mario")
+
+    #Assertions
+    assert result is not None
+    assert len(result) == 1
+    assert result[0].restaurant_name == "Mario's Pizza"
+
+#test getting a restaurant by name failure (no match)
+def test_get_restaurant_by_name_failure(monkeypatch):
+    test_restaurants = [
+        {
+            "restaurant_id": "1",
+            "owner_id": "1",
+            "restaurant_name": "Mario's Pizza",
+            "cuisine": "Italian",
+            "address": "123 Main St",
+            "open_hour": "09:00",
+            "closed_hour": "21:00",
+            "restaurant_status": "active"
+        }
+    ]
+
+    #mock loading the restaurants
+    def test_load_restaurants():
+        return test_restaurants
+    
+    #this lets us temporarily modify the original function with our test ones
+    monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
+
+    result = restaurant_service.get_restaurant_by_name_service("pasta")
+
+    #Assertions
+    assert result == []
+    assert len(result) == 0
+
+#test getting a restaurant by cuisine: Success
+def test_get_restaurant_by_cuisine_success(monkeypatch):
+    test_restaurants = [
+        {
+            "restaurant_id": "1",
+            "owner_id": "1",
+            "restaurant_name": "Mario's Pizza",
+            "cuisine": "Italian",
+            "address": "123 Main St",
+            "open_hour": "09:00",
+            "closed_hour": "21:00",
+            "restaurant_status": "active"
+        },
+        {
+            "restaurant_id": "2",
+            "owner_id": "2",
+            "restaurant_name": "Sakura Sushi",
+            "cuisine": "Japanese",
+            "address": "456 Elm St",
+            "open_hour": "10:00",
+            "closed_hour": "22:00",
+            "restaurant_status": "active"
+        },
+        {
+            "restaurant_id": "3",
+            "owner_id": "3",
+            "restaurant_name": "Taco Time",
+            "cuisine": "Mexican",
+            "address": "457 Elm St",
+            "open_hour": "10:00",
+            "closed_hour": "22:00",
+            "restaurant_status": "active"
+        }
+    ]
+
+    #mock loading the restaurants
+    def test_load_restaurants():
+        return test_restaurants
+    
+    #this lets us temporarily modify the original function with our test ones
+    monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
+
+    result = restaurant_service.get_restaurant_by_cuisine_service("japanese")
+
+    #Assertions
+    assert result is not None
+    assert len(result) == 1
+    assert result[0].restaurant_name == "Sakura Sushi"
+    assert result[0].cuisine == "Japanese"
+
+#test getting a restaurant by cuisine: Failure, no restaurant matches the cuisine
+def test_get_restaurant_by_cuisine_failure(monkeypatch):
+    test_restaurants = [
+        {
+            "restaurant_id": "1",
+            "owner_id": "1",
+            "restaurant_name": "Mario's Pizza",
+            "cuisine": "Italian",
+            "address": "123 Main St",
+            "open_hour": "09:00",
+            "closed_hour": "21:00",
+            "restaurant_status": "active"
+        },
+        {
+            "restaurant_id": "2",
+            "owner_id": "2",
+            "restaurant_name": "Sakura Sushi",
+            "cuisine": "Japanese",
+            "address": "456 Elm St",
+            "open_hour": "10:00",
+            "closed_hour": "22:00",
+            "restaurant_status": "active"
+        },
+        {
+            "restaurant_id": "3",
+            "owner_id": "3",
+            "restaurant_name": "Taco Time",
+            "cuisine": "Mexican",
+            "address": "457 Elm St",
+            "open_hour": "10:00",
+            "closed_hour": "22:00",
+            "restaurant_status": "active"
+        }
+    ]
+
+    #mock loading the restaurants
+    def test_load_restaurants():
+        return test_restaurants
+    
+    #this lets us temporarily modify the original function with our test ones
+    monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
+
+    result = restaurant_service.get_restaurant_by_cuisine_service("indian")
+
+    #Assertions
+    assert result == []
+    assert len(result) == 0
+
+#test sorting restaurant by name: SUCCESS
+def test_sort_restaurants_by_name_success(monkeypatch):
+    test_restaurants = [
+        {
+            "restaurant_id": "1",
+            "owner_id": "1",
+            "restaurant_name": "Mario's Pizza",
+            "cuisine": "Italian",
+            "address": "123 Main St",
+            "open_hour": "09:00",
+            "closed_hour": "21:00",
+            "restaurant_status": "active"
+        },
+        {
+            "restaurant_id": "2",
+            "owner_id": "2",
+            "restaurant_name": "Sakura Sushi",
+            "cuisine": "Japanese",
+            "address": "456 Elm St",
+            "open_hour": "10:00",
+            "closed_hour": "22:00",
+            "restaurant_status": "active"
+        },
+        {
+            "restaurant_id": "3",
+            "owner_id": "3",
+            "restaurant_name": "Pasta Palace",
+            "cuisine": "Italian",
+            "address": "457 Elm St",
+            "open_hour": "10:00",
+            "closed_hour": "22:00",
+            "restaurant_status": "active"
+        }
+    ]
+
+    #mock loading the restaurants
+    def test_load_restaurants():
+        return test_restaurants
+    
+    #this lets us temporarily modify the original function with our test ones
+    monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
+
+    result = restaurant_service.sort_restaurants_by_name_service()
+
+    #Assertions
+    assert len(result) == 3
+    assert result[0].restaurant_name == "Mario's Pizza"
+    assert result[1].restaurant_name == "Pasta Palace"
+    assert result[2].restaurant_name == "Sakura Sushi"
+
+#test sorting restaurants by name: FAILURE, no restaurants to sort
+def test_sort_restaurants_by_name_failure(monkeypatch):
+    test_restaurants=[]
+
+    #mock loading the restaurants
+    def test_load_restaurants():
+        return test_restaurants
+    
+    #this lets us temporarily modify the original function with our test ones
+    monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
+
+    result = restaurant_service.sort_restaurants_by_name_service()
+
+    #Assertions
+    assert len(result) == 0
+    assert result == []
+
+
+
+""" NOT YET UPDATED 
+
+
+
+
 
 
 #test activating a restaurant
@@ -250,135 +512,6 @@ def test_deactivate_restaurant(monkeypatch):
     #Assertions
     assert result.restaurant_status == "inactive"
     assert test_restaurants[0]["restaurant_status"] == "inactive"
-
-
-#test getting a restaurant by name
-def test_get_restaurant_by_name(monkeypatch):
-    test_restaurants = [
-        {
-            "restaurant_id": "1",
-            "owner_id": "1",
-            "restaurant_name": "Mario's Pizza",
-            "cuisine": "Italian",
-            "address": "123 Main St",
-            "open_hour": "09:00",
-            "closed_hour": "21:00",
-            "restaurant_status": "active"
-        }
-    ]
-
-    #mock loading the restaurants
-    def test_load_restaurants():
-        return test_restaurants
-    
-    #this lets us temporarily modify the original function with our test ones
-    monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
-
-    result = restaurant_service.get_restaurant_by_name_service("mario")
-
-    #Assertions
-    assert result is not None
-    assert len(result) == 1
-    assert result[0].restaurant_name == "Mario's Pizza"
-
-#test getting a restaurant by cuisine
-def test_get_restaurant_by_cuisine(monkeypatch):
-    test_restaurants = [
-        {
-            "restaurant_id": "1",
-            "owner_id": "1",
-            "restaurant_name": "Mario's Pizza",
-            "cuisine": "Italian",
-            "address": "123 Main St",
-            "open_hour": "09:00",
-            "closed_hour": "21:00",
-            "restaurant_status": "active"
-        },
-        {
-            "restaurant_id": "2",
-            "owner_id": "2",
-            "restaurant_name": "Sakura Sushi",
-            "cuisine": "Japanese",
-            "address": "456 Elm St",
-            "open_hour": "10:00",
-            "closed_hour": "22:00",
-            "restaurant_status": "active"
-        },
-        {
-            "restaurant_id": "3",
-            "owner_id": "3",
-            "restaurant_name": "Pasta Palace",
-            "cuisine": "Italian",
-            "address": "457 Elm St",
-            "open_hour": "10:00",
-            "closed_hour": "22:00",
-            "restaurant_status": "active"
-        }
-    ]
-
-    #mock loading the restaurants
-    def test_load_restaurants():
-        return test_restaurants
-    
-    #this lets us temporarily modify the original function with our test ones
-    monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
-
-    result = restaurant_service.get_restaurant_by_cuisine_service("italian")
-
-    #Assertions
-    assert result is not None
-    assert result[0].cuisine == "Italian"
-    assert result[1].cuisine == "Italian"
-
-#test sorting restaurant by name
-def test_sort_restaurants_by_name(monkeypatch):
-    test_restaurants = [
-        {
-            "restaurant_id": "1",
-            "owner_id": "1",
-            "restaurant_name": "Mario's Pizza",
-            "cuisine": "Italian",
-            "address": "123 Main St",
-            "open_hour": "09:00",
-            "closed_hour": "21:00",
-            "restaurant_status": "active"
-        },
-        {
-            "restaurant_id": "2",
-            "owner_id": "2",
-            "restaurant_name": "Sakura Sushi",
-            "cuisine": "Japanese",
-            "address": "456 Elm St",
-            "open_hour": "10:00",
-            "closed_hour": "22:00",
-            "restaurant_status": "active"
-        },
-        {
-            "restaurant_id": "3",
-            "owner_id": "3",
-            "restaurant_name": "Pasta Palace",
-            "cuisine": "Italian",
-            "address": "457 Elm St",
-            "open_hour": "10:00",
-            "closed_hour": "22:00",
-            "restaurant_status": "active"
-        }
-    ]
-
-    #mock loading the restaurants
-    def test_load_restaurants():
-        return test_restaurants
-    
-    #this lets us temporarily modify the original function with our test ones
-    monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
-
-    result = restaurant_service.sort_restaurants_by_name_service()
-
-    #Assertions
-    assert len(result) == 3
-    assert result[0].restaurant_name == "Mario's Pizza"
-    assert result[1].restaurant_name == "Pasta Palace"
-    assert result[2].restaurant_name == "Sakura Sushi"
 
 
 

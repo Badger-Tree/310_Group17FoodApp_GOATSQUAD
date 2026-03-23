@@ -129,7 +129,69 @@ def delete_restaurant_service(current_user_id: str) -> None:
         
     save_restaurants(restaurants)
 
-    
+
+"Service for getting a restaurant by name"
+def get_restaurant_by_name_service(search_name: str) -> List[RestaurantResponse]:
+    restaurants = load_restaurants()
+    results = []
+    for r in restaurants:
+        if search_name.lower().strip() in r["restaurant_name"].lower().strip():
+            results.append(
+                RestaurantResponse(
+                    restaurant_id = int(r["restaurant_id"]),
+                    owner_id = r["owner_id"],
+                    restaurant_name = r["restaurant_name"],
+                    cuisine = r["cuisine"],
+                    address = r["address"],
+                    open_hour = r["open_hour"],
+                    closed_hour = r["closed_hour"],
+                    restaurant_status = r["restaurant_status"]
+                )
+            )
+    return results
+
+"Service for getting a restaurant by cuisine"
+def get_restaurant_by_cuisine_service(search_cuisine: str) -> List[RestaurantResponse]:
+    restaurants = load_restaurants()
+    results = []
+    for r in restaurants:
+        if search_cuisine.lower().strip() in r["cuisine"].lower().strip():
+            results.append(
+                RestaurantResponse(
+                    restaurant_id = int(r["restaurant_id"]),
+                    owner_id = r["owner_id"],
+                    restaurant_name = r["restaurant_name"],
+                    cuisine = r["cuisine"],
+                    address = r["address"],
+                    open_hour = r["open_hour"],
+                    closed_hour = r["closed_hour"],
+                    restaurant_status = r["restaurant_status"]
+                )
+            )
+    return results
+
+"Service for sorting the restaurants by their name"
+def sort_restaurants_by_name_service() -> List[RestaurantResponse]:
+    restaurants = load_restaurants()
+            
+    #sort alphabetically by name
+    sorted_restaurants = sorted(restaurants, key=lambda r: r["restaurant_name"].lower())
+
+    results = []
+    for r in sorted_restaurants:
+        results.append(
+            RestaurantResponse(
+                restaurant_id = int(r["restaurant_id"]),
+                owner_id = r["owner_id"],
+                restaurant_name = r["restaurant_name"],
+                cuisine = r["cuisine"],
+                address = r["address"],
+                open_hour = r["open_hour"],
+                closed_hour = r["closed_hour"],
+                restaurant_status = r["restaurant_status"]
+            )
+        )
+    return results
  
 """NOT UPDATED YET   
 
@@ -191,68 +253,9 @@ def deactivate_restaurant_service(restaurant_id: int) -> RestaurantResponse:
         closed_hour = updated["closed_hour"],
         restaurant_status = updated["restaurant_status"]
     )
-
-"Service for getting a restaurant by name"
-def get_restaurant_by_name_service(search_name: str) -> List[RestaurantResponse]:
-    restaurants = load_restaurants()
-    results = []
-    for r in restaurants:
-        if search_name.lower().strip() in r["restaurant_name"].lower().strip():
-            results.append(
-                RestaurantResponse(
-                    restaurant_id = int(r["restaurant_id"]),
-                    owner_id = int(r["owner_id"]),
-                    restaurant_name = r["restaurant_name"],
-                    cuisine = r["cuisine"],
-                    address = r["address"],
-                    open_hour = r["open_hour"],
-                    closed_hour = r["closed_hour"],
-                    restaurant_status = r["restaurant_status"]
-                )
-            )
-    return results
     
-"Service for getting a restaurant by cuisine"
-def get_restaurant_by_cuisine_service(search_cuisine: str) -> List[RestaurantResponse]:
-    restaurants = load_restaurants()
-    results = []
-    for r in restaurants:
-        if search_cuisine.lower().strip() in r["cuisine"].lower().strip():
-            results.append(
-                RestaurantResponse(
-                    restaurant_id = int(r["restaurant_id"]),
-                    owner_id = int(r["owner_id"]),
-                    restaurant_name = r["restaurant_name"],
-                    cuisine = r["cuisine"],
-                    address = r["address"],
-                    open_hour = r["open_hour"],
-                    closed_hour = r["closed_hour"],
-                    restaurant_status = r["restaurant_status"]
-                )
-            )
-    return results
-    
-"Service for sorting the restaurants by their name"
-def sort_restaurants_by_name_service() -> List[RestaurantResponse]:
-    restaurants = load_restaurants()
-            
-    #sort alphabetically by name
-    sorted_restaurants = sorted(restaurants, key=lambda r: r["restaurant_name"].lower())
 
-    results = []
-    for r in sorted_restaurants:
-        results.append(
-            RestaurantResponse(
-                restaurant_id = int(r["restaurant_id"]),
-                owner_id = int(r["owner_id"]),
-                restaurant_name = r["restaurant_name"],
-                cuisine = r["cuisine"],
-                address = r["address"],
-                open_hour = r["open_hour"],
-                closed_hour = r["closed_hour"],
-                restaurant_status = r["restaurant_status"]
-            )
-        )
-    return results
+    
+
     
     """

@@ -13,10 +13,10 @@ from app.services.restaurant_service import (
     update_restaurant_service,
     #activate_restaurant_service,
     #deactivate_restaurant_service,
-    delete_restaurant_service
-    #get_restaurant_by_name_service,
-    #get_restaurant_by_cuisine_service,
-    #sort_restaurants_by_name_service
+    delete_restaurant_service,
+    get_restaurant_by_name_service,
+    get_restaurant_by_cuisine_service,
+    sort_restaurants_by_name_service
 )
 
 router = APIRouter(prefix="/restaurants", tags=["restaurants"])
@@ -51,22 +51,26 @@ def delete_restaurant(token: str = Header(...)):
     return {"message": "Restaurant has been deleted."}
 
 
-"""NOT UPDATED YET
-
 #Get restaurant by name
 @router.get("/search/name/{search_name}", response_model = List[RestaurantResponse])
 def get_restaurant_by_name(search_name: str):
     return get_restaurant_by_name_service(search_name)
+
 
 #Get restaurant by cuisine
 @router.get("/search/cuisine/{search_cuisine}", response_model = List[RestaurantResponse])
 def get_restaurant_by_cuisine(search_cuisine: str):
     return get_restaurant_by_cuisine_service(search_cuisine)
 
+
+
 #Sort restaurants by name
 @router.get("/sort/name", response_model = List[RestaurantResponse])
 def sort_restaurants_by_name():
     return sort_restaurants_by_name_service()
+
+
+"""NOT UPDATED YET
 
 
 
