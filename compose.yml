@@ -1,0 +1,18 @@
+services:
+  backend:
+    build: .
+    container_name: goatsquad-backend
+    environment:
+      - PYTHONPATH=/app
+      - WATCHFILES_FORCE_POLLING=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - /app/COSC310_ProjEnv
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - backend

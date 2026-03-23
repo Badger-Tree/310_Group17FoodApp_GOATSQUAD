@@ -74,3 +74,27 @@ def notify_order_status_update(customer_id: str, order_id: str, is_approved: boo
         "message": message,
         "status": status
     })
+
+def notify_order_status_update_customer_cancels(restaurant_id: str, order_id: str):
+    """Notifies restaurant when customer cancels the order."""
+    notification_repo.create_notification({
+        "recipient_user_id": restaurant_id,
+        "notification_type": "order",
+        "message": f"Order {order_id} has been canceled by the customer.",
+        "status": "failed"
+    })
+
+def notify_refund_issued(customer_id: str, order_id: str):
+    """Notifies customer that a refund has been issued for their canceled order."""
+    notification_repo.create_notification({
+        "recipient_user_id": customer_id,
+        "notification_type": "payment",
+        "message": f"A refund has been issued for your canceled order {order_id}. It may take a few business days to reflect in your account.",
+        "status": "pending"
+    })
+
+def get_user_inbox(user_id: str):
+    """Returns a list of notifications from csv for the specific user."""
+    all_notifications = notification_repo.load_all()
+    user_notifications = [n for n in all_notifications if n.recipient_user_id == user_id]
+    return user_notifications
