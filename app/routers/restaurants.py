@@ -42,13 +42,13 @@ def update_restaurant(payload: RestaurantUpdate, token: str = Header(...)):
     return update_restaurant_service(payload, current_user_id)
 
 #Delete restaurant
-@router.delete("/{restaurant_id}")
+@router.delete("/delete")
 def delete_restaurant(token: str = Header(...)):
     session = Token(token=token)
     current_user = get_user_from_session(session)
     current_user_id = current_user.id
     delete_restaurant_service(current_user_id)
-    return {"message": f"Restaurant with id {current_user_id} has been deleted."}
+    return {"message": "Restaurant has been deleted."}
 
 
 """NOT UPDATED YET

@@ -111,6 +111,24 @@ def update_restaurant_service(payload: RestaurantUpdate, current_user_id: str) -
         closed_hour = updated["closed_hour"],
         restaurant_status = updated["restaurant_status"]
     )
+
+    
+"Service for deleting a restaurant."
+def delete_restaurant_service(current_user_id: str) -> None:
+    restaurants = load_restaurants()
+
+    found = False
+    for i, r in enumerate(restaurants):
+        if r["owner_id"] == current_user_id:
+            found = True
+            restaurants.pop(i)
+            break
+
+    if not found:
+        raise HTTPException(status_code=404, detail=f"Restaurant not found or you do not have permission to delete it")
+        
+    save_restaurants(restaurants)
+
     
  
 """NOT UPDATED YET   
@@ -173,22 +191,6 @@ def deactivate_restaurant_service(restaurant_id: int) -> RestaurantResponse:
         closed_hour = updated["closed_hour"],
         restaurant_status = updated["restaurant_status"]
     )
-    
-"Service for deleting a restaurant."
-def delete_restaurant_service(restaurant_id: int) -> None:
-    restaurants = load_restaurants()
-
-    found = False
-    for i, r in enumerate(restaurants):
-        if int(r["restaurant_id"]) == restaurant_id:
-            found = True
-            restaurants.pop(i)
-            break
-
-    if not found:
-        raise HTTPException(status_code=404, detail=f"Restaurant {restaurant_id} not found")
-        
-    save_restaurants(restaurants)
 
 "Service for getting a restaurant by name"
 def get_restaurant_by_name_service(search_name: str) -> List[RestaurantResponse]:
