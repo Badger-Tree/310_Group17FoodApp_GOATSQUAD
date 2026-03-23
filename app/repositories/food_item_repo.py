@@ -1,9 +1,9 @@
 from pathlib import Path
-import csv
+import csv, os
+from typing import List, Dict, Any
 from decimal import Decimal
 
 DATA_PATH = Path("app/data/food_items.csv")
-FIELDNAMES = ["food_item_id", "restaurant_id", "food_name", "price", "description", "course"]
 
 def load_all():
     """load_all() function loads all food items from the CSV file and returns them as a list of dictionaries. If the file doesn't exist, it returns an empty list."""    
@@ -24,16 +24,13 @@ def load_all():
             })
     return items
 
-def save_all(items):
-    """save_all() function takes a list of food item dictionaries and writes them to the CSV file, overwriting any existing data. Ensures the directory exists before writing."""
-    DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-    with open(DATA_PATH, mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=FIELDNAMES)
+def save_all(items: List[Dict[str, Any]]) -> None:
+    tmp = DATA_PATH.with_suffix(".tmp")
+    fields = ["food_item_id", "restaurant_id", "food_name", "price", "description", "course"]
+    
+    with tmp.open("w", encoding="utf-8") as f:
+        writer=csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         writer.writerows(items)
-
-def find_by_name(food_name):
-    """find_by_name() function searches for a food item by its name and returns the first matching item as a dictionary. If no match is found, it returns None."""
-    items = load_all()
-    return [item for item in items if food_name.lower() in item["food_name"].lower()]
+        
+    os.replace(tmp, DATA_PATH)

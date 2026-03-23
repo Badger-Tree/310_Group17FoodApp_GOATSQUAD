@@ -15,3 +15,6 @@ app/services/__pycache__/address_service.cpython-314.pyc
 app/services/__pycache__/cartItems_service.cpython-314.pyc
 app/services/__pycache__/food_item_service.cpython-314.pyc
 app/services/__pycache__/user_service.cpython-314.pyc
+
+__pycache__/
+*.py[cod]
