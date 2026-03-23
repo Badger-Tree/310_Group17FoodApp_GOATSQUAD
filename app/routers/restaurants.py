@@ -13,7 +13,7 @@ from app.services.restaurant_service import (
     update_restaurant_service,
     #activate_restaurant_service,
     #deactivate_restaurant_service,
-    #delete_restaurant_service,
+    delete_restaurant_service
     #get_restaurant_by_name_service,
     #get_restaurant_by_cuisine_service,
     #sort_restaurants_by_name_service
@@ -40,6 +40,15 @@ def update_restaurant(payload: RestaurantUpdate, token: str = Header(...)):
     current_user = get_user_from_session(session)
     current_user_id = current_user.id
     return update_restaurant_service(payload, current_user_id)
+
+#Delete restaurant
+@router.delete("/{restaurant_id}")
+def delete_restaurant(token: str = Header(...)):
+    session = Token(token=token)
+    current_user = get_user_from_session(session)
+    current_user_id = current_user.id
+    delete_restaurant_service(current_user_id)
+    return {"message": f"Restaurant with id {current_user_id} has been deleted."}
 
 
 """NOT UPDATED YET
@@ -72,11 +81,7 @@ def deactivate_restaurant(restaurant_id: int):
     return deactivate_restaurant_service(restaurant_id)
 
 
-#Delete restaurant
-@router.delete("/{restaurant_id}")
-def delete_restaurant(restaurant_id: int):
-    delete_restaurant_service(restaurant_id)
-    return {"message": f"Restaurant with id {restaurant_id} has been deleted."}
+
 
 
     """

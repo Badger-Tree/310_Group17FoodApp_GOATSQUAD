@@ -142,5 +142,30 @@ def test_update_restaurant_success(mock_user_session, mock_restaurant_update, mo
     assert response.status_code == 200
     
     assert response.json() == mock_updated_restaurant
+
+
+#DELETE TEST: SUCCESS CONDITIONS
+def test_delete_restaurant_success(mock_user_session):
+
+    #Helper class to turn dictionary data into an object, to try to access the attributes with dot notation since it's was accessed that way in the router
+    class MockUserResponse:
+        def __init__(self, **kwargs): #kwargs will collect the name value pairs
+            self.__dict__.update(kwargs)  #save the name value pairs as attributes of the object
+
+    current_user = MockUserResponse(**mock_user_session) 
+
+    with patch("app.routers.restaurants.get_user_from_session", return_value=current_user):
+        with patch("app.routers.restaurants.delete_restaurant_service", return_value=None) as mock_delete:
+            response = client.delete(
+                "/restaurants/delete",
+                headers={"token" : "valid_token"}
+            )
+
+    assert response.status_code == 200
+
+    
+    assert response.json() == {"message": "Restaurant has been deleted."}
+    assert current_user.id == "2"
+    mock_delete.assert_called_once_with("2")
     
 
