@@ -5,6 +5,7 @@ from app.repositories.users_repo_csv import load_all as load_users, save_all as 
 from app.schemas.User import UserResponse, UserUpdate
 from app.factories.user_factory import CustomerFactory, StaffFactory, CustomerCreate, StaffCreate
 from app.schemas.Role import UserRole
+from app.services.cart_service import create_cart
 
 
 def get_user_by_id_service(userid : str) -> UserResponse:
@@ -39,6 +40,8 @@ def register_user_service(payload: CustomerCreate | StaffCreate, role: UserRole)
     for user in users:
         if user["id"] == new_user["id"]:
             raise HTTPException(status_code=409, detail="ID collision; retry.")
+    if role == UserRole.CUSTOMER:
+        create_cart(new_user["id"])
     users.append(new_user)
     save_all_users(users)
     return UserResponse(**new_user)
