@@ -6,7 +6,6 @@ from app.routers.user import router as user_router
 from app.routers.address import router as address_router
 from app.routers.restaurants import router as restaurant_router
 from app.routers.inventory_router import router as inventory_router
-from app.routers.authentication import router as authentication
 from app.routers.order import router as order_router
 
 app = FastAPI()
@@ -17,7 +16,7 @@ def health():
 
 @app.get("/")
 def root():
-    return {"message": "FastAPI is running!"}
+    return {"message": "GoatSquad is Live!"}
 
 app.include_router(authentication_router)
 app.include_router(cartItems_router)
@@ -26,5 +25,5 @@ app.include_router(address_router)
 app.include_router(restaurant_router)
 app.include_router(food_router)
 app.include_router(inventory_router)
-app.include_router(authentication)
 app.include_router(order_router)
+

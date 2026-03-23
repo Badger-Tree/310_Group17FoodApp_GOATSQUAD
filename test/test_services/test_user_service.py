@@ -18,7 +18,7 @@ def test_get_user_by_id_service_success(monkeypatch):
         "role": "CUSTOMER",
         "created_date": "2026-02-20T12:34:56"
         }]
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
     result = get_user_by_id_service("1")
     assert result.id == "1"
     assert result.first_name == "peregrin"
@@ -38,7 +38,7 @@ def test_get_user_by_id_service_notfound(monkeypatch):
         "role": "CUSTOMER",
         "created_date": "2026-02-20T12:34:56"
         }]
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
     with pytest.raises(HTTPException, match = "User '77' not found") as testException: get_user_by_id_service("77")
     assert testException.value.status_code ==404
     
@@ -55,7 +55,7 @@ def test_get_user_by_email_service_found(monkeypatch):
             "role": "CUSTOMER",
             "created_date": "2026-02-20T12:34:56"
             }]
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
     
     result = get_user_by_email_service("jane.doe@example.com")
     assert result.id == "1"
@@ -75,7 +75,7 @@ def test_get_user_by_email_service_caseinsensitive(monkeypatch):
         "role": "CUSTOMER",
         "created_date": "2026-02-20T12:34:56"
         }]
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
     
     result = get_user_by_email_service("Jane.Doe@example.com")
     assert result.id == "1"
@@ -95,7 +95,7 @@ def test_get_user_by_email_service_notfound(monkeypatch):
         "role": "CUSTOMER",
         "created_date": "2026-02-20T12:34:56"
         }]
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
     with pytest.raises(HTTPException, match = "User 'john.doe@example.com' not found") as testException: get_user_by_email_service("john.doe@example.com")
     assert testException.value.status_code ==404
 
@@ -118,8 +118,8 @@ def test_register_user_service_customer_success(monkeypatch):
         nonlocal saved_users
         saved_users = users.copy()
   
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
-    monkeypatch.setattr("app.services.user_service.save_all_users", mock_save_all_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.save_all", mock_save_all_users)
     monkeypatch.setattr("app.services.user_service.CustomerFactory", MockCustomerFactory)
     payload = CustomerCreate(
         email="test@example.com",
@@ -151,8 +151,8 @@ def test_register_user_service_staff_success(monkeypatch):
         nonlocal saved_users
         saved_users = users.copy()
   
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
-    monkeypatch.setattr("app.services.user_service.save_all_users", mock_save_all_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.save_all", mock_save_all_users)
     monkeypatch.setattr("app.services.user_service.CustomerFactory", MockCustomerFactory)
     payload = CustomerCreate(
         email="test@business.com",
@@ -191,8 +191,8 @@ def test_register_user_service_duplicate_email(monkeypatch):
         }]
     def mock_save_all_users(users):
         return users
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
-    monkeypatch.setattr("app.services.user_service.save_all_users", mock_save_all_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.save_all", mock_save_all_users)
     monkeypatch.setattr("app.services.user_service.CustomerFactory", MockCustomerFactory)
     payload = CustomerCreate(
         email="jane.doe@example.com",
@@ -221,8 +221,8 @@ def test_update_user_service_success(monkeypatch):
         nonlocal saved_users
         saved_users = users.copy()
         
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
-    monkeypatch.setattr("app.services.user_service.save_all_users", mock_save_all_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.save_all", mock_save_all_users)
     
     payload = UserUpdate(first_name = "UpdatedJane", last_name = None, password = "UpdatedPassword")
     updated_user = update_user_service("1", payload)
@@ -249,8 +249,8 @@ def test_update_user_service_usernotfound(monkeypatch):
         nonlocal saved_users
         saved_users = users.copy()
         
-    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
-    monkeypatch.setattr("app.services.user_service.save_all_users", mock_save_all_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
+    monkeypatch.setattr("app.repositories.users_repo_csv.save_all", mock_save_all_users)
     payload = UserUpdate(first_name = "UpdatedJane", last_name = None, password = "UpdatedPassword")
     with pytest.raises(HTTPException, match = "User 77 not found") as testException: update_user_service("77", payload)
     assert testException.value.status_code ==404
