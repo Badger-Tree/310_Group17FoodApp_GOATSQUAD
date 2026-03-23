@@ -1,10 +1,10 @@
-
 from typing import List
 from fastapi import HTTPException
 from app.repositories.users_repo_csv import find_by_email_repo, find_by_id_repo, find_by_email_repo, add_user_repo, update_user_repo
 from app.schemas.User import UserResponse, UserUpdate
 from app.factories.user_factory import CustomerFactory, StaffFactory, CustomerCreate, StaffCreate
 from app.schemas.Role import UserRole
+from app.services.cart_service import create_cart
 
 def get_user_by_id_service(userid : str) -> UserResponse:
     """This function returns a UserResponse for a user given a user id"""
