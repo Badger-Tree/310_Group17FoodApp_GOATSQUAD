@@ -14,7 +14,7 @@ from app.schemas.cart_schema import CartResponse
 from app.services.address_service import get_address_by_id_service
 from app.services.cart_service import get_cart_by_customer
 from app.services.food_item_service import get_food_by_id
-from app.services.inventory_service import check_availability
+from app.services.inventory_service import add_stock, check_availability, subtract_stock
 from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status,notify_refund_issued,notify_order_status_update_customer_cancels
 from app.services.payment_service import process_payment_service, process_refund_service
 
@@ -225,7 +225,7 @@ def set_order_status_service(order_id:str, new_status:OrderStatus) -> OrderRespo
     raise HTTPException(status_code=404, detail=f"Order notfound")       
 
 def cancel_order_customer_service(orderid:str) -> OrderResponse:
-    """This method lets a customer cancel an order. It changes order status to CANCELED"""
+    """This method lets a restaurant manager cancel an order. It changes order status to CANCELED"""
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -243,6 +243,7 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
                     items_responses = []
                     for item in order_item_data:
                         if item.get("order_id") == order.get("order_id"):
+                            add_stock(food_item_id=item["food_item_id"], quantity=item["quantity"])
                             items_responses.append(OrderItemResponse(**item))
                     return OrderResponse(**order, items = items_responses)
                 else:
@@ -296,7 +297,7 @@ def get_orders_by_userid_service(userid:str)-> List[OrderResponse]:
     return order_responses
 
 def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
-    """This method lets a restaurant manager cancel an order. It changes order status to CANCELED"""
+    """This method lets a restaurant manager cancel an order. It changes order status to CANCELED"""  
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -316,6 +317,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
                     items_responses = []
                     for item in order_item_data:
                         if item.get("order_id") == order.get("order_id"):
+                            add_stock(food_item_id=item["food_item_id"], quantity=item["quantity"])
                             items_responses.append(OrderItemResponse(**item))
                     return OrderResponse(**order, items = items_responses)
                 else:
@@ -323,6 +325,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
     raise HTTPException(status_code=404, detail="Order not found")
+
 
 def accept_order_service(orderid:str) -> OrderResponse:
     """Method used by restaurant manager to accept an order. It changes order status from PENDING to ACCEPTED"""
@@ -347,9 +350,9 @@ def accept_order_service(orderid:str) -> OrderResponse:
                 
                 for item in order_item_data:
                     if item.get("order_id") == order.get("order_id"):
+                        subtract_stock(item["food_item_id"], quantity=item["quantity"])
                         items_responses.append(OrderItemResponse(**item))
                 return OrderResponse(**order, items = items_responses)
             else:
                 raise HTTPException(status_code=400, detail = "Cannot accept order")
     raise HTTPException(status_code=404, detail="Order not found")
-

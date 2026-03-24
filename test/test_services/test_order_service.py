@@ -745,7 +745,7 @@ def test_cancel_order_restaurant_service_success(mocker):
         }]
     def mock_save_orders(input):
         return input
-    
+    mocker.patch("app.services.order_service.add_stock", return_value=None)
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders", mock_save_orders)
     mocker.patch("app.services.order_service.notify_refund_issued", return_value=None)
@@ -775,7 +775,7 @@ def test_cancel_order_restaurant_service_refund_failed(mocker):
                     "created_date": "2026-02-20T12:34:56",
                     "delivery_address_id": "addr202"
         }]
-
+    mocker.patch("app.services.order_service.add_stock", return_value=None)
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders")
     mocker.patch("app.services.order_service.notify_refund_issued")
@@ -807,7 +807,7 @@ def test_cancel_order_restaurant_service_order_not_found(mocker):
                     "created_date": "2026-02-20T12:34:56",
                     "delivery_address_id": "addr202"
         }]
-
+    mocker.patch("app.services.order_service.add_stock", return_value=None)
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders")
     mocker.patch("app.services.order_service.notify_refund_issued", return_value=None)
@@ -915,7 +915,7 @@ def test_cancel_order_customer_success(mocker):
         }]
     def mock_save_orders(input):
         return input
-    
+    mocker.patch("app.services.order_service.add_stock", return_value=None)
     mocker.patch("app.services.order_service.load_orders", return_value=mock_orders)
     mocker.patch("app.services.order_service.save_all_orders")
     mocker.patch("app.services.order_service.process_refund_service", return_value=True)
@@ -947,7 +947,7 @@ def test_cancel_order_customer_service_completed(mocker):
                     "delivery_address_id": "addr202"
         }]
 
-
+    mocker.patch("app.services.order_service.add_stock", return_value=None)
     mocker.patch("app.services.order_service.process_refund_service", return_value=True)
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders")
@@ -976,6 +976,7 @@ def test_accept_order_service_success(mocker):
         "order_item_id" : "1",
         "order_id" : "order123"
     }]
+    mocker.patch("app.services.order_service.subtract_stock", return_value=None)
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders")
     mocker.patch("app.services.order_service.load_order_items", return_value = mock_order_items)
@@ -997,6 +998,7 @@ def test_accept_order_service_order_not_found(mocker):
                     "created_date": "2026-02-20T12:34:56",
                     "delivery_address_id": "addr202"
         }]
+    mocker.patch("app.services.order_service.subtract_stock", return_value=None)
     mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders")
@@ -1016,7 +1018,7 @@ def test_accept_order_service_accepted(mocker):
                     "created_date": "2026-02-20T12:34:56",
                     "delivery_address_id": "addr202"
         }]
-    
+    mocker.patch("app.services.order_service.subtract_stock", return_value=None)
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders")
     mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
