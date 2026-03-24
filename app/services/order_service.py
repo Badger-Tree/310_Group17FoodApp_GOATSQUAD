@@ -87,7 +87,7 @@ def validate_cart(customer_id) -> CartResponse:
         raise HTTPException(status_code=400, detail="empty cart")
     return cart
 
-def get_restaurant_from_cart(cart) -> int:
+def validate_restaurant_from_cart(cart) -> int:
     """gets the restaurant id from the food items in the cart. Items must all be from the same restaurant"""
     first_item = cart.cart_items[0]
     first_food_item = get_food_by_id(first_item.food_item_id)
@@ -168,7 +168,7 @@ def process_order_service(customer_id: str, address_id:str) -> OrderResponse:
     """receives a cart and asks for payment before creating the order and sending for review. 
     Note that the service is currently using a stub method to get cart."""
     cart = validate_cart(customer_id)
-    restaurant_id = get_restaurant_from_cart(cart)
+    restaurant_id = validate_restaurant_from_cart(cart)
     address = validate_address(address_id)
     total_amount = calculate_total(cart)
     order_dict = build_order(cart, total_amount,address.address_id, restaurant_id)
