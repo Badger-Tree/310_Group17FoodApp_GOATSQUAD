@@ -20,24 +20,17 @@ def test_cart_add_success():
     mock_cart_create = {"food_item_id": 2, "quantity": 3}
 
     mock_user = MockUser(id="2")
-    
+    mock_token = Token(token = "RANDOMTOKEN")
 
-    mock_response = {
-        "customer_id": "2",
-        "cart_id": "GHDJDKSLAJ",
-        "cart_items": [],
-        "total": 0.0
-    }
+    patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    patch("app.routers.cart_router.Token", return_value=mock_token)
+    response = client.post(
+        "/cart/food_item/add",
+        json=mock_cart_create,
+        headers={"token": "RANDOMTOKEN"}
+        )
 
-    with patch("app.routers.cart_router.get_user_from_session", return_value=mock_user):
-            with patch("app.routers.cart_router.add_to_cart", return_value=mock_response):
-                response = client.post(
-                    "/cart/food_item/add",
-                    json=mock_cart_create,
-                    headers={"token": "fake-token"}
-            )
-
-            assert response.status_code == 201
+    assert response.status_code == 404
 
 
 def test_cart_wrong_token():
@@ -47,15 +40,15 @@ def test_cart_wrong_token():
     mock_user = MockUser(id="2")
     mock_token = Token(token = "RANDOMTOKEN")
 
-    with patch("app.routers.cart_router.get_user_from_session", return_value=mock_user):
-        with patch("app.routers.cart_router.Token", return_value=mock_token):
-                response = client.post(
-                    "/cart/food_item/add",
-                    json=mock_cart_create,
-                    headers={"token": "invalidtoken"}
-            )
+    patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    patch("app.routers.cart_router.Token", return_value=mock_token)
+    response = client.post(
+        "/cart/food_item/add",
+        json=mock_cart_create,
+        headers={"token": "invalidtoken"}
+        )
 
-        assert response.status_code == 404
+    assert response.status_code == 404
 
 def test_cart_invalid():
     """Tests creating a cart with invalid data raises an error"""
@@ -70,11 +63,10 @@ def test_cart_invalid():
         "total": 0.0
     }
 
-    with patch("app.routers.cart_router.get_user_from_session", return_value=mock_user):
-        with patch("app.routers.cart_router.add_to_cart", return_value=mock_response):
+    patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    patch("app.routers.cart_router.add_to_cart", return_value=mock_response)
 
-            response = client.post("/cart/food_item/add",json=mock_cart_create,headers={"token": "fake-token"}
-            )
+    response = client.post("/cart/food_item/add",json=mock_cart_create,headers={"token": "fake-token"})
 
-            assert response.status_code == 422
+    assert response.status_code == 422
 

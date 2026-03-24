@@ -1,4 +1,4 @@
-from pydantic import BaseModel, PositiveFloat, PositiveInt, ValidationError
+from pydantic import BaseModel, PositiveFloat, PositiveInt
 
 class CartItemBase(BaseModel):
     cart_item_id: str

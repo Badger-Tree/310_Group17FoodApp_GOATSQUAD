@@ -1,6 +1,6 @@
 from pathlib import Path
 import csv
-from pydantic.json import pydantic_encoder
+from pydantic_core import to_jsonable_python
 import json
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "cart.csv"
@@ -13,7 +13,6 @@ def load_all() -> list[dict]:
     carts = []
     with DATA_PATH.open("r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        
         for row in reader: 
             items = row.get("cart_items", "")
             try:
@@ -38,16 +37,12 @@ def save_all(carts):
 
         if not isinstance(carts, list):
             raise ValueError("Data should be a list")
-
-        for item in carts:
-            if not isinstance(item, dict):
-                raise ValueError("Items must be a dictionary")
-
+                
         for cart in carts:
             writer.writerow({
                 "customer_id": cart["customer_id"],
-                "cart_id": cart["cart_id"],
-                "cart_items": json.dumps(cart["cart_items"], default=pydantic_encoder),
+                "cart_id": cart.get("cart_id"),
+                "cart_items": json.dumps([c.model_dump() if hasattr(c, "model_dump") else c for c in cart["cart_items"]]),
                 "total": cart.get("total", 0)
             })
 

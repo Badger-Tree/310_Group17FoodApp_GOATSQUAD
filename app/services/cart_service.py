@@ -1,8 +1,6 @@
 import ulid
-from typing import Dict, Any
 from fastapi import HTTPException
-from app.schemas.Token import Token
-from app.schemas.cart_schema import CartCreate, CartResponse, CartBase
+from app.schemas.cart_schema import CartCreate, CartResponse
 from app.repositories.food_item_repo import load_all as load_all_food_items
 from app.repositories.cart_repo_csv import save_all as save_cart, load_all as load_all_carts
 from app.services.cart_item_service import add_cart_item
@@ -21,21 +19,26 @@ def create_cart(current_customer: str):
     customer_id = str(current_customer)
     cart_id = str(ulid.new())
 
+    cart_data = load_all_carts()
+
     cart = {
         "customer_id": customer_id,
         "cart_id": cart_id,
         "cart_items": [],
         "total": 0.0
     }
+
+    cart_data.append(cart)
     
-    save_cart(cart)
+    save_cart(cart_data)
     return cart
 
 
-def add_to_cart(customer_id, cart_add: CartCreate) -> CartResponse: 
+def add_to_cart(customer_id, cart_add: CartCreate) -> CartResponse:
     """Adds a new item to the cart if the cart_id associated with the customer exists"""
     cart_dict = cart_add.model_dump()
     food_item_data = load_all_food_items()
+    cart_data = load_all_carts()
     food_item_id = cart_dict["food_item_id"]
     food_item_obj = next(
         (f for f in food_item_data if f["food_item_id"] == food_item_id), None  
@@ -58,22 +61,18 @@ def add_to_cart(customer_id, cart_add: CartCreate) -> CartResponse:
         cart_items= cart_current.cart_items, 
         total = total
     )  
-    final_cart = cart_append(load_all_carts(), cart_response)
-    save_cart(final_cart)
+    
+    for c in cart_data:
+        if c["cart_id"] == cart_response.cart_id:
+            c["cart_items"] = cart_response.cart_items
+            c["total"] = cart_response.total
+            break
+    else:
+        cart_data.append(cart_response.model_dump())
+
+    save_cart(cart_data)
     return cart_response
 
-
-def cart_append(all_carts, cart_response): 
-    """Takes current list of carts in the dataset, only making the change to the cart_id that matches the cart_response"""
-    updated_carts = []
-    for c in all_carts:
-        if c["cart_id"] == cart_response.cart_id:
-            merged_cart_items = c["cart_items"] + cart_response.cart_items
-            c["cart_items"] = merged_cart_items
-            c["total"] = calculateSubtotal(c)
-            updated_carts.append(c)
-    return updated_carts
-    
 
 def calculateSubtotal(current_cart):
     """Calculates the subtotal of all the current items with the cart_items dictionary"""
