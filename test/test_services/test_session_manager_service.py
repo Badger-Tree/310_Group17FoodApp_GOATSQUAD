@@ -102,7 +102,7 @@ def test_get_user_from_session(mocker,mock_user_response,mock_sessions):
     
     mock_token = {
         "token": "abc456",
-        "userid": "1",
+        "user_id": "1",
         "role": "CUSTOMER",
         "created": "2026-02-20T12:34:56+00:00",
         "expires": "2026-03-20T12:34:56+00:00",
