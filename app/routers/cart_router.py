@@ -12,6 +12,7 @@ def add_item(cart_item: CartCreate, token: str = Header(...)):
         """Takes a CartCreate object containing food_item_id and quantity as well as a Token and adds an item to the cart"""
         session = Token(token=token)
         current_customer = get_user_from_session(session)
+        print(f"Using user id: {current_customer.id}")
         customer_id = current_customer.id
         if not customer_id: 
                 raise HTTPException(status_code=404, detail=f"Customer'{customer_id}' not found")
@@ -20,7 +21,7 @@ def add_item(cart_item: CartCreate, token: str = Header(...)):
 
 @router.delete("/food_item/remove", status_code=201)
 def remove_cart_item(cart_item_id: str, token: str = Header(...)):
-    """Removes a cart item with the provided cart item id"""
+    """Removes a cart item with the provided cart item id and current customer token"""
     session = Token(token=token)
     current_customer = get_user_from_session(session)
     customer_id = current_customer.id

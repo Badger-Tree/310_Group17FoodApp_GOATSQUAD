@@ -25,13 +25,12 @@ def add_cart_item(cartItem: CartItemAdd, price_per_item: float) -> CartItemRespo
         subtotal=subtotal
     )
 
-def delete_cart_item(cart_current, cart_item_id) -> dict:
+def delete_cart_item(cart_current, cart_item_id) -> dict: 
     """Removes the cart_item and returns the cart without this item"""
     found_cart_item = False
     for index, cart in enumerate(cart_current.cart_items):
         if cart.cart_item_id == cart_item_id:
             found_cart_item = True
-            print(cart.cart_item_id)
             cart_current.cart_items.pop(index)
             break
     if not found_cart_item:
