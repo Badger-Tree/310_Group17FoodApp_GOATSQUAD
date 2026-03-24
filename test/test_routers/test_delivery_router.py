@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 from fastapi import HTTPException
 from unittest.mock import patch
 from app.main import app
-import app.routers.delivery_router as delivery_router
+
 
 
 client = TestClient(app)
@@ -15,7 +15,6 @@ def test_assign_delivery_success():
         "delivery_id": "delivery-1",
         "courier_id": "courier-1",
         "created_date": "2024-06-01T12:00:00Z",
-        "delivery_status": "ASSIGNED"
     }
 
     with patch("app.routers.delivery_router.assign_delivery_to_courier", return_value=mock_delivery):
@@ -34,36 +33,80 @@ def test_assign_delivery_delivery_not_found():
         assert response.status_code == 404
         assert response.json() == {"detail": "Delivery not found"}
 
-#UPDATING DELIVERIES: SUCCESS
-def test_update_delivery_status_success():
-    mock_delivery = {
+#PICK UP DELIVERY: SUCCESSFUL
+def test_pickup_delivery_success():
+    mock_order = {
         "order_id": "order-1",
-        "address_id": "address-1",
+        "customer_id": "customer-1",
+        "restaurant_id": 1,
         "delivery_id": "delivery-1",
-        "courier_id": "courier-1",
+        "status": "OUT_FOR_DELIVERY",
+        "total_amount": 25.00,
         "created_date": "2024-06-01T12:00:00Z",
-        "delivery_status": "COMPLETED"
+        "delivery_address_id": "address-1",
+        "items": []
     }
 
-    with patch("app.routers.delivery_router.update_delivery_status", return_value=mock_delivery):
-        response = client.put("/deliveries/status/delivery-1/COMPLETED")
+    with patch("app.routers.delivery_router.pickup_delivery", return_value=mock_order):
+        response = client.put("/deliveries/pickup/delivery-1")
 
         assert response.status_code == 200
-        assert response.json() == mock_delivery
+        assert response.json() == mock_order
+
+#PICK UP DELIVERY: FAILURE DELIVERY NOT FOUND
+def test_pickup_delivery_not_found():
+    with patch("app.routers.delivery_router.pickup_delivery", side_effect=HTTPException(status_code=404, detail="Delivery not found")):
+        
+        response = client.put("/deliveries/pickup/nonexistent-delivery")
+
+        assert response.status_code == 404
+        assert response.json() == {"detail": "Delivery not found"}
+
+#COMPLETE DELIVERY: SUCCESSFUL
+def test_complete_delivery_success():
+    mock_order = {
+        "order_id": "order-1",
+        "customer_id": "customer-1",
+        "restaurant_id": 1,
+        "delivery_id": "delivery-1",
+        "status": "COMPLETED",
+        "total_amount": 25.00,
+        "created_date": "2024-06-01T12:00:00Z",
+        "delivery_address_id": "address-1",
+        "items": []
+    }
+
+    with patch("app.routers.delivery_router.complete_delivery", return_value=mock_order):
+        response = client.put("/deliveries/complete/delivery-1")
+
+        assert response.status_code == 200
+        assert response.json() == mock_order
+
+#COMPLETE DELIVERY: FAILURE DELIVERY NOT FOUND
+def test_complete_delivery_not_found():
+    with patch("app.routers.delivery_router.complete_delivery", side_effect=HTTPException(status_code=404, detail="Delivery not found")):
+        
+        response = client.put("/deliveries/complete/nonexistent-delivery")
+
+        assert response.status_code == 404
+        assert response.json() == {"detail": "Delivery not found"}
 
 #CANCELING DELIVERIES: SUCCESS
 def test_cancel_delivery_success():
-    mock_delivery = {
-        "order_id": "order-1",
-        "address_id": "address-1",
-        "delivery_id": "delivery-1",
-        "courier_id": None,
-        "created_date": "2024-06-01T12:00:00Z",
-        "delivery_status": "CANCELED"
+    mock_response = {
+        "detail": "Delivery cancelled successfully."
     }
 
-    with patch("app.routers.delivery_router.cancel_delivery", return_value=mock_delivery):
-        response = client.put("/deliveries/cancel/delivery-1")
+    with patch("app.routers.delivery_router.cancel_delivery", return_value=mock_response):
+        response = client.delete("/deliveries/cancel/delivery-1")
 
         assert response.status_code == 200
-        assert response.json() == mock_delivery
+        assert response.json() == mock_response
+
+#CANCELING DELIVERIES: FAILURE
+def test_cancel_delivery_not_found():
+    with patch("app.routers.delivery_router.cancel_delivery", side_effect=HTTPException(status_code=404, detail="Delivery not found")):
+        response = client.delete("/deliveries/cancel/nonexistent-delivery")
+
+        assert response.status_code == 404
+        assert response.json() == {"detail": "Delivery not found"}

@@ -13,7 +13,7 @@ def load_all() -> List[Dict[str, Any]]:
     
 def save_all(items: List[Dict[str, Any]]) -> None:
     tmp = DATA_PATH.with_suffix(".tmp")
-    fields = ["order_id", "courier_id", "created_date", "address_id", "delivery_status", "delivery_id"]
+    fields = ["order_id", "courier_id", "created_date", "address_id", "delivery_id"]
     
     with tmp.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields)

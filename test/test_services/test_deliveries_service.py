@@ -1,12 +1,13 @@
 from unittest.mock import patch
+from app.schemas.OrderStatus import OrderStatus
 import pytest
-from pydantic import ValidationError
 from fastapi import HTTPException
 from app.services.Delivery_service import (
     assign_delivery_to_courier,
-    update_delivery_status,
     cancel_delivery,
-    create_delivery_service
+    complete_delivery,
+    create_delivery_service,
+    pickup_delivery
 )
 
 #CREATING DELIVERIES: SUCCESS
@@ -33,7 +34,6 @@ def test_create_delivery_success():
     assert result.order_id == "order-1"
     assert result.address_id == "address-1"
     assert result.courier_id is None
-    assert result.delivery_status == "PENDING"
     assert result.delivery_id is not None
     mock_save.assert_called_once()
 
@@ -67,7 +67,6 @@ def test_assign_delivery_to_courier_success():
                   "courier_id": None,
                   "created_date": "2024-06-01T12:00:00Z",
                   "address_id": "address-1",
-                  "delivery_status": "PENDING",
                   "delivery_id": "delivery-1"
             }
       ]
@@ -104,7 +103,6 @@ def test_assign_delivery_to_courier_success():
 
             assert result.delivery_id == "delivery-1"
             assert result.courier_id == "courier-1"
-            assert result.delivery_status == "ASSIGNED"
             mock_save.assert_called_once()
 
 #ASSIGNING DELIVERIES: FAILURE DELIVERY NOT FOUND
@@ -135,7 +133,6 @@ def test_assign_delivery_to_courier_invalid_courier():
                   "courier_id": None,
                   "created_date": "2024-06-01T12:00:00Z",
                   "address_id": "address-1",
-                  "delivery_status": "PENDING",
                   "delivery_id": "delivery-1"
             }
       ]
@@ -167,26 +164,79 @@ def test_assign_delivery_to_courier_invalid_courier():
             assert exc_info.value.status_code == 400
             assert exc_info.value.detail == "Invalid courier assignment"
             mock_save.assert_not_called()
-    
-#CANCEL DELIVERIES: SUCCESS
-def test_cancel_delivery_success():
-      
+
+
+
+#PICK UP DELIVERIES: SUCCESS
+def test_pick_up_delivery_success():
       deliveries = [
             {
                   "order_id": "order-1",
-                  "courier_id": None,
+                  "courier_id": "courier-1",
                   "created_date": "2024-06-01T12:00:00Z",
                   "address_id": "address-1",
-                  "delivery_status": "PENDING",
                   "delivery_id": "delivery-1"
             }
       ]
 
-      with patch("app.services.Delivery_service.load_all", return_value= deliveries), \
-            patch ("app.services.Delivery_service.save_all") as mock_save:
+      mock_order_response = {
+            "order_id": "order-1",
+            "status": "OUT_FOR_DELIVERY",
+      }
 
-            result = cancel_delivery("delivery-1")
-        
-            assert result.delivery_id == "delivery-1"
-            assert result.delivery_status == "CANCELED"
-            mock_save.assert_called_once()
+      with patch("app.services.Delivery_service.load_all", return_value = deliveries), \
+            patch("app.services.Delivery_service.set_order_status_service", return_value = mock_order_response) as mock_set_status:
+
+            result = pickup_delivery("delivery-1")
+            
+            assert result == mock_order_response
+            mock_set_status.assert_called_once_with("order-1", OrderStatus.OUT_FOR_DELIVERY)
+    
+#PICK UP DELIVERIES: FAILURE DELIVERY NOT FOUND
+def test_pick_up_delivery_not_found():
+      with patch("app.services.Delivery_service.load_all", return_value = []), \
+            patch("app.services.Delivery_service.set_order_status_service") as mock_set_status:
+
+            with pytest.raises(HTTPException) as exc_info:
+                  pickup_delivery("delivery-1")
+
+            assert exc_info.value.status_code == 404
+            assert exc_info.value.detail == "Delivery not found"
+            mock_set_status.assert_not_called()
+
+#COMPLETE DELIVERIES: SUCCESS
+def test_complete_delivery_success():
+      deliveries = [
+            {
+                  "order_id": "order-1",
+                  "courier_id": "courier-1",
+                  "created_date": "2024-06-01T12:00:00Z",
+                  "address_id": "address-1",
+                  "delivery_id": "delivery-1"
+            }
+      ]
+
+      mock_order_response = {
+            "order_id": "order-1",
+            "status": "COMPLETED",
+      }
+
+      with patch("app.services.Delivery_service.load_all", return_value = deliveries), \
+            patch("app.services.Delivery_service.set_order_status_service", return_value = mock_order_response) as mock_set_status:
+
+            result = complete_delivery("delivery-1")
+            
+            assert result == mock_order_response
+            mock_set_status.assert_called_once_with("order-1", OrderStatus.COMPLETED)
+    
+#COMPLETE DELIVERIES: FAILURE DELIVERY NOT FOUND
+def test_complete_delivery_not_found():
+      with patch("app.services.Delivery_service.load_all", return_value = []), \
+            patch("app.services.Delivery_service.set_order_status_service") as mock_set_status:
+
+            with pytest.raises(HTTPException) as exc_info:
+                  complete_delivery("delivery-1")
+
+            assert exc_info.value.status_code == 404
+            assert exc_info.value.detail == "Delivery not found"
+            mock_set_status.assert_not_called()

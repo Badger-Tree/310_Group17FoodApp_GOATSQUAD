@@ -4,6 +4,8 @@ from app.repositories.deliveries_repo_csv import load_all, save_all
 from app.repositories.orders_repo import load_all as load_orders
 from app.repositories.staff_assignment_repo import load_all as load_staff_assignments
 from app.schemas.Delivery import DeliveryResponse
+from app.schemas.OrderStatus import OrderStatus
+from app.services.order_service import set_order_status_service
 from fastapi import HTTPException
 
 #Create delivery service, takes in order object
@@ -16,7 +18,6 @@ def create_delivery_service(order: dict) -> DeliveryResponse:
         "courier_id": None, #Courier will be assigned later on
         "created_date": datetime.now(timezone.utc).isoformat(),
         "address_id": order["delivery_address_id"],
-        "delivery_status": "PENDING",
         "delivery_id": str(uuid.uuid4())
     }
 
@@ -27,7 +28,7 @@ def create_delivery_service(order: dict) -> DeliveryResponse:
 
 #Assigning a delivery to a courier
 def assign_delivery_to_courier(delivery_id: str, courier_id: str) -> DeliveryResponse:
-    """Assigns a delivery to a courier and updates the delivery status."""
+    """Assigns a delivery to a courier"""
     deliveries = load_all()
     orders = load_orders()
     staff_assignments = load_staff_assignments()
@@ -67,15 +68,14 @@ def assign_delivery_to_courier(delivery_id: str, courier_id: str) -> DeliveryRes
         raise HTTPException(status_code=400, detail="Invalid courier assignment")
     
     target_delivery["courier_id"] = courier_id
-    target_delivery["delivery_status"] = "ASSIGNED"
 
     save_all(deliveries)
     return DeliveryResponse(**target_delivery)
 
-#Service to update delivery status
-def update_delivery_status(delivery_id: str, new_status: str) -> DeliveryResponse:
-    """Update the delivery status"""
+#SET DELIVERY AS PICKED UP
+def pickup_delivery(delivery_id: str):
     deliveries = load_all()
+
     target_delivery = None
     for delivery in deliveries:
         if delivery["delivery_id"] == delivery_id:
@@ -85,13 +85,19 @@ def update_delivery_status(delivery_id: str, new_status: str) -> DeliveryRespons
     if target_delivery is None:
         raise HTTPException(status_code=404, detail="Delivery not found")
     
-    target_delivery["delivery_status"] = new_status
+    return set_order_status_service(target_delivery["order_id"], OrderStatus.OUT_FOR_DELIVERY)
 
-    save_all(deliveries)
-    return DeliveryResponse(**target_delivery)
+#SET DELIVERY AS COMPLETE
+def complete_delivery(delivery_id: str):
+    deliveries = load_all()
 
-#Service to cancel a delivery
-def cancel_delivery(delivery_id: str) -> DeliveryResponse:
-    """Cancel a delivery by updating its status to 'CANCELED'."""
+    target_delivery = None
+    for delivery in deliveries:
+        if delivery["delivery_id"] == delivery_id:
+            target_delivery = delivery
+            break
     
-    return update_delivery_status(delivery_id, "CANCELED")
+    if target_delivery is None:
+        raise HTTPException(status_code=404, detail="Delivery not found")
+    
+    return set_order_status_service(target_delivery["order_id"], OrderStatus.COMPLETED)
