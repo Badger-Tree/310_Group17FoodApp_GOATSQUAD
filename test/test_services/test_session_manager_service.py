@@ -32,28 +32,23 @@ def create_session_service(email) -> TokenResponse:
     sessions = load_sessions()
     return TokenResponse(**new_token)
 
-def expire_session_service(token:str): 
-    """removes a session from the stored sessions when it is expired or the user logs out"""
-    sessions = load_sessions()
-    new_sessions = []
-    for session in sessions:
-        if session["token"] != token:
-            new_sessions.append(session)
-    if len(new_sessions) == len(sessions):
-        raise HTTPException(status_code=401, detail="invalid token")
-    save_sessions(new_sessions)
-
-def validate_token_service(token: Token) -> dict:
-    """checks if a session exists and is not expired, returns a dict with the same information as a TokenResponse"""
-    sessions = load_sessions()
-    for session in sessions:
-        if session["token"] == token.token:
-            expires = datetime.fromisoformat(session["expires"])
-            if datetime.now(timezone.utc) > expires:
-                expire_session_service(token)
-                raise HTTPException(status_code=401, detail="session expired")
-            return (session)
-    raise HTTPException(status_code=404, detail="session not found")
+def test_validate_token_service_success(mocker,mock_sessions):
+    """tests that validate_token_service will return a dictionary with session data if given a valid Token that is not expired"""
+    mock_token = mocker.Mock()
+    mock_token.token="abc123"
+    mock_now = datetime.fromisoformat("2026-03-20T12:34:55+00:00")
+    
+    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
+    mocker.patch("app.services.session_manager_service.datetime", wraps = datetime).now.return_value = mock_now
+    
+    
+    
+    result = validate_token_service(mock_token)
+    assert result["token"] == "abc123"
+    assert result["user_id"] == "1"  
+    assert result["role"] == UserRole.CUSTOMER
+    assert result["created"] == datetime.fromisoformat("2026-02-20T12:34:56+00:00").isoformat()
+    assert result["expires"] == datetime.fromisoformat("2026-03-20T12:34:56+00:00").isoformat()
 
 def get_user_from_session(token: Token) -> UserResponse:
     """gets a userid from the session token and returns the corresponding UserResponse"""

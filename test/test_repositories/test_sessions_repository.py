@@ -7,15 +7,15 @@ def test_load_all_success(monkeypatch, tmp_path):
     """tests that load_all() will return a  list with data from csv data that csv exists, has data"""
     mock_path = tmp_path / "sessions.csv"
     
-    mock_path.write_text("token,userid,role,created,expires\n"
+    mock_path.write_text("token,user_id,role,created,expires\n"
                     "1,1,CUSTOMER,2026-02-20T12:34:56,2026-03-20T12:34:56\n"
                     "1a3ba654-2bd8-496c-847e-31e398e266fa,2,CUSTOMER,2026-02-20T12:34:56,2027-02-20T12:34:56\n")
 
     monkeypatch.setattr("app.repositories.sessions_repo.DATA_PATH", mock_path)
     result = load_all()
     assert len(result) == 2
-    assert result[0]["userid"] == "1"
-    assert result[1]["userid"] == "2"
+    assert result[0]["user_id"] == "1"
+    assert result[1]["user_id"] == "2"
     assert result[1]["created"] == "2026-02-20T12:34:56"
 def test_load_all_fileDNE(monkeypatch, tmp_path):
     """this tests that load_all() will return an empty list if calling a file that does not exist"""
@@ -35,14 +35,14 @@ def test_load_all_empty(monkeypatch, tmp_path):
 def test_save_all_success(monkeypatch, tmp_path):
     """this tests that save_all() will save input to a csv if csv exists and has headers"""
     mock_path = tmp_path / "sessions.csv"
-    mock_path.write_text("token,userid,role,created,expires\n"
+    mock_path.write_text("token,user_id,role,created,expires\n"
                     "1,1,CUSTOMER,2026-02-20T12:34:56,2026-03-20T12:34:56\n"
                     "1a3ba654-2bd8-496c-847e-31e398e266fa,2,CUSTOMER,2026-02-20T12:34:56,2027-02-20T12:34:56\n")
 
     monkeypatch.setattr("app.repositories.sessions_repo.DATA_PATH", mock_path)
     
     input_data = [{"token" : "13",
-                "userid" : "44",
+                "user_id" : "44",
                 "role" : "CUSTOMER",
                 "created" : "2026-02-20T12:34:56",
                 "expires" : "2026-03-20T12:34:56"}]
@@ -54,7 +54,7 @@ def test_save_all_success(monkeypatch, tmp_path):
         rows = list(reader)
         
     assert len(rows) == 1
-    assert rows[0]["userid"] == "44"
+    assert rows[0]["user_id"] == "44"
     assert rows[0]["role"] == "CUSTOMER"
     assert rows[0]["created"] == "2026-02-20T12:34:56"
     
@@ -70,7 +70,7 @@ def test_save_all_empty_list(monkeypatch, tmp_path):
         rows = list(reader)
     
     assert len(rows) == 0
-    expected_fields = ["token","userid","role","created","expires"]
+    expected_fields = ["token","user_id","role","created","expires"]
     assert reader.fieldnames == expected_fields
     
 def test_save_all_fileDNE(monkeypatch, tmp_path):
@@ -79,7 +79,7 @@ def test_save_all_fileDNE(monkeypatch, tmp_path):
 
     monkeypatch.setattr("app.repositories.sessions_repo.DATA_PATH", mock_path)
     input_data = [{"token" : "13",
-                "userid" : "44",
+                "user_id" : "44",
                 "role" : "CUSTOMER",
                 "created" : "2026-02-20T12:34:56",
                 "expires" : "2026-03-20T12:34:56"}]
@@ -92,5 +92,5 @@ def test_save_all_fileDNE(monkeypatch, tmp_path):
         rows = list(reader)
         
     assert len(rows) == 1
-    assert rows[0]["userid"] == "44"
+    assert rows[0]["user_id"] == "44"
     
