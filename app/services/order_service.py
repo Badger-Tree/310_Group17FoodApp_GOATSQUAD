@@ -25,39 +25,6 @@ from app.services.payment_service import process_payment_service, process_refund
 from pydantic import BaseModel, Field
 from typing import List
 
-# class CartItemResponse(BaseModel):
-#     food_item_id: int
-#     quantity: int
-#     price_per_item: float
-
-# class CartResponse(BaseModel):
-#     cart_id: str
-#     customer_id: str
-#     restaurant_id: int
-#     delivery_address_id: str
-#     cart_items: List[CartItemResponse]
-    
-# def get_cart_by_id(cart_id: str) -> CartResponse:
-#     cart_items = [
-#         CartItemResponse(
-#             food_item_id=1,
-#             quantity=1,
-#             price_per_item=1.00
-#         ),
-#         CartItemResponse(
-#             food_item_id=2,
-#             quantity=2,
-#             price_per_item=1.00
-#         )]
-
-#     cart = CartResponse(
-#         cart_id=cart_id,
-#         customer_id="1",
-#         restaurant_id="1",
-#         delivery_address_id="1",
-#         cart_items=cart_items)
-#     return cart
-    
 class DeliveryResponse(BaseModel):
     """this is a stub so I can create a delivery before delivery module is created"""
     order_id: str
