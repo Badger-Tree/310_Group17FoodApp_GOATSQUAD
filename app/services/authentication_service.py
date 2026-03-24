@@ -8,7 +8,7 @@ from app.repositories.users_repo_csv import load_all as load_users
 
 def login_service(credentials: LoginRequest) -> TokenResponse:
     """Lets a user log in to the system. Input: LoginRequest(email, password). 
-    Output: TokenResponse (userid, token, created, expires)"""
+    Output: TokenResponse (user_id, token, created, expires)"""
     if validate_credentials(credentials.email, credentials.password):
         token = create_session_service(credentials.email)
         return token
