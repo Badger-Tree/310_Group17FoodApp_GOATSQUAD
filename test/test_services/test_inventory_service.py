@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import patch
 from app.services import inventory_service
+from app.services.inventory_service import add_stock, subtract_stock
 from app.schemas.inventory import Inventory
 
 @patch("app.services.inventory_service.get_inventory_by_food_id")
@@ -25,3 +26,29 @@ def test_update_stock_negative_raises_error():
     """Test that updating stock with a negative quantity raises a ValueError"""
     with pytest.raises(ValueError, match="Quantity cannot be negative"):
         inventory_service.update_inventory(food_item_id=101, new_quantity=-5)
+
+def test_add_stock(mocker):
+    """verifies that adding stock increments quantity in repo"""
+    mocker.patch("app.services.inventory_service.find_by_food_id_repo", return_value={"inventory_id": 1, "food_item_id": 1, "quantity": 10})
+
+    mocker.patch("app.services.inventory_service.load_all", return_value=[{"inventory_id": 1, "food_item_id": 1, "quantity": 10}])
+
+    mock_save = mocker.patch("app.services.inventory_service.save_all")
+
+    result = add_stock(food_item_id=1, quantity=5)
+
+    assert result.quantity == 15
+    mock_save.assert_called_once()
+
+def test_subtract_stock(mocker):
+    """verifies subtracting stock decrements quantity"""
+    mocker.patch("app.services.inventory_service.find_by_food_id_repo", return_value={"inventory_id": 1, "food_item_id": 1, "quantity": 10})
+
+    mocker.patch("app.services.inventory_service.load_all", return_value=[{"inventory_id": 1, "food_item_id": 1, "quantity": 10}])
+
+    mock_save = mocker.patch("app.services.inventory_service.save_all")
+
+    result = subtract_stock(food_item_id=1, quantity=3)
+
+    assert result.quantity == 7
+    mock_save.assert_called_once()
