@@ -1,4 +1,4 @@
-from app.services.cart_service import add_to_cart, create_cart, get_cart_by_customer, calculateSubtotal
+from app.services.cart_service import add_to_cart, create_cart, get_cart_by_customer, calculateSubtotal, delete_from_cart
 from app.schemas.cart_schema import CartCreate, CartResponse
 from fastapi import HTTPException
 import pytest
@@ -166,6 +166,9 @@ def test_add_to_cart_invalid(mocker):
 
 
 
+class MockCart:
+    def __init__(self, cart_items):
+        self.cart_items = cart_items
 
 mock_current_cart = [
     {
@@ -194,22 +197,157 @@ mock_current_cart = [
 
 def test_CalculateSubtotal_valid(mocker): 
     """Tests that calculatesubtotal calculates what its supposed to with valid data"""
+    mock_cart = MockCart(mock_current_cart[0]["cart_items"])
     mocker.patch("app.services.cart_service.load_all_carts", return_value = mock_current_cart)
 
-    result = calculateSubtotal(mock_current_cart[0])
+    result = calculateSubtotal(mock_cart)
     assert result == 33.47
 
-def test_CalculateSubtotal_zero(mocker): 
+def test_CalculateSubtotal_emoty_list(mocker): 
     """Tests that calculatesubtotal returns 0 if cart_items are empty"""
+    empty_cart = MockCart([])
     mocker.patch("app.services.cart_service.load_all_carts", return_value = [])
-
-    result = calculateSubtotal({"cart_items": []})
+    
+    result = calculateSubtotal(empty_cart)
     assert result == 0.0
 
 def test_CalculateSubtotal_empty(mocker): 
     """Tests that calculatesubtotal returns 0 when the cart is empty"""
-    mocker.patch("app.services.cart_service.load_all_carts", return_value = [])
+    cart = MockCart({})
+    mocker.patch("app.services.cart_service.load_all_carts", cart)
 
-    cart = {}
     result = calculateSubtotal(cart)
     assert result == 0.0
+
+
+
+class MockUser:
+    def __init__(self, id):
+        self.id = id
+
+def test_delete_from_cart_first_item(mocker): 
+    """Tests that delerting first cart item is successful"""
+    mock_current_cart = [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+]
+    mock_user = MockUser(id="2")
+    cart_item_id = "01KM8SQ4JB61NVWKSM2AVSFN3C"
+
+    mocker.patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    mocker.patch("app.services.cart_service.load_all_carts", return_value = mock_current_cart)
+    result = delete_from_cart(2, cart_item_id)
+
+    assert result["customer_id"] == "2"
+    assert result["cart_id"] == "GHDJDKSLAJ" 
+    first = result["cart_items"][0]
+    assert first.cart_item_id == "61NVWKSM2AVSFDFKSLAJA"
+    assert first.food_item_id == 1
+    assert first.quantity == 1
+    assert first.price_per_item == 15.5
+    assert first.subtotal == 15.5
+    assert result["total"] == 15.5
+    
+def test_delete_from_cart_last_item(mocker): 
+    """Tests that deleting last cart item is successful"""
+    mock_current_cart = [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+]
+
+    mock_user = MockUser(id="2")
+    cart_item_id = "61NVWKSM2AVSFDFKSLAJA"
+
+    mocker.patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    mocker.patch("app.services.cart_service.load_all_carts", return_value = mock_current_cart)
+    result = delete_from_cart(2, cart_item_id)
+
+    assert result["customer_id"] == "2"
+    assert result["cart_id"] == "GHDJDKSLAJ" 
+    first = result["cart_items"][0]
+    assert first.cart_item_id == "01KM8SQ4JB61NVWKSM2AVSFN3C"
+    assert first.food_item_id == 2
+    assert first.quantity == 3
+    assert first.price_per_item == 5.99
+    assert first.subtotal == 17.97
+    assert result["total"] == 17.97
+
+
+def test_delete_from_cart_does_not_exist(mocker): 
+    """Tests that deleting an item from a cart that does not exist raises an error"""
+    mock_current_cart = [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+]
+
+
+    mock_user = MockUser(id="2")
+    cart_item_id = "DOESNOTEXIST"
+
+    mocker.patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    mocker.patch("app.services.cart_service.load_all_carts", return_value = mock_current_cart)
+
+    with pytest.raises(HTTPException) as testException: 
+        delete_from_cart(2, cart_item_id)
+
+    assert testException.value.status_code ==404
