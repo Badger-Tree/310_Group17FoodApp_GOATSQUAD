@@ -32,6 +32,8 @@ def register_user_service(payload: CustomerCreate | StaffCreate, role: UserRole)
     else:raise HTTPException(status_code=400, detail=f"User role not found")
     new_user = factory.create_user(payload)
     new_user = add_user_repo(new_user)
+    if role == UserRole.CUSTOMER:
+        create_cart(new_user["id"])
     return UserResponse(**new_user)
 
 def update_user_service(user_id:str, payload:UserUpdate) -> UserResponse:

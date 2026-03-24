@@ -117,10 +117,17 @@ def test_register_user_service_customer_success(monkeypatch):
     def mock_save_all_users(users):
         nonlocal saved_users
         saved_users = users.copy()
-  
+    def mock_create_cart(current_customer):
+        return {
+        "customer_id": current_customer,
+        "cart_id": "mock_cart_id",
+        "cart_items": [],
+        "total": 0.0}
+        
     monkeypatch.setattr("app.repositories.users_repo_csv.load_all", mock_load_users)
     monkeypatch.setattr("app.repositories.users_repo_csv.save_all", mock_save_all_users)
     monkeypatch.setattr("app.services.user_service.CustomerFactory", MockCustomerFactory)
+    monkeypatch.setattr("app.services.user_service.create_cart",mock_create_cart)
     payload = CustomerCreate(
         email="test@example.com",
         first_name="Test",
