@@ -50,17 +50,27 @@ def validate_token_service(token: Token) -> dict:
         if session["token"] == token.token:
             expires = datetime.fromisoformat(session["expires"])
             if datetime.now(timezone.utc) > expires:
-                expire_session_service(token)
+                expire_session_service(session["token"])
                 raise HTTPException(status_code=401, detail="session expired")
             return (session)
     raise HTTPException(status_code=404, detail="session not found")
 
 def get_user_from_session(token: Token) -> UserResponse:
     """gets a userid from the session token and returns the corresponding UserResponse"""
-    """Returns the user from a given session"""
     session = validate_token_service(token)
     user = get_user_by_id_service(session["userid"])
     if not user:
         raise HTTPException(status_code=404, detail="user not found")
     return user
-    
+
+def get_session_from_token(token:str):
+    """returns a full token response (token, user id, role, created, expires) from the token"""
+    sessions = load_sessions()
+    for session in sessions:
+        if session["token"] == token:
+            return TokenResponse(token = session["token"],
+                                 user_id = session["user_id"],
+                                role = session["role"],
+                                created = session["created"],
+                                expires = session["expires"])
+    raise HTTPException(status_code=401, detail="invalid token")
