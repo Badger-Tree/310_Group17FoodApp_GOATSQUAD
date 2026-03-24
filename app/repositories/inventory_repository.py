@@ -21,3 +21,11 @@ def save_all(items: List[Dict[str, Any]]) -> None:
         writer.writerows(items)
         
     os.replace(tmp, DATA_PATH)
+
+def find_by_food_id_repo(food_item_id: int) -> dict | None:
+    """search csv for specific food item id and return raw dictionary"""
+    items = load_all()
+    for item in items:
+        if int(item["food_item_id"]) == food_item_id:
+            return item
+    return None
