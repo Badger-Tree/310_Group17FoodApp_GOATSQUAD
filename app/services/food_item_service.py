@@ -1,12 +1,14 @@
+from ..schemas.inventory import InventoryCreate
 from ..schemas.food_item import FoodItemCreate, FoodItemUpdate
 from ..repositories.food_item_repo import load_all, save_all
+from ..services import inventory_service
 
 def list_food_items():
     """list_food_items() retrieves all food items and returns as a list of dictionaries."""
     return load_all()
 
 def create_food_item(payload: FoodItemCreate):
-    """create_food_item() takes a FoodItemCreate object, generates a new unique ID, saves it to the CSV file, and returns the created item as a dictionary."""
+    """create_food_item() takes a FoodItemCreate object, generates a new unique ID and initializes inventory to default quantity of 0, saves it to the CSV file, and returns the created item as a dictionary."""
     items = load_all()
 
     new_id = max([item["food_item_id"] for item in items], default=0) + 1
@@ -16,6 +18,12 @@ def create_food_item(payload: FoodItemCreate):
 
     items.append(new_food)
     save_all(items)
+
+    inventory_service.create_inventory_record(InventoryCreate(
+        food_item_id = new_id,
+        quantity = 0
+    ))
+
     return new_food
 
 def get_food_by_id(food_id: int):
@@ -46,7 +54,7 @@ def update_food_item(food_id: int, payload: FoodItemUpdate):
     return None
 
 def delete_food_item(food_id: int) -> bool:
-    """delete_food_item() deletes a food item by ID; returns true if successful, false if item not found."""
+    """delete_food_item() deletes a food item by ID, along with its inventory; returns true if successful, false if item not found."""
     items = load_all()
     initial_count = len(items)
     filtered_items = [item for item in items if item["food_item_id"] != food_id]
@@ -55,4 +63,7 @@ def delete_food_item(food_id: int) -> bool:
         return False
     
     save_all(filtered_items)
+
+    inventory_service.delete_inventory_record(food_id)
+
     return True

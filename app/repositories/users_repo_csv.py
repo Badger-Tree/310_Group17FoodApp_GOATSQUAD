@@ -1,3 +1,4 @@
+from http.client import HTTPException
 from pathlib import Path
 import csv, os
 from typing import List, Dict, Any
@@ -27,3 +28,35 @@ def save_all(items: List[Dict[str, Any]]) -> None:
         writer.writerows(items)
         
     os.replace(tmp, DATA_PATH)
+    
+def find_by_id_repo(user_id: str) -> dict[str,Any] | None:
+    users = load_all()
+    for user in users: 
+        if user.get("id") == user_id:
+            return user
+    return None
+
+def find_by_email_repo(email: str) -> dict[str,Any] | None:
+    user_data = load_all()
+    for user in user_data: 
+        if user.get("email").lower() == email.lower():
+            return user
+    return None
+
+def add_user_repo(new_user:dict):
+    users = load_all()
+    for user in users:
+        if user["id"] == new_user["id"]:
+            raise ValueError("duplicate user id")
+    users.append(new_user)
+    save_all(users)
+    return new_user
+
+def update_user_repo(user_id: str, updated_fields:dict) -> dict | None:
+    users = load_all()
+    for user in users:
+        if user["id"] == user_id:
+            user.update(updated_fields)
+            save_all(users)
+            return user
+    return None
