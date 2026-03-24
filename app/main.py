@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers.cartItems import router as cartItems_router
+from app.routers.cart_router import router as cart_router
 from .routers.food_item import router as food_router
 from app.routers.authentication import router as authentication_router
 from app.routers.user import router as user_router
@@ -8,6 +8,7 @@ from app.routers.inventory_router import router as inventory_router
 from app.routers.restaurants import router as restaurant_router
 from app.routers.inventory_router import router as inventory_router
 from app.routers.order import router as order_router
+from app.routers import delivery_router as delivery_router
 
 app = FastAPI()
 
@@ -20,11 +21,12 @@ def root():
     return {"message": "GoatSquad is Live!"}
 
 app.include_router(authentication_router)
-app.include_router(cartItems_router)
+app.include_router(cart_router)
 app.include_router(user_router)
 app.include_router(address_router)
 app.include_router(restaurant_router)
 app.include_router(food_router)
 app.include_router(inventory_router)
 app.include_router(order_router)
+app.include_router(delivery_router.router)
 

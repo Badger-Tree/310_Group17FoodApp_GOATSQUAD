@@ -10,7 +10,7 @@ def assign_staff_role(current_user, restaurant_id: int, staff_user_id: str, role
 
     #check if the current user is either owner
     if current_user.role != "OWNER":
-        raise HTTPException(status_code=403, detail="Only restaurant owners and managers can assign staff roles.")
+        raise HTTPException(status_code=403, detail="Only restaurant owners can assign staff roles.")
     
     #load existing staff assignments, users, and restaurants
     staff = load_all()
