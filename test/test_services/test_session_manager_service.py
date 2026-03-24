@@ -62,11 +62,15 @@ def test_expire_session_service(mocker,mock_sessions):
     assert len(saved_data) == 2
 
 def test_validate_token_service_success(mocker,mock_sessions):
-    """tests that validate_token_service will return a dictionary with session data if given a Token"""
+    """tests that validate_token_service will return a dictionary with session data if given a valid Token that is not expired"""
     mock_token = mocker.Mock()
     mock_token.token="abc123"
-
+    mock_now = datetime.fromisoformat("2026-03-20T12:34:55+00:00")
+    
     mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
+    mocker.patch("app.services.session_manager_service.datetime", wraps = datetime).now.return_value = mock_now
+    
+    
     
     result = validate_token_service(mock_token)
     assert result["token"] == "abc123"
