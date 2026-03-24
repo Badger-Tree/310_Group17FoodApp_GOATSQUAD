@@ -1,0 +1,2 @@
+customer_id,cart_id,cart_items,total
+72e3f0ce-9570-4c44-8edc-af61dd0e92e0,01KMEFPD7WTW37VV83FYQ9TX65,"[{'cart_item_id': '01KMEFQTTVADBF2ARXQWBNRGN1', 'food_item_id': 1, 'quantity': 1, 'price_per_item': 15.5, 'subtotal': 15.5}, {'cart_item_id': '01KMEFRDMFKDS119ZACXRCM6MB', 'food_item_id': 1, 'quantity': 1, 'price_per_item': 15.5, 'subtotal': 15.5}, {'cart_item_id': '01KMEFRMPZFJP76H14RHZJMZ57', 'food_item_id': 2, 'quantity': 2, 'price_per_item': 5.99, 'subtotal': 11.98}]",42.980000000000004
