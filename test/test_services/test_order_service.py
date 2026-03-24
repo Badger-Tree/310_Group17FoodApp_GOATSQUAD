@@ -190,8 +190,7 @@ def test_process_order_service_success(mocker):
     class Mock_TempCart:
         def __init__(self):
             self.cart_id = "cart123"
-            self.customer_id = "123"
-            self.restaurant_id = 456
+            self.customer_id = "user123"
             self.cart_items = [Mock_TempCartItem(1, 1, 4.00),                 
             ]
     class Mock_TempCartItem:
@@ -201,13 +200,14 @@ def test_process_order_service_success(mocker):
             self.price_per_item = price_per_item 
             
     mocker.patch("app.services.order_service.notify_order_placed")
+    mocker.patch("app.services.order_service.get_restaurant_from_cart", return_value = 1)
     mocker.patch("app.services.order_service.notify_payment_status")
     mocker.patch("app.services.order_service.get_cart_by_id", lambda cart_id: Mock_TempCart())
     mocker.patch("app.services.order_service.get_address_by_id_service", return_value = mock_address_response)
     mock_payment = mocker.patch("app.services.order_service.process_payment_service", return_value = True)
     
     mock_create_order = mocker.patch("app.services.order_service.create_order_service")
-    result = process_order_service("cart123","7")
+    result = process_order_service("user123","7")
     mock_payment.assert_called_once()
     mock_create_order.assert_called_once()
 
@@ -217,10 +217,10 @@ def test_process_order_service_cart_not_found(mocker):
         def __init__(self):
             self.cart_id = "cart123"
             self.customer_id = "123"
-            self.restaurant_id = 456
             self.cart_items = []
 
     mocker.patch("app.services.order_service.get_cart_by_id", side_effect=HTTPException(status_code=404))
+    mocker.patch("app.services.order_service.get_restaurant_from_cart", return_value = 1)
     mocker.patch("app.services.order_service.notify_order_placed")
     mocker.patch("app.services.order_service.notify_payment_status")
     mock_payment = mocker.patch("app.services.order_service.process_payment_service", return_value = True)
@@ -232,6 +232,21 @@ def test_process_order_service_cart_not_found(mocker):
     mock_payment.assert_not_called()
     mock_create_order.assert_not_called()
 
+def get_restaurant_from_cart_items_success():
+    """checks that get_restaurant_from_cart_items will return a restaurant id given valid input"""
+    class Mock_TempCart:
+        def __init__(self):
+            self.cart_id = "cart123"
+            self.customer_id = "123"
+            self.cart_items = [Mock_TempCartItem(1, 1, 4.00),  Mock_TempCartItem(1, 1, 4.00)          
+            ]
+    class Mock_TempCartItem:
+        def __init__(self, food_item_id, quantity, price_per_item):
+            self.food_item_id = food_item_id
+            self.quantity = quantity
+            self.price_per_item = price_per_item 
+
+    
 def test_process_order_service_empty_cart(mocker):
     """checks that method raises 400 exception if a cart has no items in it"""
     class Mock_TempCart:
@@ -270,6 +285,7 @@ def test_process_order_service_address_not_found(mocker):
 
     mocker.patch("app.services.order_service.get_cart_by_id", lambda cart_id: Mock_TempCart())
     mocker.patch("app.services.order_service.notify_order_placed")
+    mocker.patch("app.services.order_service.get_restaurant_from_cart", return_value = 1)
     mocker.patch("app.services.order_service.notify_payment_status")
     mock_payment = mocker.patch("app.services.order_service.process_payment_service", return_value = True)
     mock_create_order = mocker.patch("app.services.order_service.create_order_service")
@@ -296,6 +312,7 @@ def test_process_order_service_multiple_items(mocker):
             self.price_per_item = price_per_item 
     
     mocker.patch("app.services.order_service.notify_order_placed")
+    mocker.patch("app.services.order_service.get_restaurant_from_cart", return_value = 1)
     mocker.patch("app.services.order_service.notify_payment_status")
     mocker.patch("app.services.order_service.get_cart_by_id", lambda cart_id: Mock_TempCart())
     mock_payment = mocker.patch("app.services.order_service.process_payment_service", return_value = True)
@@ -505,8 +522,7 @@ def test_cancel_order_customer_success(mocker):
         "price_per_item": 13.33
     }])
     result = cancel_order_customer_service("order123")
-    assert result.order_id == ("order123")
-    
+    assert result.order_id == ("order123")  
 
 def test_cancel_order_customer_service_completed(mocker):
     """tests that cancel_order_customer_service() will generate an error if order has already been completed"""

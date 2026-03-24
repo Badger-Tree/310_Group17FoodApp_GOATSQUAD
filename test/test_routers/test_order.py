@@ -1,5 +1,4 @@
 from enum import Enum
-
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 import unittest.mock
