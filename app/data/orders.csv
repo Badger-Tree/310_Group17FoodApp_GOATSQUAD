@@ -1,2 +1,2 @@
 order_id,customer_id,restaurant_id,cart_id,delivery_id,status,total_amount,created_date,delivery_address_id
-order123,cust456,789,cart101,dc61f9b4-3018-4100-a7ed-bccfd253fc82,ACCEPTED,26.66,2026-02-20T12:34:56,addr202
+order123,cust456,789,cart101,c75ca7c0-f0b5-4e70-9e8c-b6a344da3599,ACCEPTED,26.66,2026-02-20T12:34:56,addr202

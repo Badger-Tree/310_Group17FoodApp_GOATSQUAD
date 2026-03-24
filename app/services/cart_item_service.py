@@ -1,6 +1,7 @@
 import ulid
 from app.schemas.cart_item_schema import CartItemAdd, CartItemResponse
 from pydantic import ValidationError
+from fastapi import HTTPException
 
 def add_cart_item(cartItem: CartItemAdd, price_per_item: float) -> CartItemResponse:
     """Adds a singular cart item and returns a CartItemResponse (cart_item_id, food_item_id, price_per_item, quantity, subtotal)"""
@@ -23,3 +24,16 @@ def add_cart_item(cartItem: CartItemAdd, price_per_item: float) -> CartItemRespo
         quantity=quantity,
         subtotal=subtotal
     )
+
+def delete_cart_item(cart_current, cart_item_id) -> dict:
+    """Removes the cart_item and returns the cart without this item"""
+    found_cart_item = False
+    for index, cart in enumerate(cart_current.cart_items):
+        if cart.cart_item_id == cart_item_id:
+            found_cart_item = True
+            print(cart.cart_item_id)
+            cart_current.cart_items.pop(index)
+            break
+    if not found_cart_item:
+        raise HTTPException(status_code=404, detail=f"Item '{cart_item_id}' not found")
+    return cart_current

@@ -24,6 +24,14 @@ def mock_load_users():
         "created_date": "2026-02-20T12:34:56"
         }]
 
+def mock_load_carts():
+    return [{"customer_id": "2", 
+            "cart_id": "CART",
+            "cart_items": [],
+            "total": 0}]
+def mock_save_carts(*args, **kwargs):
+    return None
+
 def mock_save_users(*args, **kwargs):
     return None
         
@@ -87,8 +95,10 @@ def test_register_customer_success():
     """tests that register_customer will return a 201 response if a customer is successfully created"""
     with patch("app.repositories.users_repo_csv.load_all", mock_load_users):
         with patch("app.repositories.users_repo_csv.save_all", mock_save_users):
-            response = client.post("/users/new-customer", json = mock_customer_create)
-            assert response.status_code == 201
+            with patch("app.services.cart_service.load_all_carts", mock_load_carts):
+                with patch("app.services.cart_service.save_cart", mock_save_carts):
+                    response = client.post("/users/new-customer", json = mock_customer_create)
+                    assert response.status_code == 201
 
 def test_register_customer_duplicate_user():
     """tests that register_customer will throw a 409 response if a provided email is a duplicate"""

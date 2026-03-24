@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from app.schemas.cart_schema import CartCreate, CartResponse
 from app.repositories.food_item_repo import load_all as load_all_food_items
 from app.repositories.cart_repo_csv import save_all as save_cart, load_all as load_all_carts
-from app.services.cart_item_service import add_cart_item
+from app.services.cart_item_service import add_cart_item, delete_cart_item
 
 
 def get_cart_by_customer(customer_id: str) -> CartResponse:
@@ -83,6 +83,21 @@ def calculateSubtotal(current_cart):
     return subtotal
 
 
+def delete_from_cart(customer_id, cart_item_id) -> CartResponse:
+    cart_data = load_all_carts()
+    cart_current = get_cart_by_customer(customer_id)
+    cart_this = delete_cart_item(cart_current, cart_item_id)
+    cart_total= calculateSubtotal(cart_this)
+    
+    for c in cart_data:
+        if c["cart_id"] == cart_this.cart_id:
+            c["cart_items"] = cart_this.cart_items
+            c["total"] = cart_total
+            break
+    else:
+        cart_data.append(cart_this.model_dump())
 
+    save_cart(cart_data)
+    return cart_data
 
  

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Header
 from app.schemas.cart_schema import CartCreate, CartResponse
-from app.services.cart_service import add_to_cart
+from app.services.cart_service import add_to_cart, delete_from_cart
 from app.schemas.Token import Token
 from app.services.session_manager_service import get_user_from_session
 from fastapi import HTTPException
@@ -16,3 +16,14 @@ def add_item(cart_item: CartCreate, token: str = Header(...)):
         if not customer_id: 
                 raise HTTPException(status_code=404, detail=f"Customer'{customer_id}' not found")
         return add_to_cart(customer_id, cart_item)
+
+
+@router.delete("/food_item/remove", status_code=201)
+def remove_cart_item(cart_item_id: str, token: str = Header(...)):
+    """Removes a cart item with the provided cart item id"""
+    session = Token(token=token)
+    current_customer = get_user_from_session(session)
+    customer_id = current_customer.id
+    if not customer_id: 
+        raise HTTPException(status_code=404, detail=f"Customer'{customer_id}' not found")
+    return delete_from_cart(customer_id, cart_item_id)
