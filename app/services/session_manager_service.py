@@ -50,7 +50,7 @@ def validate_token_service(token: Token) -> dict:
         if session["token"] == token.token:
             expires = datetime.fromisoformat(session["expires"])
             if datetime.now(timezone.utc) > expires:
-                expire_session_service(token)
+                expire_session_service(session["token"])
                 raise HTTPException(status_code=401, detail="session expired")
             return (session)
     raise HTTPException(status_code=404, detail="session not found")
