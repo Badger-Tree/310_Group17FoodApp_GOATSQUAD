@@ -497,6 +497,7 @@ def test_process_order_success(mocker):
         items=[OrderItemResponse(order_id="order124", food_item_id=11, order_item_id="111", quantity=1, price_per_item=7.5)],
     )
 
+    mocker.patch("app.services.order_service.validate_item_inventory")
     mocker.patch("app.services.order_service.validate_cart", return_value=mock_cart)
     mocker.patch("app.services.order_service.validate_restaurant_from_cart", return_value="rest_101")
     mocker.patch("app.services.order_service.validate_address", return_value=mock_address)
@@ -539,7 +540,7 @@ def test_process_order_payment_failed(mocker):
         delivery_address_id=address_id,
         items=[OrderItemResponse(order_id="order124", food_item_id=11, order_item_id="111", quantity=1, price_per_item=7.5)],
     )
-
+    mocker.patch("app.services.order_service.validate_item_inventory")
     mocker.patch("app.services.order_service.validate_cart", return_value=mock_cart)
     mocker.patch("app.services.order_service.validate_restaurant_from_cart", return_value="rest_101")
     mocker.patch("app.services.order_service.validate_address", return_value=mock_address)
@@ -555,6 +556,47 @@ def test_process_order_payment_failed(mocker):
     with pytest.raises(HTTPException) as testException: process_order_service(customer_id, address_id)
     assert testException.value.status_code ==400
     
+def test_process_order_service_insufficient_inventory(mocker):
+    """checks that method raises 422 exception if a cart items do not have sufficient inventory"""
+    customer_id = "2"
+    address_id = "addr_456"
+    mock_cart = CartResponse(
+        customer_id=customer_id,
+        cart_id="cart_abc123",
+        cart_items=[CartItemResponse(cart_item_id="item_1", food_item_id=101, quantity=2, price_per_item=9.99, subtotal=19.98)],
+        total=25.47,
+    )
+    mock_address = MagicMock()
+    mock_address.address_id = address_id
+    mock_order_items = []
+    mock_order_response = OrderResponse(
+        order_id="1",
+        customer_id=customer_id,
+        restaurant_id=100,
+        cart_id="cart",
+        delivery_id=None,
+        status="PENDING",
+        total_amount=100.0,
+        created_date=datetime.now(timezone.utc),
+        delivery_address_id=address_id,
+        items=[OrderItemResponse(order_id="order124", food_item_id=11, order_item_id="111", quantity=1, price_per_item=7.5)],
+    )
+    mocker.patch("app.services.order_service.validate_item_inventory",side_effect=HTTPException(status_code=422))
+    mocker.patch("app.services.order_service.validate_cart", return_value=mock_cart)
+    mocker.patch("app.services.order_service.validate_restaurant_from_cart", return_value="rest_101")
+    mocker.patch("app.services.order_service.validate_address", return_value=mock_address)
+    mocker.patch("app.services.order_service.calculate_total", return_value=100.0)
+    mocker.patch("app.services.order_service.build_order", return_value={"order_id": "1"})
+    mocker.patch("app.services.order_service.build_order_items", return_value=mock_order_items)
+    mocker.patch("app.services.order_service.save_order")
+    mocker.patch("app.services.order_service.save_order_items")
+    mocker.patch("app.services.order_service.get_order_by_order_id_service", return_value=mock_order_response)
+    mocker.patch("app.services.order_service.notify_order_placed")
+
+    with pytest.raises(HTTPException) as testException: process_order_service(customer_id, address_id)
+    assert testException.value.status_code ==422
+        
+
 def test_process_order_service_empty_cart(mocker):
     """checks that method raises 400 exception if a cart has no items in it"""
     customer_id = "2"
@@ -580,7 +622,7 @@ def test_process_order_service_empty_cart(mocker):
         delivery_address_id=address_id,
         items=[OrderItemResponse(order_id="order124", food_item_id=11, order_item_id="111", quantity=1, price_per_item=7.5)],
     )
-
+    mocker.patch("app.services.order_service.validate_item_inventory")
     mocker.patch("app.services.order_service.validate_cart", return_value=mock_cart)
     mocker.patch("app.services.order_service.validate_restaurant_from_cart", return_value="rest_101")
     mocker.patch("app.services.order_service.validate_address", return_value=mock_address)
@@ -623,6 +665,7 @@ def test_process_order_service_address_not_found(mocker):
         items=[OrderItemResponse(order_id="order124", food_item_id=11, order_item_id="111", quantity=1, price_per_item=7.5)],
     )
 
+    mocker.patch("app.services.order_service.validate_item_inventory")
     mocker.patch("app.services.order_service.validate_cart", return_value=mock_cart)
     mocker.patch("app.services.order_service.validate_restaurant_from_cart", return_value="rest_101")
     mocker.patch("app.services.order_service.validate_address", side_effect=HTTPException(status_code=404))
@@ -668,7 +711,7 @@ def test_process_order_service_address_not_found(mocker):
         items=[OrderItemResponse(order_id="order124", food_item_id=11, order_item_id="111", quantity=1, price_per_item=7.5),
                OrderItemResponse(order_id="order124", food_item_id=11, order_item_id="111", quantity=1, price_per_item=7.5)],
     )
-
+    mocker.patch("app.services.order_service.validate_item_inventory")
     mocker.patch("app.services.order_service.validate_cart", return_value=mock_cart)
     mocker.patch("app.services.order_service.validate_restaurant_from_cart", return_value="rest_101")
     mocker.patch("app.services.order_service.validate_address", return_value=mock_address)
