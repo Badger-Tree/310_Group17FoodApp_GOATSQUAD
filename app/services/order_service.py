@@ -149,33 +149,24 @@ def process_order_service(cart_id: str, address_id:str) -> OrderResponse:
     new_order = create_order_service(order_dict,order_items_dict)
     return new_order
  
-def create_order_service(new_order: dict, new_items: list[dict]) -> OrderResponse:
-    """Method Creates an Order from a dictionary after if was processed for payment"""
-
-    # save order
+def save_order(new_order: dict):
+    """saves an order dict to orders csv using repo methods""" 
     order_data = load_orders()
     order_data.append(new_order)
     save_all_orders(order_data)
     
-    # save order items
+def save_order_items(new_order_items: dict):
+    """saves a dict of order items to order items csv using repo methods"""
     order_item_data = load_order_items()
-    new_items_response = []
-    for item in new_items:
+    for item in new_order_items:
         order_item_data.append(item)
-        new_items_response.append(OrderItemResponse(**item))
     save_all_order_items(order_item_data)
-    
-    # make order response
-    new_order_response =OrderResponse(order_id= new_order["order_id"],
-                        customer_id= new_order["customer_id"],
-                        restaurant_id= new_order["restaurant_id"],
-                        delivery_id = None,
-                        delivery_address_id=new_order["delivery_address_id"],
-                        status = OrderStatus.PENDING,
-                        total_amount = new_order["total_amount"],
-                        created_date = new_order["created_date"],
-                        items = new_items_response)
-    # notify
+
+def create_order_service(new_order: dict, new_items: list[dict]) -> OrderResponse:
+    """Method Creates an Order from a dictionary after if was processed for payment"""
+    save_order(new_order)
+    save_order_items(new_items)
+    new_order_response = get_order_by_order_id_service(new_order["order_id"])
     notify_order_placed(new_order_response.customer_id, new_order_response.restaurant_id, new_order_response.order_id)
     return new_order_response
     
