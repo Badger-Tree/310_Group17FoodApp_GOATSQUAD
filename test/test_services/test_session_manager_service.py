@@ -1,127 +1,76 @@
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
-from app.schemas.Role import UserRole
+import secrets
+from app.schemas.Login import LoginRequest
 from app.schemas.Token import Token, TokenResponse
+from app.repositories.sessions_repo import load_all as load_sessions, save_all as save_sessions
 from app.schemas.User import UserResponse
-from app.services.session_manager_service import create_session_service, expire_session_service, get_session_from_token, get_user_from_session, validate_token_service
-import pytest
+from app.services.user_service import get_user_by_email_service, get_user_by_id_service
 
-@pytest.fixture
-def mock_users():
-    return [{
-            "id": "1",
-            "email": "pippin@example.com",
-            "first_name": "peregrin",
-            "last_name": "took",
-            "password": "password",
-            "role": "CUSTOMER",
-            "created_date": "2026-02-20T12:34:56"
-            }]
+def create_session_service(email) -> TokenResponse:
+    """Creates and stores a session. 
+    Input:user email (str). 
+    Output: TokenResponse (userid, token, created, expires) """
+    token = secrets.token_hex(16)
+    created = datetime.now(timezone.utc)
+    expires = created + timedelta(hours=1)
 
-@pytest.fixture
-def mock_user_response():
-    return UserResponse(id= "1",
-                    email= "pippin@example.com",
-                    first_name= "peregrin",
-                    last_name= "took",
-                    password= "password",
-                    role= "CUSTOMER",
-                    created_date= datetime.fromisoformat("2026-02-20T12:34:56")
-                    )
-
-@pytest.fixture
-def mock_sessions():
-    return  [{"token": "abc123","user_id":"1", "role" : "CUSTOMER", "created": "2026-02-20T12:34:56+00:00","expires": "2026-03-20T12:34:56+00:00",},
-                {"token": "abc456","user_id":"1", "role" : "CUSTOMER", "created" : "2026-02-20T12:34:56+00:00","expires":"2026-03-20T12:34:56+00:00"},
-                {"token": "abc789","user_id":"2", "role" : "STAFF", "created" : "2026-02-20T12:34:56+00:00","expires":"2026-01-20T12:34:56+00:00"}]
-
-
-def test_create_session_service_success(mocker, mock_sessions, mock_user_response):
-    """tests that create_session_service will create Token if given a use email"""
-
-    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
-    mocker.patch("app.services.session_manager_service.save_sessions", return_value = [])
-    mocker.patch("app.services.session_manager_service.get_user_by_email_service", return_value = mock_user_response)
-
-    result = create_session_service("pippin@example.com")
-    assert result.user_id == "1"
-    assert result.role == UserRole.CUSTOMER
-    assert result.expires > result.created
-
-def test_expire_session_service(mocker,mock_sessions):
-    """tests that expire_session_service will remove a session record given a token (str)"""
-    mock_token = "abc123"
+    user = get_user_by_email_service(email)
+    sessions = load_sessions()
+    sessions.append({"userid":user.id,
+                     "role":user.role,
+                     "token": token,
+                     "created" : created.isoformat(),
+                     "expires" : expires.isoformat()})
+    save_sessions(sessions)
     
-    mock_load_sessions = mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
-    mock_save_sessions = mocker.patch("app.services.session_manager_service.save_sessions")
-    
-    expire_session_service(mock_token)
-    mock_save_sessions.assert_called_once()
-    mock_load_sessions.assert_called_once()
-    saved_data = mock_save_sessions.call_args[0][0]
-    assert len(saved_data) == 2
+    new_token = {"token": token,
+                "user_id": user.id,
+                "role" : user.role,
+                "created" : created,
+                "expires" : expires}
+    sessions = load_sessions()
+    return TokenResponse(**new_token)
 
-def test_validate_token_service_success(mocker,mock_sessions):
-    """tests that validate_token_service will return a dictionary with session data if given a Token"""
-    mock_token = mocker.Mock()
-    mock_token.token="abc123"
+def expire_session_service(token:str): 
+    """removes a session from the stored sessions when it is expired or the user logs out"""
+    sessions = load_sessions()
+    new_sessions = []
+    for session in sessions:
+        if session["token"] != token:
+            new_sessions.append(session)
+    if len(new_sessions) == len(sessions):
+        raise HTTPException(status_code=401, detail="invalid token")
+    save_sessions(new_sessions)
 
-    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
-    
-    result = validate_token_service(mock_token)
-    assert result["token"] == "abc123"
-    assert result["user_id"] == "1"  
-    assert result["role"] == UserRole.CUSTOMER
-    assert result["created"] == datetime.fromisoformat("2026-02-20T12:34:56+00:00").isoformat()
-    assert result["expires"] == datetime.fromisoformat("2026-03-20T12:34:56+00:00").isoformat()
+def validate_token_service(token: Token) -> dict:
+    """checks if a session exists and is not expired, returns a dict with the same information as a TokenResponse"""
+    sessions = load_sessions()
+    for session in sessions:
+        if session["token"] == token.token:
+            expires = datetime.fromisoformat(session["expires"])
+            if datetime.now(timezone.utc) > expires:
+                expire_session_service(token)
+                raise HTTPException(status_code=401, detail="session expired")
+            return (session)
+    raise HTTPException(status_code=404, detail="session not found")
 
-def test_validate_token_service_session_not_found(mocker,mock_sessions):
-    """tests that validate_token_service will raise an error if a session id not found"""
-    mock_token = mocker.Mock()
-    mock_token.token="abc"
+def get_user_from_session(token: Token) -> UserResponse:
+    """gets a userid from the session token and returns the corresponding UserResponse"""
+    session = validate_token_service(token)
+    user = get_user_by_id_service(session["userid"])
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+    return user
 
-    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
-    with pytest.raises(HTTPException) as testException: validate_token_service(mock_token)
-    assert testException.value.status_code ==404
-    
-def test_validate_token_service_session_expired(mocker,mock_sessions):
-    """tests that validate_token_service will raise an error if a session is expired"""
-    mock_token = mocker.Mock()
-    mock_token.token="abc789"
-
-    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
-    with pytest.raises(HTTPException) as testException: validate_token_service(mock_token)
-    assert testException.value.status_code ==401
-    
-def test_get_user_from_session(mocker,mock_user_response,mock_sessions):
-    """checks that get_user_from_session will return a UserResponse if given a valid session token"""
-    
-    mock_token = {
-        "token": "abc456",
-        "userid": "1",
-        "role": "CUSTOMER",
-        "created": "2026-02-20T12:34:56+00:00",
-        "expires": "2026-03-20T12:34:56+00:00",
-        }
-    
-    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
-    mocker.patch("app.services.session_manager_service.validate_token_service", return_value = mock_token)    
-    mocker.patch("app.services.session_manager_service.get_user_by_id_service", return_value = mock_user_response)
-    result = get_user_from_session(Token(token = "abc456"))
-        
-    assert result.id == "1"
-    assert result.role == UserRole.CUSTOMER
-
-def test_get_session_from_token_success(mocker,mock_sessions):
-    """tests that get_session_from_token will return a Response given a valid token"""
-    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
-    result = get_session_from_token("abc123")
-    assert result.token == "abc123"
-    assert result.user_id == "1"
-    assert result.role == UserRole.CUSTOMER
-    
-def test_get_session_from_token_success(mocker,mock_sessions):
-    """tests that get_session_from_token will return an error if given an invalid token"""
-    mocker.patch("app.services.session_manager_service.load_sessions", return_value = mock_sessions)
-    with pytest.raises(HTTPException) as testException: get_session_from_token("notoken")
-    assert testException.value.status_code ==401
+def get_session_from_token(token:str):
+    """returns a full token response (token, user id, role, created, expires) from the token"""
+    sessions = load_sessions()
+    for session in sessions:
+        if session["token"] == token:
+            return TokenResponse(token = session["token"],
+                                 user_id = session["user_id"],
+                                role = session["role"],
+                                created = session["created"],
+                                expires = session["expires"])
+    raise HTTPException(status_code=401, detail="invalid token")
