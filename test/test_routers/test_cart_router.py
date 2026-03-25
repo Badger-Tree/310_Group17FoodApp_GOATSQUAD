@@ -376,3 +376,207 @@ def test_remove_wrong_cart_item_id(mocker):
     )
 
     assert response.status_code == 404
+
+
+
+
+def test_update_cart_item_success(mocker):
+    """Tests that updating the first item from the cart is successful"""
+    mock_cart_item_id = "01KM8SQ4JB61NVWKSM2AVSFN3C"
+    mock_user = MockUser(id="2")
+    mock_cart = [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+]
+    
+    mock_cart_updated= [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 3,
+                "quantity": 1,
+                "price_per_item": 10.0,
+                "subtotal": 10.0
+            }
+        ],
+        "total": 10.0
+    }
+]
+    
+    mock_cart_create = {"food_item_id": 2, "quantity": 3}
+
+    def update_cart_item():
+        return mock_cart_updated
+
+    mocker.patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    mocker.patch("app.services.cart_service.load_all_carts", return_value=mock_cart)
+    mocker.patch("app.services.cart_service.save_cart", return_value=None)
+    mocker.patch("app.services.cart_item_service.delete_cart_item", side_effect=update_cart_item)
+
+    response = client.put(
+        "/cart/food_item/update",
+        params={"cart_item_id": mock_cart_item_id},
+        json = mock_cart_create,
+        headers={"token": "RANDOMTOKEN"}
+    )
+
+    assert response.status_code == 201
+
+
+
+def test_update_wrong_cart_item_id(mocker):
+    """Tests that updating with incorrect cart_item_id is unsuccessful"""
+    mock_cart_item_id = "INVALIDCART"
+    mock_user = MockUser(id="2")
+    mock_cart = [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+]
+    
+    mock_cart_updated= [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 3,
+                "quantity": 1,
+                "price_per_item": 10.0,
+                "subtotal": 10.0
+            }
+        ],
+        "total": 10.0
+    }
+]
+    
+    mock_cart_create = {"food_item_id": 2, "quantity": 3}
+
+    def update_cart_item():
+        return mock_cart_updated
+
+    mocker.patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    mocker.patch("app.services.cart_service.load_all_carts", return_value=mock_cart)
+    mocker.patch("app.services.cart_service.save_cart", return_value=None)
+    mocker.patch("app.services.cart_item_service.delete_cart_item", side_effect=update_cart_item)
+
+    response = client.put(
+        "/cart/food_item/update",
+        params={"cart_item_id": mock_cart_item_id},
+        json = mock_cart_create,
+        headers={"token": "RANDOMTOKEN"}
+    )
+
+    assert response.status_code == 404
+
+
+def test_update_quantity_zero(mocker):
+    """Tests that updating with 0 quantity value raises an error"""
+    mock_cart_item_id = "01KM8SQ4JB61NVWKSM2AVSFN3C"
+    mock_user = MockUser(id="2")
+    mock_cart = [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+]
+    
+    mock_cart_updated= [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 3,
+                "quantity": 1,
+                "price_per_item": 10.0,
+                "subtotal": 10.0
+            }
+        ],
+        "total": 10.0
+    }
+]
+    
+    mock_cart_create = {"food_item_id": 2, "quantity": 0}
+
+    def update_cart_item():
+        return mock_cart_updated
+
+    mocker.patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    mocker.patch("app.services.cart_service.load_all_carts", return_value=mock_cart)
+    mocker.patch("app.services.cart_service.save_cart", return_value=None)
+    mocker.patch("app.services.cart_item_service.delete_cart_item", side_effect=update_cart_item)
+
+    response = client.put(
+        "/cart/food_item/update",
+        params={"cart_item_id": mock_cart_item_id},
+        json = mock_cart_create,
+        headers={"token": "RANDOMTOKEN"}
+    )
+
+    assert response.status_code == 422
