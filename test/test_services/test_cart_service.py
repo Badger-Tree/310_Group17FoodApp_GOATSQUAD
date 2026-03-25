@@ -1,5 +1,5 @@
-from app.services.cart_service import add_to_cart, create_cart, get_cart_by_customer, calculateSubtotal, delete_from_cart
-from app.schemas.cart_schema import CartCreate, CartResponse
+from app.services.cart_service import add_to_cart, create_cart, get_cart_by_customer, calculateSubtotal, delete_from_cart, update_cart
+from app.schemas.cart_schema import CartCreate, CartResponse, CartUpdate
 from fastapi import HTTPException
 import pytest
 from unittest.mock import patch
@@ -42,6 +42,8 @@ def test_get_cart_by_customer_int(mocker):
     assert result.cart_id == "GHDJDKSLAJ"
     assert result.cart_items == []
     assert result.total == 0
+
+
 
 
 class MockUser:
@@ -155,7 +157,7 @@ def test_add_to_cart_no_customer_id(mocker):
 
 
 def test_add_to_cart_invalid(mocker): 
-    """Tests that an exception is raised when inavlid data is added to the cart"""
+    """Tests that an exception is raised when invalid food data is added to the cart"""
 
     cart_data = CartCreate(food_item_id = "100", quantity = "3")
     mocker.patch("app.services.cart_service.load_all_carts", return_value = mock_data)
@@ -351,3 +353,150 @@ def test_delete_from_cart_does_not_exist(mocker):
         delete_from_cart(2, cart_item_id)
 
     assert testException.value.status_code ==404
+
+
+
+
+
+class MockUser:
+    def __init__(self, id):
+        self.id = id
+
+def test_update_cart_valid(mocker): 
+    """Tests that updating a cart item is successful"""
+    mock_current_cart = [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+]
+    mock_user = MockUser(id="2")
+    cart_item_id = "01KM8SQ4JB61NVWKSM2AVSFN3C"
+    cart_update = CartUpdate(food_item_id = 2, quantity = 4)
+
+    mocker.patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    mocker.patch("app.services.cart_service.load_all_carts", return_value = mock_current_cart)
+    
+    result = update_cart(2, cart_item_id, cart_update)
+
+    assert result["customer_id"] == "2"
+    assert result["cart_id"] == "GHDJDKSLAJ" 
+    first = result["cart_items"][0]
+    assert first.cart_item_id == "01KM8SQ4JB61NVWKSM2AVSFN3C"
+    assert first.food_item_id == 2
+    assert first.quantity == 4
+    assert first.price_per_item == 5.99
+    assert first.subtotal == 23.96
+    assert first.subtotal == 23.96
+    first = result["cart_items"][1]
+    assert first.cart_item_id == "61NVWKSM2AVSFDFKSLAJA"
+    assert result["total"] == 39.46
+
+
+class MockUser:
+    def __init__(self, id):
+        self.id = id
+
+class MockFood:
+    def __init__(self, id):
+        self.id = id
+
+def test_update_cart_no_food_item(mocker): 
+    """Tests that trying to update a cart item with a food item that does not exist raises an exception"""
+    mock_current_cart = [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+]
+    mock_user = MockUser(id="2")
+    mock_food = MockFood(id=3)
+    cart_item_id = "01KM8SQ4JB61NVWKSM2AVSFN3C"
+    cart_update = CartUpdate(food_item_id = 10, quantity = 4)
+
+    mocker.patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    mocker.patch("app.services.cart_service.load_all_carts", return_value = mock_current_cart)
+    mocker.patch("app.services.food_item_service", return_value = mock_food)
+    
+    with pytest.raises(HTTPException) as testException: 
+        update_cart(2, cart_item_id, cart_update)
+
+    assert testException.value.status_code ==404
+
+
+def test_update_cart_no_cart_item_id(mocker): 
+    """Tests that trying to update cart with wrong cart item id raises an exception"""
+    mock_current_cart = [
+    {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+]
+    mock_user = MockUser(id="2")
+    mock_food = MockFood(id=3)
+    cart_item_id = "8SQ4JB6"
+    cart_update = CartUpdate(food_item_id = 1, quantity = 4)
+
+    mocker.patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
+    mocker.patch("app.services.cart_service.load_all_carts", return_value = mock_current_cart)
+    mocker.patch("app.services.food_item_service", return_value = mock_food)
+    
+    with pytest.raises(HTTPException) as testException: 
+        update_cart(2, cart_item_id, cart_update)
+
+    assert testException.value.status_code ==404
+    
