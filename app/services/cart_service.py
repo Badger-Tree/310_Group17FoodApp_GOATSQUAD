@@ -3,11 +3,11 @@ from fastapi import HTTPException
 from app.schemas.cart_schema import CartCreate, CartResponse
 from app.repositories.food_item_repo import load_all as load_all_food_items
 from app.repositories.cart_repo_csv import save_all as save_cart, load_all as load_all_carts
-from app.services.cart_item_service import add_cart_item
+from app.services.cart_item_service import add_cart_item, delete_cart_item
 
 
 def get_cart_by_customer(customer_id: str) -> CartResponse:
-    """Gets the cart but the customer_id and returns a CartResponse with information of the cart in question"""
+    """Gets the cart with the customer_id and returns a CartResponse with information of the cart in question"""
     cart_data = load_all_carts()
     for c in cart_data:
         if c.get("customer_id") == str(customer_id):
@@ -75,14 +75,30 @@ def add_to_cart(customer_id, cart_add: CartCreate) -> CartResponse:
 
 
 def calculateSubtotal(current_cart):
-    """Calculates the subtotal of all the current items with the cart_items dictionary"""
+    """Calculates the subtotal of all the current items with the cart_items"""
     subtotal = 0
-    cart_items = getattr(current_cart, "cart_items", None) or current_cart.get("cart_items", [])
+    cart_items = getattr(current_cart, "cart_items", [])
     for item in cart_items:
         subtotal += getattr(item, "subtotal", None) or item["subtotal"]
     return subtotal
 
 
+def delete_from_cart(customer_id, cart_item_id) -> CartResponse:
+    """Deletes a cart item with the provided customer id and cart item id"""
+    cart_data = load_all_carts()
+    cart_current = get_cart_by_customer(customer_id) 
+    cart_after_delete = delete_cart_item(cart_current, cart_item_id) 
+    cart_total= calculateSubtotal(cart_after_delete)
+    
+    for c in cart_data:
+        if c["cart_id"] == cart_after_delete.cart_id:
+            c["cart_items"] = cart_after_delete.cart_items
+            c["total"] = cart_total
+            break
+    else:
+        cart_data.append(c)
 
+    save_cart(cart_data)
+    return c
 
  

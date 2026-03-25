@@ -10,7 +10,11 @@ from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
 from enum import Enum
+from app.schemas.cart_schema import CartResponse
 from app.services.address_service import get_address_by_id_service
+from app.services.cart_service import get_cart_by_customer
+from app.services.food_item_service import get_food_by_id
+from app.services.inventory_service import add_stock, check_availability, subtract_stock
 from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status,notify_refund_issued,notify_order_status_update_customer_cancels
 from app.services.payment_service import process_payment_service, process_refund_service
 
@@ -22,39 +26,6 @@ from app.services.payment_service import process_payment_service, process_refund
 from pydantic import BaseModel, Field
 from typing import List
 
-class CartItemResponse(BaseModel):
-    food_item_id: int
-    quantity: int
-    price_per_item: float
-
-class CartResponse(BaseModel):
-    cart_id: str
-    customer_id: str
-    restaurant_id: int
-    delivery_address_id: str
-    cart_items: List[CartItemResponse]
-    
-def get_cart_by_id(cart_id: str) -> CartResponse:
-    cart_items = [
-        CartItemResponse(
-            food_item_id=1,
-            quantity=1,
-            price_per_item=1.00
-        ),
-        CartItemResponse(
-            food_item_id=2,
-            quantity=2,
-            price_per_item=1.00
-        )]
-
-    cart = CartResponse(
-        cart_id=cart_id,
-        customer_id="1",
-        restaurant_id="1",
-        delivery_address_id="1",
-        cart_items=cart_items)
-    return cart
-    
 class DeliveryResponse(BaseModel):
     """this is a stub so I can create a delivery before delivery module is created"""
     order_id: str
@@ -75,15 +46,33 @@ def create_delivery_service(order: dict) -> DeliveryResponse:
 #######################
 
 
-def validate_cart(cart_id) -> CartResponse:
+def validate_cart(customer_id) -> CartResponse:
     """Checks if a cart exists and returns either an exception or a CartResponse"""
-    cart = get_cart_by_id(cart_id)
+    cart = get_cart_by_customer(customer_id)
     if not cart:
         raise HTTPException(status_code=404, detail="cart not found")
     if not cart.cart_items:
         raise HTTPException(status_code=400, detail="empty cart")
     return cart
-    
+
+def validate_item_inventory(cart):
+    for item in cart.cart_items:
+        is_available = check_availability(item.food_item_id, item.quantity)
+        if is_available == False:
+            raise HTTPException(status_code=422, detail="insufficient inventory")
+        
+def validate_restaurant_from_cart(cart) -> int:
+    """gets the restaurant id from the food items in the cart. Items must all be from the same restaurant"""
+    first_item = cart.cart_items[0]
+    first_food_item = get_food_by_id(first_item.food_item_id)
+    restaurant_id = first_food_item["restaurant_id"]
+
+    for item in cart.cart_items:
+        food_item = get_food_by_id(item.food_item_id)
+        if restaurant_id != food_item["restaurant_id"]:
+            raise HTTPException(status_code=400, detail="items not from same restaurant")
+    return restaurant_id
+
 def validate_address(address_id) -> AddressResponse:
     """"checks if an address exists, returns AddressResponse or exception"""
     address = get_address_by_id_service(address_id)
@@ -98,12 +87,12 @@ def calculate_total(cart):
         subtotal += item.price_per_item * item.quantity
     return round(subtotal,2)
 
-def build_order(cart, total_amount, address_id)->dict:
+def build_order(cart, total_amount, address_id,restaurant_id)->dict:
     """Builds a dictionary with cart and calculated fields needed for an order"""
     order_id = str(uuid.uuid4())
     new_order = {"order_id": order_id,
                 "customer_id": cart.customer_id,
-                "restaurant_id": cart.restaurant_id,
+                "restaurant_id": restaurant_id,
                 "cart_id": cart.cart_id,
                 "delivery_id" : None,
                 "status" : "PENDING",
@@ -136,19 +125,6 @@ def handle_payment(order_dict) -> bool:
         notify_payment_status(order_dict["customer_id"], order_dict["order_id"], False)
         raise HTTPException(status_code=400, detail = "payment not processed order")
         
-
-def process_order_service(cart_id: str, address_id:str) -> OrderResponse:
-    """receives a cart and asks for payment before creating the order and sending for review. 
-    Note that the service is currently using a stub method to get cart."""
-    cart = validate_cart(cart_id)
-    address = validate_address(address_id)
-    total_amount = calculate_total(cart)
-    order_dict = build_order(cart, total_amount,address.address_id)
-    order_items_dict = build_order_items(cart, order_dict["order_id"])
-    handle_payment(order_dict)
-    new_order = create_order_service(order_dict,order_items_dict)
-    return new_order
- 
 def save_order(new_order: dict):
     """saves an order dict to orders csv using repo methods""" 
     order_data = load_orders()
@@ -161,15 +137,25 @@ def save_order_items(new_order_items: dict):
     for item in new_order_items:
         order_item_data.append(item)
     save_all_order_items(order_item_data)
-
-def create_order_service(new_order: dict, new_items: list[dict]) -> OrderResponse:
-    """Method Creates an Order from a dictionary after if was processed for payment"""
-    save_order(new_order)
-    save_order_items(new_items)
-    new_order_response = get_order_by_order_id_service(new_order["order_id"])
+    
+def process_order_service(customer_id: str, address_id:str) -> OrderResponse:
+    """receives a cart and asks for payment before creating the order and sending for review. 
+    Note that the service is currently using a stub method to get cart."""
+    cart = validate_cart(customer_id)
+    validate_item_inventory(cart)
+    restaurant_id = validate_restaurant_from_cart(cart)
+    address = validate_address(address_id)
+    total_amount = calculate_total(cart)
+    order_dict = build_order(cart, total_amount,address.address_id, restaurant_id)
+    order_items_dict = build_order_items(cart, order_dict["order_id"])
+    handle_payment(order_dict)
+    save_order(order_dict)
+    save_order_items(order_items_dict)
+    new_order_response = get_order_by_order_id_service(order_dict["order_id"])
     notify_order_placed(new_order_response.customer_id, new_order_response.restaurant_id, new_order_response.order_id)
     return new_order_response
-    
+
+
 def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
     """Method gets a single OrderResponse object. Takes in an order id (str)"""
     order_data = load_orders()
@@ -239,7 +225,7 @@ def set_order_status_service(order_id:str, new_status:OrderStatus) -> OrderRespo
     raise HTTPException(status_code=404, detail=f"Order notfound")       
 
 def cancel_order_customer_service(orderid:str) -> OrderResponse:
-    """This method lets a customer cancel an order. It changes order status to CANCELED"""
+    """This method lets a restaurant manager cancel an order. It changes order status to CANCELED"""
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -257,6 +243,7 @@ def cancel_order_customer_service(orderid:str) -> OrderResponse:
                     items_responses = []
                     for item in order_item_data:
                         if item.get("order_id") == order.get("order_id"):
+                            add_stock(food_item_id=item["food_item_id"], quantity=item["quantity"])
                             items_responses.append(OrderItemResponse(**item))
                     return OrderResponse(**order, items = items_responses)
                 else:
@@ -310,7 +297,7 @@ def get_orders_by_userid_service(userid:str)-> List[OrderResponse]:
     return order_responses
 
 def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
-    """This method lets a restaurant manager cancel an order. It changes order status to CANCELED"""
+    """This method lets a restaurant manager cancel an order. It changes order status to CANCELED"""  
     order_data = load_orders()
     order_item_data = load_order_items()
     
@@ -330,6 +317,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
                     items_responses = []
                     for item in order_item_data:
                         if item.get("order_id") == order.get("order_id"):
+                            add_stock(food_item_id=item["food_item_id"], quantity=item["quantity"])
                             items_responses.append(OrderItemResponse(**item))
                     return OrderResponse(**order, items = items_responses)
                 else:
@@ -337,6 +325,7 @@ def cancel_order_restaurant_service(orderid:str) -> OrderResponse:
             else:
                 raise HTTPException(status_code=400, detail = "Cannot cancel order")
     raise HTTPException(status_code=404, detail="Order not found")
+
 
 def accept_order_service(orderid:str) -> OrderResponse:
     """Method used by restaurant manager to accept an order. It changes order status from PENDING to ACCEPTED"""
@@ -361,9 +350,9 @@ def accept_order_service(orderid:str) -> OrderResponse:
                 
                 for item in order_item_data:
                     if item.get("order_id") == order.get("order_id"):
+                        subtract_stock(item["food_item_id"], quantity=item["quantity"])
                         items_responses.append(OrderItemResponse(**item))
                 return OrderResponse(**order, items = items_responses)
             else:
                 raise HTTPException(status_code=400, detail = "Cannot accept order")
     raise HTTPException(status_code=404, detail="Order not found")
-

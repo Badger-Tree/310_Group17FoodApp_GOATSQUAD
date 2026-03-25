@@ -11,10 +11,9 @@ class DeliveryCreate(DeliveryBase):
 
 class DeliveryUpdate(BaseModel):
     courier_id: Optional[str] = None
-    delivery_status: Optional[str] = None
+
 
 class DeliveryResponse(DeliveryBase):
     delivery_id: str
     courier_id: Optional[str] = None
     created_date: datetime
-    delivery_status: str
