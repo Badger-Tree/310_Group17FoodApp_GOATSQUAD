@@ -9,8 +9,9 @@ from app.schemas.OrderItem import OrderItemResponse
 from app.schemas.OrderStatus import OrderStatus
 from app.schemas.Role import UserRole
 from app.schemas.User import UserResponse
+from app.schemas.cart_item_schema import CartItemResponse
 from app.schemas.notification import NotificationBase, NotificationStatus, NotificationType
-from app.services.order_service import CartItemResponse, CartResponse, DeliveryResponse
+from app.services.order_service import CartResponse, DeliveryResponse
 import pytest
 from unittest.mock import patch
 from app.routers.order import router
@@ -22,37 +23,43 @@ client = TestClient(app)
 
 @pytest.fixture
 def mock_cart():
-    cart_items = [
-        CartItemResponse(
-            food_item_id=1,
-            quantity=1,
-            price_per_item=1.00
-        ),
-        CartItemResponse(
-            food_item_id=2,
-            quantity=2,
-            price_per_item=1.00
-        )
-    ]
-
     return CartResponse(
-        cart_id="1",
-        customer_id="1",
-        restaurant_id=1,
-        delivery_address_id="1",
-        cart_items=cart_items
+        customer_id="cust456",
+        cart_id="cart",
+        cart_items=[
+            CartItemResponse(
+                cart_item_id="item_1",
+                food_item_id=101,
+                quantity=2,
+                price_per_item=12.5,
+                subtotal=25.0
+            ),
+            CartItemResponse(
+                cart_item_id="item_2",
+                food_item_id=202,
+                quantity=1,
+                price_per_item=8.75,
+                subtotal=8.75
+            ),
+            CartItemResponse(
+                cart_item_id="item_3",
+                food_item_id=303,
+                quantity=3,
+                price_per_item=5.0,
+                subtotal=15.0
+            )
+        ],
+        total=48.75
     )
+        
     
 @pytest.fixture
 def mock_empty_cart():
-    cart_items = []
-
     return CartResponse(
-        cart_id="1",
-        customer_id="1",
-        restaurant_id=1,
-        delivery_address_id="1",
-        cart_items=cart_items
+        customer_id="cust456",
+        cart_id="cart",
+        cart_items=[],  # empty list
+        total=0.0
     )
 
 @pytest.fixture
@@ -124,7 +131,7 @@ def mock_staff_response():
         email="pippin@example.com",
         first_name="peregrin",
         last_name="took",
-        role=UserRole.OWNER,
+        role=UserRole.STAFF,
         created_date=datetime(2026, 2, 20, 12, 34, 56))
       
 @pytest.fixture
@@ -151,53 +158,58 @@ def test_create_order_success(mock_customer_response, mock_load_orders,mock_load
             with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
                 with patch("app.services.order_service.save_all_orders", return_value = mock_save_orders):
                     with patch("app.services.order_service.save_all_order_items", return_value = mock_save_all_order_items):
-                        with patch("app.services.order_service.process_payment_service", return_value = True):
-                            with patch("app.services.order_service.get_cart_by_id", return_value = mock_cart):
-                                with patch("app.services.order_service.notify_order_placed") as mock_order_notfiy:
-                                    with patch("app.services.order_service.notify_payment_status") as mock_payment_notify:
-                                        with patch("app.services.order_service.get_address_by_id_service", return_value = mock_address_response):
-                                            response = client.post("/orders/create_order/1/4",headers={"token":"123"})
-                                            assert response.status_code == 201
-                                            response_data = response.json()
-                                            assert "order_id" in response_data
-                                            assert "customer_id" in response_data
-                                            assert "restaurant_id" in response_data
-                                            assert "delivery_address_id" in response_data
-                                            assert "status" in response_data
-                                            assert "total_amount" in response_data
-                                            assert "items" in response_data
-                                            assert response_data["customer_id"] == "1"
-                                            assert response_data["total_amount"] == 3.00
-                                            assert response_data["status"] == "PENDING"
-                                            assert response_data["delivery_address_id"] == "4"
-                                            mock_payment_notify.assert_called_once()
-                                            mock_order_notfiy.assert_called_once()
-                
+                        with patch("app.services.order_service.validate_item_inventory"):
+                            with patch("app.services.order_service.process_payment_service", return_value = True):
+                                with patch("app.services.order_service.get_cart_by_customer", return_value = mock_cart):
+                                    with patch("app.services.order_service.get_food_by_id", return_value={"restaurant_id": 1}):
+                                        with patch("app.services.order_service.notify_order_placed") as mock_order_notfiy:
+                                            with patch("app.services.order_service.notify_payment_status") as mock_payment_notify:
+                                                with patch("app.services.order_service.get_address_by_id_service", return_value = mock_address_response):
+                                                    response = client.post("/orders/create_order/4",headers={"token":"123"})
+                                                    assert response.status_code == 201
+                                                    response_data = response.json()
+                                                    assert "order_id" in response_data
+                                                    assert "customer_id" in response_data
+                                                    assert "restaurant_id" in response_data
+                                                    assert "delivery_address_id" in response_data
+                                                    assert "status" in response_data
+                                                    assert "total_amount" in response_data
+                                                    assert "items" in response_data
+                                                    assert response_data["customer_id"] == "cust456"
+                                                    assert response_data["total_amount"] == 48.75
+                                                    assert response_data["status"] == "PENDING"
+                                                    assert response_data["delivery_address_id"] == "4"
+                                                    mock_payment_notify.assert_called_once()
+                                                    mock_order_notfiy.assert_called_once()
+                    
 def test_create_order_empty_order(mock_customer_response, mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items,mock_empty_cart):
     """Tests that create_order will throw a 422 error if an order has no order items"""                
     with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
         with patch("app.services.order_service.load_orders", return_value = mock_load_orders):
             with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
                 with patch("app.services.order_service.save_all_orders", return_value = mock_save_orders):
-                    with patch("app.services.order_service.save_all_order_items", return_value = mock_save_all_order_items):
-                        with patch("app.services.order_service.process_payment_service", return_value = True):
-                            with patch("app.services.order_service.get_cart_by_id", return_value = mock_empty_cart):
-                                with patch("app.services.order_service.notify_order_placed") as mock_order_notfiy:
-                                    with patch("app.services.order_service.notify_payment_status") as mock_payment_notify:
-                                        response = client.post("/orders/create_order/1/4",headers={"token":"123"})
-                                        assert response.status_code == 400
-                                        mock_payment_notify.assert_not_called()
-                                        mock_order_notfiy.assert_not_called()  
-                                                
+                    with patch("app.services.order_service.validate_item_inventory"):
+                        with patch("app.services.order_service.save_all_order_items", return_value = mock_save_all_order_items):
+                            with patch("app.services.order_service.process_payment_service", return_value = True):
+                                with patch("app.services.order_service.get_cart_by_customer", return_value = mock_empty_cart):
+                                    with patch("app.services.order_service.get_food_by_id", return_value={"restaurant_id": 1}):
+                                        with patch("app.services.order_service.notify_order_placed") as mock_order_notfiy:
+                                            with patch("app.services.order_service.notify_payment_status") as mock_payment_notify:
+                                                with patch("app.services.order_service.get_address_by_id_service", return_value = mock_address_response):
+                                                    response = client.post("/orders/create_order/4",headers={"token":"123"})
+                                                    assert response.status_code == 400
+                                                    mock_payment_notify.assert_not_called()
+                                                    mock_order_notfiy.assert_not_called()  
+                                                        
 def test_create_order_not_authorized(mock_staff_response):
     """Tests that create_order will throw a 403 error if the user does not have CUSTOMER role"""                
     with patch("app.routers.order.get_user_from_session", return_value = mock_staff_response):
-            response = client.post("/orders/create_order/1/4",headers={"token":"123"})
+            response = client.post("/orders/create_order/4",headers={"token":"123"})
             assert response.status_code == 403
 
 def test_create_order_no_token():
     """Tests that create_order will throw a 422 error if the header has no token"""                
-    response = client.post("/orders/create_order/1/4")
+    response = client.post("/orders/create_order/4")
     assert response.status_code == 422
           
 def test_get_order_by_id_succecss(mock_load_orders,mock_load_order_items):
@@ -291,6 +303,7 @@ def test_cancel_order_customer_success(mock_customer_response,mock_load_orders,m
                             with patch("app.services.order_service.process_refund_service", return_value = True):
                                 with patch("app.services.order_service.notify_refund_issued") as mock_payment_notfiy: 
                                     with patch("app.services.order_service.notify_order_status_update_customer_cancels") as mock_order_notfiy:
+                                        with patch("app.services.order_service.add_stock", return_value=None):
                                             response = client.put("/orders/cancel_order_customer/order123",headers={"token":"123"})
                                             assert response.status_code == 200
                                             response_data = response.json()
@@ -329,8 +342,8 @@ def test_cancel_order_customer_order_accepted(mock_customer_response,mock_load_o
                     with patch("app.services.order_service.save_all_orders", return_value = mock_save_orders):
                         with patch("app.services.order_service.save_all_order_items", return_value = mock_save_all_order_items):
                             with patch("app.services.order_service.process_refund_service", return_value = True):
-                                        response = client.put("/orders/cancel_order_customer/order789",headers={"token":"123"})
-                                        assert response.status_code == 400
+                                response = client.put("/orders/cancel_order_customer/order789",headers={"token":"123"})
+                                assert response.status_code == 400
 
     
 def test_cancel_order_customer_wrong_customer(mock_customer_response,mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items):
@@ -341,8 +354,8 @@ def test_cancel_order_customer_wrong_customer(mock_customer_response,mock_load_o
                     with patch("app.services.order_service.save_all_orders", return_value = mock_save_orders):
                         with patch("app.services.order_service.save_all_order_items", return_value = mock_save_all_order_items):
                             with patch("app.services.order_service.process_refund_service", return_value = True):
-                                        response = client.put("/orders/cancel_order_customer/order456",headers={"token":"123"})
-                                        assert response.status_code == 403
+                                response = client.put("/orders/cancel_order_customer/order456",headers={"token":"123"})
+                                assert response.status_code == 403
 def test_cancel_order_customer_not_authenticated():
     """tests that cancel_order_customer will return a 401 error if user is not authorized to cancel order"""
     with patch("app.routers.order.get_user_from_session", side_effect=HTTPException(status_code=401, detail="User not found")):
@@ -360,6 +373,7 @@ def test_cancel_order_restaurant_success(mock_staff_response,mock_load_orders,mo
                                 with patch("app.services.order_service.process_refund_service", return_value = True):
                                     with patch("app.services.order_service.notify_refund_issued") as mock_payment_notfiy: 
                                         with patch("app.services.order_service.notify_order_status_update") as mock_order_notfiy:
+                                            with patch("app.services.order_service.add_stock", return_value=None):
                                                 response = client.put("/orders/cancel_order_restaurant/order123",headers={"token":"123"})
                                                 assert response.status_code == 200
                                                 response_data = response.json()
@@ -379,8 +393,9 @@ def test_cancel_order_restaurant_order_not_found(mock_staff_response,mock_load_o
                     with patch("app.services.order_service.save_all_orders", return_value = mock_save_orders):
                         with patch("app.services.order_service.save_all_order_items", return_value = mock_save_all_order_items):
                             with patch("app.services.order_service.process_refund_service", return_value = True):
-                                        response = client.put("/orders/cancel_order_restaurant/noorder",headers={"token":"123"})
-                                        assert response.status_code == 404
+                                with patch("app.services.order_service.add_stock", return_value=None):
+                                    response = client.put("/orders/cancel_order_restaurant/noorder",headers={"token":"123"})
+                                    assert response.status_code == 404
   
 def test_cancel_order_restaurant_order_accepted(mock_staff_response,mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items):
     """tests that cancel_order_restaurant will return a 400 error if order is already accepted"""
@@ -390,6 +405,7 @@ def test_cancel_order_restaurant_order_accepted(mock_staff_response,mock_load_or
                     with patch("app.services.order_service.save_all_orders", return_value = mock_save_orders):
                         with patch("app.services.order_service.save_all_order_items", return_value = mock_save_all_order_items):
                             with patch("app.services.order_service.process_refund_service", return_value = True):
+                                with patch("app.services.order_service.add_stock", return_value=None):
                                         response = client.put("/orders/cancel_order_restaurant/order456",headers={"token":"123"})
                                         assert response.status_code == 400
     
@@ -401,21 +417,22 @@ def test_accept_order_success(mock_staff_response, mock_load_orders,mock_load_or
                 with patch("app.services.order_service.save_all_orders", return_value = mock_save_orders):
                     with patch("app.services.order_service.notify_order_status_update") as mock_order_notfiy:
                         with patch("app.services.order_service.create_delivery_service", return_value = mock_delivery_response):
-                            response = client.put("/orders/accept_order/order123",headers={"token":"123"})
-                            assert response.status_code == 200
-                            response_data = response.json()
-                            assert "order_id" in response_data
-                            assert "customer_id" in response_data
-                            assert "restaurant_id" in response_data
-                            assert "delivery_address_id" in response_data
-                            assert "status" in response_data
-                            assert "total_amount" in response_data
-                            assert "items" in response_data
-                            assert response_data["customer_id"] == "cust456"
-                            assert response_data["total_amount"] == 26.66
-                            assert response_data["status"] == "ACCEPTED"
-                            assert response_data["delivery_id"] == "newdelivery"
-                            mock_order_notfiy.assert_called_once()
+                            with patch("app.services.order_service.subtract_stock", return_value=None):
+                                response = client.put("/orders/accept_order/order123",headers={"token":"123"})
+                                assert response.status_code == 200
+                                response_data = response.json()
+                                assert "order_id" in response_data
+                                assert "customer_id" in response_data
+                                assert "restaurant_id" in response_data
+                                assert "delivery_address_id" in response_data
+                                assert "status" in response_data
+                                assert "total_amount" in response_data
+                                assert "items" in response_data
+                                assert response_data["customer_id"] == "cust456"
+                                assert response_data["total_amount"] == 26.66
+                                assert response_data["status"] == "ACCEPTED"
+                                assert response_data["delivery_id"] == "newdelivery"
+                                mock_order_notfiy.assert_called_once()
                                                             
 def test_accept_order_success_order_not_found(mock_staff_response, mock_load_orders,mock_load_order_items,mock_save_orders,mock_delivery_response):
     """tests that accept_order will return an 404 message if order is not found"""
@@ -424,6 +441,7 @@ def test_accept_order_success_order_not_found(mock_staff_response, mock_load_ord
             with patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
                 with patch("app.services.order_service.save_all_orders", return_value = mock_save_orders):
                     with patch("app.services.order_service.notify_order_status_update") as mock_notfiy:
+                        with patch("app.services.order_service.subtract_stock", return_value=None):
                             response = client.put("/orders/accept_order/noorder",headers={"token":"123"})
                             assert response.status_code == 404
 
@@ -438,4 +456,3 @@ def test_accept_order_restaurant_not_authorized(mock_customer_response):
     with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):
         response = client.put("/orders/accept_order/order123",headers={"token":"123"})
         assert response.status_code == 403
-    

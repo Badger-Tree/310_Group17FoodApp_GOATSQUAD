@@ -2,23 +2,23 @@ from fastapi import APIRouter, HTTPException, Header, status
 from app.schemas.Order import OrderCreate, OrderResponse
 from app.schemas.Role import UserRole
 from app.schemas.Token import Token
-from app.services.order_service import cancel_order_customer_service, cancel_order_restaurant_service,accept_order_service, create_order_service, get_order_by_order_id_service, get_order_status_by_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service, process_order_service
+from app.services.order_service import cancel_order_customer_service, cancel_order_restaurant_service,accept_order_service, get_order_by_order_id_service, get_order_status_by_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service, process_order_service
 from typing import List
 from enum import Enum
 from app.schemas.Order import OrderResponse
 from app.services.session_manager_service import get_user_from_session
-from app.services.authorization_service import require_role_multi_service, require_role_service
+from app.services.authorization_service import require_role_service
 from app.schemas.Token import Token
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
-@router.post("/create_order/{cart_id}/{address_id}", response_model=OrderResponse,status_code=status.HTTP_201_CREATED)
-def create_order(cart_id: str,address_id:str,token: str = Header(...)):
+@router.post("/create_order/{address_id}", response_model=OrderResponse,status_code=status.HTTP_201_CREATED)
+def create_order(address_id:str,token: str = Header(...)):
     """Creates and saves an order for a customer. Gets a cart_id from path paramater. Output: OrderResponse"""
     session = Token(token=token)
     current_user = get_user_from_session(session)
     require_role_service(current_user,UserRole.CUSTOMER)
-    return process_order_service(cart_id,address_id)
+    return process_order_service(current_user.id,address_id)
 
 @router.get("/get_order_by_id/{orderid}", response_model=OrderResponse, status_code=status.HTTP_200_OK)
 def get_order_by_id(orderid: str):
@@ -73,7 +73,7 @@ def cancel_order_restaurant(order_id:str,token: str = Header(...)):
     """
     session = Token(token=token)
     current_user = get_user_from_session(session)
-    require_role_multi_service(current_user, [UserRole.MANAGER, UserRole.OWNER])
+    require_role_service(current_user, UserRole.STAFF)
     # TODO: check if user_id from session is in get_staff_by_restaurant
     return cancel_order_restaurant_service(order_id)
 
@@ -85,6 +85,6 @@ def accept_order(order_id:str,token: str = Header(...)):
     """
     session = Token(token=token)
     current_user = get_user_from_session(session)
-    require_role_multi_service(current_user, [UserRole.MANAGER, UserRole.OWNER])
+    require_role_service(current_user, UserRole.STAFF)
     # TODO: check if user_id from session is in get_staff_by_restaurant
     return accept_order_service(order_id)

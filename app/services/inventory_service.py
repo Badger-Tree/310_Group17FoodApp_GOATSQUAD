@@ -1,5 +1,5 @@
 from typing import Optional
-from app.repositories.inventory_repository import load_all, save_all
+from app.repositories.inventory_repository import load_all, save_all, find_by_food_id_repo
 from app.schemas.inventory import Inventory, InventoryCreate
 
 def create_inventory_record(payload: InventoryCreate) -> Inventory:
@@ -16,12 +16,9 @@ def create_inventory_record(payload: InventoryCreate) -> Inventory:
     return Inventory(**new_record)
 
 def get_inventory_by_food_id(food_item_id: int) -> Optional[Inventory]:
-    """Finds an inventory record specifically by the food_item_id"""
-    items = load_all()
-    for item in items:
-        if int(item["food_item_id"]) == food_item_id:
-            return Inventory(**item)
-    return None
+    """Finds an inventory record specifically by the food_item_id. then if found a dictionary, turn into pydant obj, if not, none"""
+    record = find_by_food_id_repo(food_item_id)
+    return Inventory(**record) if record else None
 
 def delete_inventory_record(food_item_id: int) -> bool:
     """Delete an inventory record by food_item_id"""
@@ -54,3 +51,15 @@ def update_inventory(food_item_id: int, new_quantity: int) -> Inventory:
             save_all(items)
             return Inventory(**item)
     return None
+
+def add_stock(food_item_id: int, quantity: int):
+    record = get_inventory_by_food_id(food_item_id)
+    if record:
+        new_total = record.quantity + quantity
+        return update_inventory(food_item_id, new_total)
+    
+def subtract_stock(food_item_id: int, quantity: int):
+    record = get_inventory_by_food_id(food_item_id)
+    if record:
+        new_total = record.quantity - quantity
+        return update_inventory(food_item_id, new_total)
