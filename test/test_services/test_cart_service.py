@@ -1,4 +1,4 @@
-from app.services.cart_service import add_to_cart, create_cart, get_cart_by_customer, calculateSubtotal, delete_from_cart
+from app.services.cart_service import add_to_cart, create_cart, get_cart_by_customer, calculateSubtotal, delete_from_cart, clear_cart
 from app.schemas.cart_schema import CartCreate, CartResponse
 from fastapi import HTTPException
 import pytest
@@ -349,5 +349,80 @@ def test_delete_from_cart_does_not_exist(mocker):
 
     with pytest.raises(HTTPException) as testException: 
         delete_from_cart(2, cart_item_id)
+
+    assert testException.value.status_code ==404
+
+
+
+def test_clear_cart_valid(mocker): 
+    """Tests that clearing a cart is successful"""
+    mock_current_cart = [
+    {
+        "customer_id": "2",
+        "cart_id": "EXISTS",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+]
+
+    mocker.patch("app.services.cart_service.load_all_carts", return_value = mock_current_cart)
+
+    result = clear_cart("2", "EXISTS")
+
+    assert result["customer_id"] == "2"
+    assert result["cart_id"] == "EXISTS" 
+    assert result["cart_items"] == []
+    assert result["total"] == 0.0
+
+
+
+def test_clear_cart_not_found(mocker): 
+    """Tests that clearing a cart is successful"""
+    mock_current_cart = [
+    {
+        "customer_id": "2",
+        "cart_id": "EXISTS",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+]
+
+    mocker.patch("app.services.cart_service.load_all_carts", return_value = mock_current_cart)
+
+
+    with pytest.raises(HTTPException) as testException: 
+        clear_cart("2", "DOESNOTEXISTS")
 
     assert testException.value.status_code ==404

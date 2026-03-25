@@ -101,4 +101,27 @@ def delete_from_cart(customer_id, cart_item_id) -> CartResponse:
     save_cart(cart_data)
     return c
 
+
+def clear_cart(customer_id, cart_id): 
+    """Clears the cart completely"""
+    cart_data = load_all_carts() 
+    print(cart_data)
+
+    found_cart_item = False
+    for index, cart in enumerate(cart_data):  
+        if cart["cart_id"] == cart_id:
+            found_cart_item = True  
+            cart["customer_id"] == customer_id           
+            cart["cart_items"] = []        
+            cart["total"] = 0.0           
+            break
+    if not found_cart_item:
+        raise HTTPException(status_code=404, detail=f"Cart '{cart_id}' not found")
+    save_cart(cart_data)
+
+    return cart
+        
+    
+
+
  
