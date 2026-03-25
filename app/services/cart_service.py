@@ -105,7 +105,6 @@ def delete_from_cart(customer_id, cart_item_id) -> CartResponse:
 def clear_cart(customer_id, cart_id): 
     """Clears the cart completely"""
     cart_data = load_all_carts() 
-    print(cart_data)
 
     found_cart_item = False
     for index, cart in enumerate(cart_data):  
