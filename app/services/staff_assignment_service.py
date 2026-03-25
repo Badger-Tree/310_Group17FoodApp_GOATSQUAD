@@ -5,22 +5,22 @@ from app.repositories.restaurants_repo_csv import load_all as load_restaurants
 from typing import Dict, Any
 from fastapi import HTTPException
 
-#assign staff role to user for a restaurant
-def assign_staff_role(current_user, restaurant_id: int, staff_user_id: str, role: str) -> Dict[str, Any]:
+#give assignment to user for a restaurant
+def assign_staff(current_user, staff_id: str, assignment: str) -> Dict[str, Any]:
 
-    #check if the current user is either owner
+    #check if the current user is the owner
     if current_user.role != "OWNER":
-        raise HTTPException(status_code=403, detail="Only restaurant owners can assign staff roles.")
+        raise HTTPException(status_code=403, detail="Only restaurant owners can assign staff.")
     
     #load existing staff assignments, users, and restaurants
     staff = load_all()
     users = load_users()
     restaurants = load_restaurants()
 
-    #Find the user whose role will be changed
+    #Find the user whose assignment will be changed
     target_user = None
     for user in users:
-        if user["id"] == staff_user_id:
+        if user["id"] == staff_id:
             target_user = user
             break
 
@@ -35,28 +35,24 @@ def assign_staff_role(current_user, restaurant_id: int, staff_user_id: str, role
     #Check if the restaurant exists
     selected_restaurant = None
     for restaurant in restaurants:
-        if int(restaurant["restaurant_id"]) == restaurant_id:
+        if restaurant["owner_id"] == current_user.id:
             selected_restaurant = restaurant
             break
 
     if selected_restaurant is None:
         raise HTTPException(status_code=404, detail="Restaurant not found.")
-    
-    #make sure the current user is the owner of the restaurant
-    if selected_restaurant["owner_id"] != current_user.id:
-        raise HTTPException(status_code=403, detail="Only the restaurant owner can assign staff roles.")
 
     #Check for duplicate assignments. Cannot have a user with multiple roles
-    for assignment in staff:
-        if assignment["restaurant_id"] == str(restaurant_id) and assignment["user_id"] == staff_user_id:
-            raise HTTPException(status_code=400, detail="This user already has a role assigned for this restaurant.")
+    for existing_assignment in staff:
+        if existing_assignment["restaurant_id"] == selected_restaurant["restaurant_id"] and existing_assignment["staff_id"] == staff_id:
+            raise HTTPException(status_code=400, detail="This user already has an assignment for this restaurant.")
         
     # Create new assignment
     new_assignment = {
         "assignment_id": str(len(staff) + 1),  # Simple ID generation
-        "restaurant_id": str(restaurant_id),
-        "user_id": staff_user_id,
-        "role": role
+        "restaurant_id": str(selected_restaurant["restaurant_id"]),
+        "staff_id": staff_id,
+        "assignment": assignment
     }
     
     # Save the new assignment
@@ -64,3 +60,99 @@ def assign_staff_role(current_user, restaurant_id: int, staff_user_id: str, role
     save_all(staff)
     
     return new_assignment
+
+#Update a staff's assignment to another assignment for a restaurant
+def update_staff_assignment(current_user, staff_id: str, new_assignment: str) -> Dict[str, Any]:
+      #check if the current user is the owner
+    if current_user.role != "OWNER":
+        raise HTTPException(status_code=403, detail="Only restaurant owners can update staff assignments.")
+
+    #load existing staff assignments, users, and restaurants
+    staff = load_all()
+    users = load_users()
+    restaurants = load_restaurants()
+
+    #Find the user whose assignment will be changed
+    target_user = None
+    for user in users:
+        if user["id"] == staff_id:
+            target_user = user
+            break
+
+    if target_user is None:
+        raise HTTPException(status_code=404, detail="User not found.")
+    
+    #Check if the restaurant exists
+    selected_restaurant = None
+    for restaurant in restaurants:
+        if restaurant["owner_id"] == current_user.id:
+            selected_restaurant = restaurant
+            break
+
+    if selected_restaurant is None:
+        raise HTTPException(status_code=404, detail="Restaurant not found.")
+    
+    #Find and update assignment
+    assignment_to_update = None
+
+    for existing_assignment in staff:
+        if(existing_assignment["restaurant_id"] == str(selected_restaurant["restaurant_id"]) and existing_assignment["staff_id"] == staff_id):
+            assignment_to_update = existing_assignment
+            break
+
+    if assignment_to_update is None:
+        raise HTTPException(status_code=404, detail="Assignment not found.")
+    
+    assignment_to_update["assignment"] = new_assignment
+    save_all(staff)
+    
+    return assignment_to_update
+
+#remove/return user's assignment to STAFF
+def remove_staff_assignment(current_user, staff_id: str) -> Dict[str, Any]:
+
+    #check if the current user is the owner
+    if current_user.role != "OWNER":
+        raise HTTPException(status_code=403, detail="Only restaurant owners can remove staff assignments.")
+
+    #load existing staff assignments, users, and restaurants
+    staff = load_all()
+    users = load_users()
+    restaurants = load_restaurants()
+
+    #Find the user whose assignment will be changed
+    target_user = None
+    for user in users:
+        if user["id"] == staff_id:
+            target_user = user
+            break
+
+    if target_user is None:
+        raise HTTPException(status_code=404, detail="User not found.")
+    
+      #Check if the restaurant exists
+    selected_restaurant = None
+    for restaurant in restaurants:
+        if restaurant["owner_id"] == current_user.id:
+            selected_restaurant = restaurant
+            break
+
+    if selected_restaurant is None:
+        raise HTTPException(status_code=404, detail="Restaurant not found.")
+
+    # Find and remove the assignment
+    assignment_to_remove = None
+    
+    for existing_assignment in staff:
+        if (existing_assignment["restaurant_id"] == str(selected_restaurant["restaurant_id"]) and existing_assignment["staff_id"] == staff_id):
+            assignment_to_remove = existing_assignment
+            break
+
+    if assignment_to_remove is None:
+        raise HTTPException(status_code=404, detail="Assignment not found.")
+    
+    staff.remove(assignment_to_remove)
+    save_all(staff)
+    
+    return assignment_to_remove
+

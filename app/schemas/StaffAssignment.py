@@ -4,20 +4,22 @@ from typing import Optional
 
 """Staff base model"""
 class StaffAssignmentBase(BaseModel):
-    restaurant_id: int
-    user_id: int #The person being assigned a role by the manager
-    role: str
+    staff_id: str #The owner assigning the roles
+    assignment: str
 
-"""Staff Assignment Constructor"""
+"""Create the assignment"""
 class StaffAssignmentCreate(StaffAssignmentBase):
-    assigned_by: int #temporary authentication. This will ask for the user id of the manager doing the assigning
+    pass
 
-"""Update the role"""
+"""Update the assignment"""
 class StaffAssignmentUpdate(BaseModel):
-    role: Optional[str] = None
+    assignment: Optional[str] = None
 
 """Returns the assignment id and who it was assigned by"""
 class StaffAssignmentResponse(StaffAssignmentBase):
-    assignment_id: int
-    assigned_by: int
+    assignment_id: str
+    restaurant_id: str
+    staff_id: str
+    assignment: str
+
 

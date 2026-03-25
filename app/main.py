@@ -8,7 +8,8 @@ from app.routers.inventory_router import router as inventory_router
 from app.routers.restaurants import router as restaurant_router
 from app.routers.inventory_router import router as inventory_router
 from app.routers.order import router as order_router
-from app.routers import delivery_router as delivery_router
+from app.routers.delivery_router import router as delivery_router
+from app.routers.staff_assignment_router import router as staff_assignment_router
 
 app = FastAPI()
 
@@ -28,5 +29,6 @@ app.include_router(restaurant_router)
 app.include_router(food_router)
 app.include_router(inventory_router)
 app.include_router(order_router)
-app.include_router(delivery_router.router)
+app.include_router(delivery_router)
+app.include_router(staff_assignment_router)
 

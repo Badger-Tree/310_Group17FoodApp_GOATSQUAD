@@ -16,7 +16,7 @@ def load_all() -> List[Dict[str, Any]]:
 
 def save_all(items: List[Dict[str, Any]]) -> None:
     tmp = DATA_PATH.with_suffix(".tmp")
-    fields = ["assignment_id", "restaurant_id", "user_id", "role"]
+    fields = ["assignment_id", "restaurant_id", "staff_id", "assignment"]
 
     with tmp.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
