@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Header
 from app.schemas.cart_schema import CartCreate, CartResponse, CartUpdate
 from app.services.cart_service import add_to_cart, delete_from_cart, update_cart
+from app.services.cart_service import add_to_cart, delete_from_cart, clear_cart
 from app.schemas.Token import Token
 from app.services.session_manager_service import get_user_from_session
 from fastapi import HTTPException
