@@ -5,7 +5,6 @@ from app.services.Delivery_service import (
     assign_delivery_to_courier,
     pickup_delivery,
     complete_delivery,
-    cancel_delivery
 )
 
 router = APIRouter(prefix="/deliveries", tags=["deliveries"])
@@ -25,9 +24,6 @@ def complete_delivery_route(delivery_id: str):
     """Marks a delivery as complete."""
     return complete_delivery(delivery_id)
 
-@router.delete("/cancel/{delivery_id}", status_code = status.HTTP_200_OK)
-def cancel_delivery_route(delivery_id: str):
-    """Cancels a delivery."""
-    return cancel_delivery(delivery_id)
+
 
 #No create delivery router because it is part of the create order workflow

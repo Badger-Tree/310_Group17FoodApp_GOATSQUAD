@@ -90,23 +90,3 @@ def test_complete_delivery_not_found():
 
         assert response.status_code == 404
         assert response.json() == {"detail": "Delivery not found"}
-
-#CANCELING DELIVERIES: SUCCESS
-def test_cancel_delivery_success():
-    mock_response = {
-        "detail": "Delivery cancelled successfully."
-    }
-
-    with patch("app.routers.delivery_router.cancel_delivery", return_value=mock_response):
-        response = client.delete("/deliveries/cancel/delivery-1")
-
-        assert response.status_code == 200
-        assert response.json() == mock_response
-
-#CANCELING DELIVERIES: FAILURE
-def test_cancel_delivery_not_found():
-    with patch("app.routers.delivery_router.cancel_delivery", side_effect=HTTPException(status_code=404, detail="Delivery not found")):
-        response = client.delete("/deliveries/cancel/nonexistent-delivery")
-
-        assert response.status_code == 404
-        assert response.json() == {"detail": "Delivery not found"}

@@ -4,7 +4,6 @@ import pytest
 from fastapi import HTTPException
 from app.services.Delivery_service import (
     assign_delivery_to_courier,
-    cancel_delivery,
     complete_delivery,
     create_delivery_service,
     pickup_delivery

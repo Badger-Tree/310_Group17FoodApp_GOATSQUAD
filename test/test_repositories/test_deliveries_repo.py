@@ -7,10 +7,10 @@ def test_load_all_success(monkeypatch, tmp_path):
     """tests that load_all() will return a  list with data from csv data that csv exists, has data"""
     mock_path = tmp_path / "deliveries.csv"
     
-    mock_path.write_text("order_id,courier_id,created_date,address_id,delivery_status,delivery_id\n"
-                        "1,1,2024-01-01,1,delivered,1\n"
-                        "2,2,2024-01-02,2,in_transit,2\n"
-                        "3,3,2024-01-03,3,pending,3\n")
+    mock_path.write_text("order_id,courier_id,created_date,address_id,delivery_id\n"
+                        "1,1,2024-01-01,1,1\n"
+                        "2,2,2024-01-02,2,2\n"
+                        "3,3,2024-01-03,3,3\n")
 
     monkeypatch.setattr("app.repositories.deliveries_repo_csv.DATA_PATH", mock_path)
     result = load_all()
@@ -28,7 +28,7 @@ def test_load_all_fileDNE(monkeypatch, tmp_path):
 def test_load_all_empty(monkeypatch, tmp_path):
     """this tests that load_all() will return an empty list if calling a file with no records"""
     mock_path = tmp_path / "deliveries.csv"
-    mock_path.write_text("order_id,courier_id,created_date,address_id,delivery_status,delivery_id\n")
+    mock_path.write_text("order_id,courier_id,created_date,address_id,delivery_id\n")
     monkeypatch.setattr("app.repositories.deliveries_repo_csv.DATA_PATH", mock_path)
     result = load_all()
     assert result == []
@@ -36,10 +36,10 @@ def test_load_all_empty(monkeypatch, tmp_path):
 def test_save_all_success(monkeypatch, tmp_path):
     """this tests that save_all() will save input to a csv if csv exists and has headers"""
     mock_path = tmp_path / "deliveries.csv"
-    mock_path.write_text("order_id,courier_id,created_date,address_id,delivery_status,delivery_id\n"
-                        "1,1,2024-01-01,1,delivered,1\n"
-                        "2,2,2024-01-02,2,in_transit,2\n"
-                        "3,3,2024-01-03,3,pending,3\n")
+    mock_path.write_text("order_id,courier_id,created_date,address_id,delivery_id\n"
+                        "1,1,2024-01-01,1,1\n"
+                        "2,2,2024-01-02,2,2\n"
+                        "3,3,2024-01-03,3,3\n")
 
     monkeypatch.setattr("app.repositories.deliveries_repo_csv.DATA_PATH", mock_path)
     
@@ -47,7 +47,6 @@ def test_save_all_success(monkeypatch, tmp_path):
                 "courier_id" : "2",
                 "created_date" : "2024-01-01",
                 "address_id" : "1",
-                "delivery_status" : "delivered",
                 "delivery_id" : "1"}]
     
     save_all(input_data)
@@ -61,7 +60,6 @@ def test_save_all_success(monkeypatch, tmp_path):
     assert rows[0]["courier_id"] == "2"
     assert rows[0]["created_date"] == "2024-01-01"
     assert rows[0]["address_id"] == "1"
-    assert rows[0]["delivery_status"] == "delivered"
     assert rows[0]["delivery_id"] == "1"
     
 def test_save_all_empty_list(monkeypatch, tmp_path):
@@ -76,7 +74,7 @@ def test_save_all_empty_list(monkeypatch, tmp_path):
         rows = list(reader)
     
     assert len(rows) == 0
-    expected_fields = ["order_id", "courier_id", "created_date", "address_id", "delivery_status", "delivery_id"]
+    expected_fields = ["order_id", "courier_id", "created_date", "address_id", "delivery_id"]
     assert reader.fieldnames == expected_fields
     
 def test_save_all_fileDNE(monkeypatch, tmp_path):
@@ -88,7 +86,6 @@ def test_save_all_fileDNE(monkeypatch, tmp_path):
                 "courier_id" : "2",
                 "created_date" : "2024-01-01",
                 "address_id" : "1",
-                "delivery_status" : "delivered",
                 "delivery_id" : "1"}]
     
     save_all(input_data)
@@ -102,5 +99,4 @@ def test_save_all_fileDNE(monkeypatch, tmp_path):
     assert rows[0]["courier_id"] == "2"
     assert rows[0]["created_date"] == "2024-01-01"
     assert rows[0]["address_id"] == "1"
-    assert rows[0]["delivery_status"] == "delivered"
     assert rows[0]["delivery_id"] == "1"
