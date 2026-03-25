@@ -1,9 +1,8 @@
 from app.services.cart_service import add_to_cart, create_cart, get_cart_by_customer, calculateSubtotal, delete_from_cart, update_cart
-from app.schemas.cart_schema import CartCreate, CartResponse, CartUpdate
+from app.schemas.cart_schema import CartCreate, CartUpdate, CartResponse
 from fastapi import HTTPException
 import pytest
 from unittest.mock import patch
-from app.routers.cart_router import router
 
 mock_data = [{ 
     "customer_id": "2", 
@@ -356,8 +355,6 @@ def test_delete_from_cart_does_not_exist(mocker):
 
 
 
-
-
 class MockUser:
     def __init__(self, id):
         self.id = id
@@ -499,4 +496,3 @@ def test_update_cart_no_cart_item_id(mocker):
         update_cart(2, cart_item_id, cart_update)
 
     assert testException.value.status_code ==404
-    
