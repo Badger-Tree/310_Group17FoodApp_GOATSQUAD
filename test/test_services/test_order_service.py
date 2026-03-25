@@ -5,6 +5,7 @@ from app.schemas.Address import AddressResponse
 import pytest
 from fastapi import HTTPException
 from datetime import datetime, timezone
+from app.schemas.Delivery import DeliveryResponse
 from app.schemas.Order import OrderResponse
 from app.schemas.OrderItem import OrderItemResponse
 from app.schemas.OrderStatus import OrderStatus
@@ -20,6 +21,13 @@ mock_address_response = AddressResponse(address_id= "7",
             postal_code= "H0B 1T5",
             instructions= "leave at driveway",
             created_date = "2025-01-20T11:34:56")
+mock_delivery = DeliveryResponse(
+    delivery_id="delivery123",
+    order_id="order123",
+    address_id="address123",
+    courier_id=None,
+    created_date=datetime.now()
+)
 
 def test_get_order_by_order_id_service_success(mocker):
     """tests that get_order_by_order_id_service() will successfully get an order given valid order id"""
@@ -28,7 +36,7 @@ def test_get_order_by_order_id_service_success(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "delivery",
                     "status": "PENDING",
                     "total_amount": 26.66,
                     "created_date": "2026-02-20T12:34:56",
@@ -66,7 +74,7 @@ def test_get_order_by_order_id_service_order_not_found(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "delivery",
                     "status": "PENDING",
                     "total_amount": 26.66,
                     "created_date": "2026-02-20T12:34:56",
@@ -86,6 +94,9 @@ def test_get_order_by_order_id_service_order_not_found(mocker):
     result = get_order_by_order_id_service("order1")
     assert result is None
     
+def mock_delivery_response():
+    return 
+    
 def test_get_orders_by_restaurant_service_success(mocker):
     """tests that get_orders_by_restaurant_service() will successfully get an order given valid restaurant id"""
     mock_orders= [{
@@ -93,7 +104,7 @@ def test_get_orders_by_restaurant_service_success(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "delivery",
                     "status": "PENDING",
                     "total_amount": 26.66,
                     "created_date": "2026-02-20T12:34:56",
@@ -129,7 +140,7 @@ def test_get_orders_by_restaurant_service_not_found(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "delivery",
                     "status": "PENDING",
                     "total_amount": 26.66,
                     "created_date": "2026-02-20T12:34:56",
@@ -148,7 +159,7 @@ def test_get_orders_by_userid_service_success(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "delivery",
                     "status": "PENDING",
                     "total_amount": 26.66,
                     "created_date": "2026-02-20T12:34:56",
@@ -182,7 +193,7 @@ def test_get_orders_by_userid_service_not_found(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "delivery",
                     "status": "PENDING",
                     "total_amount": 26.66,
                     "created_date": "2026-02-20T12:34:56",
@@ -447,7 +458,6 @@ def test_save_order_success(mocker):
     assert isinstance(saved_orders, list)
     assert len(saved_orders) > 1
 
-
 def test_save_order_items_success(mocker):
     """tests that save_order_items will save new order items to repo"""
     existing_data = [{"order_item_id": "item001",
@@ -596,7 +606,6 @@ def test_process_order_service_insufficient_inventory(mocker):
     with pytest.raises(HTTPException) as testException: process_order_service(customer_id, address_id)
     assert testException.value.status_code ==422
         
-
 def test_process_order_service_empty_cart(mocker):
     """checks that method raises 400 exception if a cart has no items in it"""
     customer_id = "2"
@@ -684,7 +693,7 @@ def test_process_order_service_address_not_found(mocker):
     mock_build_order.assert_not_called()
     mock_build_order_items.assert_not_called()
 
-# def test_process_order_service_multiple_items(mocker):
+def test_process_order_service_multiple_items(mocker):
     """tests that process_order will route information to all services it calls given customer and address with multiple order items"""
     customer_id = "2"
     address_id = "addr_456"
@@ -801,7 +810,7 @@ def test_cancel_order_restaurant_service_order_not_found(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "delivery",
                     "status": "PENDING",
                     "total_amount": 26.66,
                     "created_date": "2026-02-20T12:34:56",
@@ -823,7 +832,7 @@ def test_get_order_status_by_id_service_success(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "delivery",
                     "status": "CANCELED",
                     "total_amount": 26.66,
                     "created_date": "2026-02-20T12:34:56",
@@ -842,7 +851,7 @@ def test_get_order_status_by_id_service_order_not_found(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "delivery",
                     "status": "PENDING",
                     "total_amount": 26.66,
                     "created_date": "2026-02-20T12:34:56",
@@ -861,7 +870,7 @@ def test_set_order_status_service_success(mocker):
         "customer_id": "cust456",
         "restaurant_id": 789,
         "cart_id": "cart101",
-        "delivery_id": None,
+        "delivery_id": "delivery",
         "status": "PENDING",
         "total_amount": 26.66,
         "created_date": "2026-02-20T12:34:56",
@@ -885,7 +894,7 @@ def test_set_order_status_service_order_not_found(mocker):
         "customer_id": "cust456",
         "restaurant_id": 789,
         "cart_id": "cart101",
-        "delivery_id": None,
+        "delivery_id": "delivery",
         "status": "PENDING",
         "total_amount": 26.66,
         "created_date": "2026-02-20T12:34:56",
@@ -922,7 +931,6 @@ def test_cancel_order_customer_success(mocker):
     mocker.patch("app.services.order_service.notify_refund_issued", return_value=None)
     mocker.patch("app.services.order_service.notify_order_status_update_customer_cancels", return_value=None)
 
-    
     mocker.patch("app.services.order_service.load_order_items", return_value=[{
         "order_id": "order123",
         "order_item_id" : "1",
@@ -940,7 +948,7 @@ def test_cancel_order_customer_service_completed(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "delivery",
                     "status": "COMPLETED",
                     "total_amount": 26.66,
                     "created_date": "2026-02-20T12:34:56",
@@ -976,6 +984,7 @@ def test_accept_order_service_success(mocker):
         "order_item_id" : "1",
         "order_id" : "order123"
     }]
+    mocker.patch("app.services.order_service.create_delivery_service", return_value=mock_delivery)
     mocker.patch("app.services.order_service.subtract_stock", return_value=None)
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders")
@@ -998,6 +1007,7 @@ def test_accept_order_service_order_not_found(mocker):
                     "created_date": "2026-02-20T12:34:56",
                     "delivery_address_id": "addr202"
         }]
+    mocker.patch("app.services.order_service.create_delivery_service", return_value=mock_delivery)
     mocker.patch("app.services.order_service.subtract_stock", return_value=None)
     mocker.patch("app.services.order_service.notify_order_status_update", return_value=None)
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
@@ -1012,12 +1022,13 @@ def test_accept_order_service_accepted(mocker):
                     "customer_id": "cust456",
                     "restaurant_id": 789,
                     "cart_id": "cart101",
-                    "delivery_id": None,
+                    "delivery_id": "delivery",
                     "status": "IN_PREPARATION",
                     "total_amount": 26.66,
                     "created_date": "2026-02-20T12:34:56",
                     "delivery_address_id": "addr202"
         }]
+    mocker.patch("app.services.order_service.create_delivery_service", return_value=mock_delivery)
     mocker.patch("app.services.order_service.subtract_stock", return_value=None)
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
     mocker.patch("app.services.order_service.save_all_orders")
