@@ -1,17 +1,12 @@
-from enum import Enum
-
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 import unittest.mock
 from app.schemas.Address import AddressResponse
-from app.schemas.Order import OrderResponse
-from app.schemas.OrderItem import OrderItemResponse
-from app.schemas.OrderStatus import OrderStatus
 from app.schemas.Role import UserRole
 from app.schemas.User import UserResponse
 from app.schemas.cart_item_schema import CartItemResponse
-from app.schemas.notification import NotificationBase, NotificationStatus, NotificationType
-from app.services.order_service import CartResponse, DeliveryResponse
+from app.schemas.cart_schema import CartResponse
+from app.schemas.Delivery import DeliveryResponse
 import pytest
 from unittest.mock import patch
 from app.routers.order import router
@@ -149,7 +144,8 @@ def mock_delivery_response():
     return DeliveryResponse(address_id= "4",
             order_id= "cust456",
             courier_id= "5",
-            delivery_id = "newdelivery")
+            delivery_id = "newdelivery",
+            created_date = "2025-01-20T11:34:56")
     
 def test_create_order_success(mock_customer_response, mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items,mock_cart,mock_address_response):
     """Tests that create_order will route valid input to process_order_service and return expected json with a 201 code """
@@ -418,21 +414,21 @@ def test_accept_order_success(mock_staff_response, mock_load_orders,mock_load_or
                     with patch("app.services.order_service.notify_order_status_update") as mock_order_notfiy:
                         with patch("app.services.order_service.create_delivery_service", return_value = mock_delivery_response):
                             with patch("app.services.order_service.subtract_stock", return_value=None):
-                                response = client.put("/orders/accept_order/order123",headers={"token":"123"})
-                                assert response.status_code == 200
-                                response_data = response.json()
-                                assert "order_id" in response_data
-                                assert "customer_id" in response_data
-                                assert "restaurant_id" in response_data
-                                assert "delivery_address_id" in response_data
-                                assert "status" in response_data
-                                assert "total_amount" in response_data
-                                assert "items" in response_data
-                                assert response_data["customer_id"] == "cust456"
-                                assert response_data["total_amount"] == 26.66
-                                assert response_data["status"] == "ACCEPTED"
-                                assert response_data["delivery_id"] == "newdelivery"
-                                mock_order_notfiy.assert_called_once()
+                                    response = client.put("/orders/accept_order/order123",headers={"token":"123"})
+                                    assert response.status_code == 200
+                                    response_data = response.json()
+                                    assert "order_id" in response_data
+                                    assert "customer_id" in response_data
+                                    assert "restaurant_id" in response_data
+                                    assert "delivery_address_id" in response_data
+                                    assert "status" in response_data
+                                    assert "total_amount" in response_data
+                                    assert "items" in response_data
+                                    assert response_data["customer_id"] == "cust456"
+                                    assert response_data["total_amount"] == 26.66
+                                    assert response_data["status"] == "ACCEPTED"
+                                    assert response_data["delivery_id"] == "newdelivery"
+                                    mock_order_notfiy.assert_called_once()
                                                             
 def test_accept_order_success_order_not_found(mock_staff_response, mock_load_orders,mock_load_order_items,mock_save_orders,mock_delivery_response):
     """tests that accept_order will return an 404 message if order is not found"""
@@ -442,8 +438,9 @@ def test_accept_order_success_order_not_found(mock_staff_response, mock_load_ord
                 with patch("app.services.order_service.save_all_orders", return_value = mock_save_orders):
                     with patch("app.services.order_service.notify_order_status_update") as mock_notfiy:
                         with patch("app.services.order_service.subtract_stock", return_value=None):
-                            response = client.put("/orders/accept_order/noorder",headers={"token":"123"})
-                            assert response.status_code == 404
+                            with patch("app.services.order_service.create_delivery_service", return_value = mock_delivery_response):
+                                response = client.put("/orders/accept_order/noorder",headers={"token":"123"})
+                                assert response.status_code == 404
 
 def test_accept_order_not_authenticated():
     """tests that accept order will return a 401 message if user is not logged in"""

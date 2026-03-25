@@ -11,6 +11,7 @@ from app.schemas.OrderStatus import OrderStatus
 import uuid
 from enum import Enum
 from app.schemas.cart_schema import CartResponse
+from app.services.Delivery_service import create_delivery_service
 from app.services.address_service import get_address_by_id_service
 from app.services.cart_service import get_cart_by_customer
 from app.services.food_item_service import get_food_by_id
@@ -19,31 +20,31 @@ from app.services.notification_service import notify_order_placed, notify_order_
 from app.services.payment_service import process_payment_service, process_refund_service
 
 
-##################################################################
-# Stub methods that will get replaced when real modules are availble
-##################################################################
+# ##################################################################
+# # Stub methods that will get replaced when real modules are availble
+# ##################################################################
 
-from pydantic import BaseModel, Field
-from typing import List
+# from pydantic import BaseModel, Field
+# from typing import List
 
-class DeliveryResponse(BaseModel):
-    """this is a stub so I can create a delivery before delivery module is created"""
-    order_id: str
-    courier_id: Optional[str]
-    delivery_id: str
-    address_id: str
+# class DeliveryResponse(BaseModel):
+#     """this is a stub so I can create a delivery before delivery module is created"""
+#     order_id: str
+#     courier_id: Optional[str]
+#     delivery_id: str
+#     address_id: str
     
-def create_delivery_service(order: dict) -> DeliveryResponse:
-    """this is a stub so I can send order to create delivery before delivery module is created"""
-    new_delivery_id = str(uuid.uuid4())
-    return DeliveryResponse(
-            order_id= order["order_id"],
-            courier_id= None,
-            delivery_id= new_delivery_id,
-            address_id= order["delivery_address_id"])
-#######################
-# end of stub methods #
-#######################
+# def create_delivery_service(order: dict) -> DeliveryResponse:
+#     """this is a stub so I can send order to create delivery before delivery module is created"""
+#     new_delivery_id = str(uuid.uuid4())
+#     return DeliveryResponse(
+#             order_id= order["order_id"],
+#             courier_id= None,
+#             delivery_id= new_delivery_id,
+#             address_id= order["delivery_address_id"])
+# #######################
+# # end of stub methods #
+# #######################
 
 
 def validate_cart(customer_id) -> CartResponse:
