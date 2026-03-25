@@ -89,7 +89,7 @@ def test_assign_delivery_to_courier_success():
                     "assignment_id": "1",
                     "user_id": "courier-1",
                     "restaurant_id": "restaurant-1",
-                    "role": "COURIER"
+                    "assignment": "COURIER"
             }
       ]
 
@@ -184,7 +184,7 @@ def test_pick_up_delivery_success():
       }
 
       with patch("app.services.Delivery_service.load_all", return_value = deliveries), \
-            patch("app.services.Delivery_service.set_order_status_service", return_value = mock_order_response) as mock_set_status:
+            patch("app.services.order_service.set_order_status_service", return_value = mock_order_response) as mock_set_status:
 
             result = pickup_delivery("delivery-1")
             
@@ -194,7 +194,7 @@ def test_pick_up_delivery_success():
 #PICK UP DELIVERIES: FAILURE DELIVERY NOT FOUND
 def test_pick_up_delivery_not_found():
       with patch("app.services.Delivery_service.load_all", return_value = []), \
-            patch("app.services.Delivery_service.set_order_status_service") as mock_set_status:
+            patch("app.services.order_service.set_order_status_service") as mock_set_status:
 
             with pytest.raises(HTTPException) as exc_info:
                   pickup_delivery("delivery-1")
@@ -221,7 +221,7 @@ def test_complete_delivery_success():
       }
 
       with patch("app.services.Delivery_service.load_all", return_value = deliveries), \
-            patch("app.services.Delivery_service.set_order_status_service", return_value = mock_order_response) as mock_set_status:
+            patch("app.services.order_service.set_order_status_service", return_value = mock_order_response) as mock_set_status:
 
             result = complete_delivery("delivery-1")
             
@@ -231,7 +231,7 @@ def test_complete_delivery_success():
 #COMPLETE DELIVERIES: FAILURE DELIVERY NOT FOUND
 def test_complete_delivery_not_found():
       with patch("app.services.Delivery_service.load_all", return_value = []), \
-            patch("app.services.Delivery_service.set_order_status_service") as mock_set_status:
+            patch("app.services.order_service.set_order_status_service") as mock_set_status:
 
             with pytest.raises(HTTPException) as exc_info:
                   complete_delivery("delivery-1")

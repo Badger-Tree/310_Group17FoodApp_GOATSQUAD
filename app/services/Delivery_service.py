@@ -5,7 +5,7 @@ from app.repositories.orders_repo import load_all as load_orders
 from app.repositories.staff_assignment_repo import load_all as load_staff_assignments
 from app.schemas.Delivery import DeliveryResponse
 from app.schemas.OrderStatus import OrderStatus
-from app.services.order_service import set_order_status_service
+# from app.services.order_service import set_order_status_service
 from fastapi import HTTPException
 
 #Create delivery service, takes in order object
@@ -59,7 +59,7 @@ def assign_delivery_to_courier(delivery_id: str, courier_id: str) -> DeliveryRes
         if (
             assignment["user_id"] == courier_id
             and assignment["restaurant_id"] == str(target_order["restaurant_id"])
-            and assignment["role"] == "COURIER"
+            and assignment["assignment"] == "COURIER"
         ):
             valid_courier = assignment
             break
@@ -74,6 +74,7 @@ def assign_delivery_to_courier(delivery_id: str, courier_id: str) -> DeliveryRes
 
 #SET DELIVERY AS PICKED UP
 def pickup_delivery(delivery_id: str):
+    from app.services.order_service import set_order_status_service
     deliveries = load_all()
 
     target_delivery = None
@@ -89,6 +90,7 @@ def pickup_delivery(delivery_id: str):
 
 #SET DELIVERY AS COMPLETE
 def complete_delivery(delivery_id: str):
+    from app.services.order_service import set_order_status_service
     deliveries = load_all()
 
     target_delivery = None
