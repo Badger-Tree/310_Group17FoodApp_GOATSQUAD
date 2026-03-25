@@ -24,11 +24,3 @@ def update_inventory(food_item_id: int, payload: InventoryUpdate):
     if not updated_record:
         raise HTTPException(status_code=404, detail="Inventory record not found")
     return updated_record
-
-@router.delete("/{food_item_id}", status_code=204)
-def delete_inventory(food_item_id: int):
-    """Delete an inventory record."""
-    success = inventory_service.delete_inventory_record(food_item_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Inventory record not found")
-    return None
