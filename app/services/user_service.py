@@ -1,10 +1,10 @@
-
 from typing import List
 from fastapi import HTTPException
 from app.repositories.users_repo_csv import find_by_email_repo, find_by_id_repo, find_by_email_repo, add_user_repo, update_user_repo
 from app.schemas.User import UserResponse, UserUpdate
 from app.factories.user_factory import CustomerFactory, StaffFactory, CustomerCreate, StaffCreate
 from app.schemas.Role import UserRole
+from app.services.cart_service import create_cart
 
 def get_user_by_id_service(userid : str) -> UserResponse:
     """This function returns a UserResponse for a user given a user id"""
@@ -31,6 +31,8 @@ def register_user_service(payload: CustomerCreate | StaffCreate, role: UserRole)
     else:raise HTTPException(status_code=400, detail=f"User role not found")
     new_user = factory.create_user(payload)
     new_user = add_user_repo(new_user)
+    if role == UserRole.CUSTOMER:
+        create_cart(new_user["id"])
     return UserResponse(**new_user)
 
 def update_user_service(user_id:str, payload:UserUpdate) -> UserResponse:
