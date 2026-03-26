@@ -20,7 +20,7 @@ def create_cart(current_customer: str):
     customer_id = str(current_customer)
     cart_id = str(ulid.new())
 
-    cart_data = load_all_carts()
+    cart_data = load_all_carts() 
 
     cart = {
         "customer_id": customer_id,
@@ -133,3 +133,21 @@ def update_cart(customer_id, cart_item_id, cart_update) -> CartResponse:
 
     save_cart(cart_data)
     return c
+
+def clear_cart(customer_id, cart_id): 
+    """Clears the cart completely"""
+    cart_data = load_all_carts() 
+
+    found_cart_item = False
+    for index, cart in enumerate(cart_data):  
+        if cart["cart_id"] == cart_id:
+            found_cart_item = True  
+            cart["customer_id"] == customer_id           
+            cart["cart_items"] = []        
+            cart["total"] = 0.0           
+            break
+    if not found_cart_item:
+        raise HTTPException(status_code=404, detail=f"Cart '{cart_id}' not found")
+    save_cart(cart_data)
+
+    return cart
