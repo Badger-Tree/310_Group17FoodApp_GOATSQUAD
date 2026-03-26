@@ -14,3 +14,7 @@ class CartResponse(CartBase):
 class CartCreate(BaseModel):
     food_item_id: int
     quantity: PositiveInt
+
+
+class CartUpdate(CartCreate): 
+    pass
