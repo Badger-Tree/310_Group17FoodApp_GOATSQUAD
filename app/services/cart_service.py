@@ -34,18 +34,6 @@ def create_cart(current_customer: str):
     save_cart(cart_data)
     return cart
 
-"""
-THIS WAS TO GET FOOD ITEM ID BUT NOT USED, COULD ALSO CHECK INVENTORY IF THERES TIME
-def verify_food_item(food_data): 
-    Verifies that the food_item exists
-    food_item= get_food_by_id(food_data)
-    print(food_item)
-    food_item_id = food_item["food_item_id"]
-    
-    if not food_item_id:    
-        raise HTTPException(status_code=404, detail="Food item does not exist")
-    return food_item
-"""
 
 def add_to_cart(customer_id, cart_add: CartCreate) -> CartResponse:
     """Adds a new item to the cart if the cart_id associated with the customer exists"""
@@ -133,3 +121,22 @@ def update_cart(customer_id, cart_item_id, cart_update) -> CartResponse:
 
     save_cart(cart_data)
     return c
+
+
+def clear_cart(customer_id, cart_id): 
+    """Clears the cart completely"""
+    cart_data = load_all_carts() 
+
+    found_cart_item = False
+    for index, cart in enumerate(cart_data):  
+        if cart["cart_id"] == cart_id:
+            found_cart_item = True  
+            cart["customer_id"] == customer_id           
+            cart["cart_items"] = []        
+            cart["total"] = 0.0           
+            break
+    if not found_cart_item:
+        raise HTTPException(status_code=404, detail=f"Cart '{cart_id}' not found")
+    save_cart(cart_data)
+
+    return cart
