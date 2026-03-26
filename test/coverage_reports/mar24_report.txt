@@ -1,0 +1,56 @@
+============================= test session starts ==============================
+
+test/test_factories/test_user_factories.py ...                           [  0%]
+test/test_repositories/test_addresses_repo_csv.py ......                 [  2%]
+test/test_repositories/test_cart_items_repo_csv.py .....                 [  4%]
+test/test_repositories/test_cart_repo_csv.py .....                       [  5%]
+test/test_repositories/test_deliveries_repo.py ......                    [  7%]
+test/test_repositories/test_food_item_repositories.py .                  [  7%]
+test/test_repositories/test_inventory_repository.py .                    [  7%]
+test/test_repositories/test_notification_repo.py .....                   [  9%]
+test/test_repositories/test_order_items_repo.py ......                   [ 10%]
+test/test_repositories/test_orders_repo.py ......                        [ 12%]
+test/test_repositories/test_sessions_repository.py ......                [ 14%]
+test/test_repositories/test_users_repo_csv.py .............              [ 18%]
+test/test_routers/test_address.py ..............                         [ 22%]
+test/test_routers/test_authentication.py .....                           [ 23%]
+test/test_routers/test_cart_router.py .......                            [ 25%]
+test/test_routers/test_delivery_router.py ......                         [ 27%]
+test/test_routers/test_order.py .........................                [ 34%]
+test/test_routers/test_user.py .................                         [ 39%]
+test/test_schemas/test_Address.py ............                           [ 43%]
+test/test_schemas/test_Login.py ....                                     [ 44%]
+test/test_schemas/test_Order.py .........                                [ 46%]
+test/test_schemas/test_OrderItem.py ........                             [ 49%]
+test/test_schemas/test_Role.py ..                                        [ 49%]
+test/test_schemas/test_Token.py ......                                   [ 51%]
+test/test_schemas/test_User.py ............                              [ 54%]
+test/test_schemas/test_cart_items_schemas.py .......                     [ 56%]
+test/test_schemas/test_cart_schemas.py .......                           [ 58%]
+test/test_schemas/test_food_item_schemas.py .....                        [ 60%]
+test/test_schemas/test_inventory_schemas.py .....                        [ 61%]
+test/test_schemas/test_notification_schemas.py ....                      [ 63%]
+test/test_services/test_address_service.py ...........                   [ 66%]
+test/test_services/test_authentication_service.py ......                 [ 67%]
+test/test_services/test_authorization_service.py ....                    [ 69%]
+test/test_services/test_cart_item_service.py ......                      [ 70%]
+test/test_services/test_cart_service.py ..................               [ 76%]
+test/test_services/test_deliveries_service.py .........                  [ 78%]
+test/test_services/test_food_item_services.py ..                         [ 79%]
+test/test_services/test_inventory_service.py .....                       [ 80%]
+test/test_services/test_notification_service.py ..........               [ 83%]
+test/test_services/test_order_service.py ............................... [ 92%]
+.....                                                                    [ 93%]
+test/test_services/test_payment_service.py ....                          [ 95%]
+test/test_services/test_session_manager_service.py .......               [ 97%]
+test/test_services/test_user_service.py ..........                       [100%]
+
+=============================== warnings summary ===============================
+test/test_routers/test_address.py::test_create_address_success
+test/test_services/test_address_service.py::test_create_address_service_success
+test/test_services/test_address_service.py::test_create_address_service_partial_input
+  /Users/davamegan/Documents/UBCO/2025-2026/WINTER 2026/COSC 310/Labs/310_Group17FoodApp_GOATSQUAD/app/services/address_service.py:43: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "created_date": datetime.utcnow().isoformat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 346 passed, 3 warnings in 0.62s ========================
