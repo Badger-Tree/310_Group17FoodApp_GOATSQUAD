@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from datetime import time
 from typing import Optional
 
-
 """ This is the base model for restaurant"""
 class RestaurantBase(BaseModel):
     restaurant_name: str

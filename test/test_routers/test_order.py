@@ -161,22 +161,23 @@ def test_create_order_success(mock_customer_response, mock_load_orders,mock_load
                                         with patch("app.services.order_service.notify_order_placed") as mock_order_notfiy:
                                             with patch("app.services.order_service.notify_payment_status") as mock_payment_notify:
                                                 with patch("app.services.order_service.get_address_by_id_service", return_value = mock_address_response):
-                                                    response = client.post("/orders/create_order/4",headers={"token":"123"})
-                                                    assert response.status_code == 201
-                                                    response_data = response.json()
-                                                    assert "order_id" in response_data
-                                                    assert "customer_id" in response_data
-                                                    assert "restaurant_id" in response_data
-                                                    assert "delivery_address_id" in response_data
-                                                    assert "status" in response_data
-                                                    assert "total_amount" in response_data
-                                                    assert "items" in response_data
-                                                    assert response_data["customer_id"] == "cust456"
-                                                    assert response_data["total_amount"] == 48.75
-                                                    assert response_data["status"] == "PENDING"
-                                                    assert response_data["delivery_address_id"] == "4"
-                                                    mock_payment_notify.assert_called_once()
-                                                    mock_order_notfiy.assert_called_once()
+                                                    with patch("app.services.order_service.clear_cart"):
+                                                        response = client.post("/orders/create_order/4",headers={"token":"123"})
+                                                        assert response.status_code == 201
+                                                        response_data = response.json()
+                                                        assert "order_id" in response_data
+                                                        assert "customer_id" in response_data
+                                                        assert "restaurant_id" in response_data
+                                                        assert "delivery_address_id" in response_data
+                                                        assert "status" in response_data
+                                                        assert "total_amount" in response_data
+                                                        assert "items" in response_data
+                                                        assert response_data["customer_id"] == "cust456"
+                                                        assert response_data["total_amount"] == 48.75
+                                                        assert response_data["status"] == "PENDING"
+                                                        assert response_data["delivery_address_id"] == "4"
+                                                        mock_payment_notify.assert_called_once()
+                                                        mock_order_notfiy.assert_called_once()
                     
 def test_create_order_empty_order(mock_customer_response, mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items,mock_empty_cart):
     """Tests that create_order will throw a 422 error if an order has no order items"""                
@@ -192,11 +193,12 @@ def test_create_order_empty_order(mock_customer_response, mock_load_orders,mock_
                                         with patch("app.services.order_service.notify_order_placed") as mock_order_notfiy:
                                             with patch("app.services.order_service.notify_payment_status") as mock_payment_notify:
                                                 with patch("app.services.order_service.get_address_by_id_service", return_value = mock_address_response):
-                                                    response = client.post("/orders/create_order/4",headers={"token":"123"})
-                                                    assert response.status_code == 400
-                                                    mock_payment_notify.assert_not_called()
-                                                    mock_order_notfiy.assert_not_called()  
-                                                        
+                                                    with patch("app.services.order_service.clear_cart"):
+                                                        response = client.post("/orders/create_order/4",headers={"token":"123"})
+                                                        assert response.status_code == 400
+                                                        mock_payment_notify.assert_not_called()
+                                                        mock_order_notfiy.assert_not_called()  
+                                                            
 def test_create_order_not_authorized(mock_staff_response):
     """Tests that create_order will throw a 403 error if the user does not have CUSTOMER role"""                
     with patch("app.routers.order.get_user_from_session", return_value = mock_staff_response):
