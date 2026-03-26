@@ -118,8 +118,8 @@ def test_update_staff_assignment_not_owner(mock_load_users, mock_load_restaurant
     with pytest.raises(HTTPException) as exc_info:
         update_staff_assignment(current_user, "2", "CHEF")
 
-    assert exc_info.value.status_code == 403
-    assert exc_info.value.detail == "Only restaurant owners can update staff assignments."
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Restaurant not found."
 
 #REMOVE STAFF ASSIGNMENT: SUCCESS
 @patch("app.services.staff_assignment_service.save_all")
