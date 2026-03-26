@@ -6,3 +6,4 @@ restaurant_id,owner_id,restaurant_name,cuisine,address,open_hour,closed_hour,res
 9,5,Burger Barn,American,654 Center St.,08:00,22:00,inactive
 10,0,T,striTng,strTTttttting,08:02,08:02,active
 11,1,twest,test,test,08:11,08:21,inactive
+12,a1a68d08-99cd-4cf8-9cd4-571551e062f3,string,string,string,04:00,04:00,active
