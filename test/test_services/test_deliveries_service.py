@@ -87,7 +87,7 @@ def test_assign_delivery_to_courier_success():
       staff_assignments = [
             {
                     "assignment_id": "1",
-                    "user_id": "courier-1",
+                    "staff_id": "courier-1", #fixed bug here
                     "restaurant_id": "restaurant-1",
                     "assignment": "COURIER"
             }
