@@ -1,2 +1,4 @@
 customer_id,cart_id,cart_items,total
-0356ac1c-1db0-42e7-a54a-e4837e529527,01KMGWQS0C93KN9430EMQJEYGZ,"[{""cart_item_id"": ""01KMHMTFJ43MJ0FV68Q54Z6TNP"", ""food_item_id"": 3, ""quantity"": 3, ""price_per_item"": 10.0, ""subtotal"": 30.0}, {""cart_item_id"": ""01KMHMTP9GS6T13VYV8JP5H9EH"", ""food_item_id"": 3, ""quantity"": 2, ""price_per_item"": 10.0, ""subtotal"": 20.0}]",50.0
+6724b24d-7388-45e1-a5d6-ab0bca59626b,01KMM4J5XC7TFZP66JJFNT3XSD,[],0.0
+558faba1-02ab-4545-9e5d-80d9b934681f,01KMM4JCMZQQ83459B5G15MA9E,[],0.0
+b1c95dc0-750f-4035-ba04-d3a9196da20a,01KMM4JFPG90XPY9PPE9XMX7V6,[],0.0
