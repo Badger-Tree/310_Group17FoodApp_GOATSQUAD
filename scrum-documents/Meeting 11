@@ -1,0 +1,62 @@
+Date: March 26, 2026
+Type: Team Meeting
+Attendees: Ailish, Colleen, Megan, Hitesh
+
+Key Discussion Points:
+  1. Preparing for M3 submission and demo
+  2. Walk through everyone's code
+  3. Leftover tasks in the project board
+  4. Refactoring code
+
+What was accomplished during the meeting:
+  1. Sharing each others codes and progress.
+  2. Demo each other's code
+  3. Trying to make the app work for everyone.
+
+Responsibilities:
+
+General:
+- Testing
+- Code review
+- Making sure the sprint backlog is organized and followed
+
+Tesh:
+- Improve continuous integration when possible
+- Implementing the restaurant module
+- Implementing delivery module
+- Create the scrum documents
+- Refactoring code and creating tests
+
+Colleen:
+- Implementing user registration module
+- Implementing orders module
+- Implementing session manager
+- Implementing authorization and authentication
+- Implementing tests to main
+
+Megan:
+- Implementing continuous integration
+- Implementing food item and inventory module
+- Implementing notification module
+- Implementing docker setup and coverage reports
+
+Ailish:
+- Implementing cart module
+- Implementing payment module
+- Implementing part of Delivery module
+
+Discussion during the meeting:
+- What's working well?
+  1. Good teamwork and communication.
+  2. Better at github
+  3. Good organization.
+  4. It's been helpful talking through each other's code and problems.
+  5. Walked through modules to prep for demo
+  6. Last minute trouble shooting
+- What needs improvement
+  1. Organization
+  
+Action Items (Things to get done as a group) and Responsibilities:
+  1. Start thinking about the front end
+  2. Refactor code
+  3. Target left over issues
