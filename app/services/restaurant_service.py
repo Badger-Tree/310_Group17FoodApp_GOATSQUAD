@@ -12,6 +12,8 @@ from app.schemas.Restaurant import RestaurantCreate, RestaurantUpdate, Restauran
 from app.services.user_service import update_user_service
 """Importing the users csv and the role schema to update the user role during restaurant creation"""
 from app.repositories.users_repo_csv import load_all as load_users, save_all as save_users
+"""Importing the staff assignment methods"""
+from app.services.staff_assignment_service import create_staff_assignment_for_owner
 from app.schemas.Role import UserRole
 
 """Service for creating a restaurant"""
@@ -39,24 +41,28 @@ def create_restaurant_service(payload: RestaurantCreate, current_user_id: str) -
         "restaurant_status": "active"
     }
 
-    #Updating the user role to owner if they create a restaurant
+    #Assigning "OWNER" assignment when a user creates a restaurant.
     users = load_users()
     user_found = False
     
     for user in users:
         if user.get("id") == current_user_id:
-            user["role"] = UserRole.OWNER.value #update the role to owner
-            user_found = True
-            break
+           user_found = True
+           break
 
     if not user_found:
         raise HTTPException(status_code=404, detail=f"User '{current_user_id}' not found")
     
-    save_users(users)
-    
     restaurants.append(new_restaurant)
     save_restaurants(restaurants)
+    create_staff_assignment_for_owner(new_restaurant["restaurant_id"], current_user_id, "OWNER")
+
+
     
+
+    
+
+
     #return the restaurant response
     return RestaurantResponse(
         restaurant_id = new_id,

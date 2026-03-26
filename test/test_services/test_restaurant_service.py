@@ -35,6 +35,8 @@ def test_create_restaurant(monkeypatch):
         }
     ]
 
+    assignments= []
+
     #mock loading the restaurants
     def test_load_restaurants():
         return test_restaurants
@@ -51,12 +53,27 @@ def test_create_restaurant(monkeypatch):
     def test_save_users(data):
         test_users[:] = data
     
+
+    def test_create_staff_assignment_for_owner(restaurant_id, staff_id, assignment):
+        assignments.append({
+            "restaurant_id": restaurant_id,
+            "staff_id": staff_id,
+            "assignment": assignment
+        })
+        return {
+            "assignment_id": "1",
+            "restaurant_id": restaurant_id,
+            "staff_id": staff_id,
+            "assignment": assignment
+        }
+
+    
     #this lets us temporarily modify the original function with our test ones
     monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
     monkeypatch.setattr(restaurant_service, "save_restaurants", test_save_restaurants)
     monkeypatch.setattr(restaurant_service, "load_users", test_load_users)
     monkeypatch.setattr(restaurant_service, "save_users", test_save_users)
-
+    monkeypatch.setattr(restaurant_service, "create_staff_assignment_for_owner", test_create_staff_assignment_for_owner)
     #payload that matches schema
     payload = RestaurantCreate(
         restaurant_name="Testaurant",
@@ -77,7 +94,10 @@ def test_create_restaurant(monkeypatch):
     assert result.closed_hour == time(21, 0)
     assert result.restaurant_status == "active"
     assert len(test_restaurants) == 2
-    assert test_users[0]["role"] == "OWNER"
+    assert len(assignments) == 1
+    assert assignments[0]["restaurant_id"] == str(result.restaurant_id)
+    assert assignments[0]["staff_id"] == test_users[0]["id"]
+    assert assignments[0]["assignment"] == "OWNER"
 
 #test updating a restaurant
 from app.schemas.Restaurant import RestaurantUpdate
