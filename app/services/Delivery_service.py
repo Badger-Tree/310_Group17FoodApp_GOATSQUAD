@@ -57,7 +57,7 @@ def assign_delivery_to_courier(delivery_id: str, courier_id: str) -> DeliveryRes
     valid_courier = None
     for assignment in staff_assignments:
         if (
-            assignment["staff_id"] == courier_id
+            assignment["user_id"] == courier_id
             and assignment["restaurant_id"] == str(target_order["restaurant_id"])
             and assignment["assignment"] == "COURIER"
         ):

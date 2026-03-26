@@ -48,9 +48,3 @@ notification_id,recipient_user_id,notification_type,message,status
 47,123,payment,Payment for order 3e11c2ac-5a0b-4892-8357-e7b8c2ac1178 was successful. The restaurant is preparing your meal!,pending
 48,123,payment,Payment for order 56b3e8aa-44f2-40d0-b044-a91c8ea88c72 was successful. The restaurant is preparing your meal!,pending
 49,123,payment,Payment for order ea6d19f8-2ff9-48b3-90ff-e14b42ade21d was successful. The restaurant is preparing your meal!,pending
-50,6724b24d-7388-45e1-a5d6-ab0bca59626b,payment,Payment for order 24559264-630a-4ae4-9bd3-5ade8b3acae3 failed. Please update your payment information and try again.,failed
-51,6724b24d-7388-45e1-a5d6-ab0bca59626b,payment,Payment for order 5956dc73-4b98-490e-9798-86f232c19e48 failed. Please update your payment information and try again.,failed
-52,6724b24d-7388-45e1-a5d6-ab0bca59626b,payment,Payment for order 564fd901-1b96-4631-afea-7db8f104317a was successful. The restaurant is preparing your meal!,pending
-53,6724b24d-7388-45e1-a5d6-ab0bca59626b,order,Order 564fd901-1b96-4631-afea-7db8f104317a placed! We'll let you know when it's ready.,pending
-54,101,order,New order received: 564fd901-1b96-4631-afea-7db8f104317a. Please begin preparation.,pending
-55,6724b24d-7388-45e1-a5d6-ab0bca59626b,order,Your order 564fd901-1b96-4631-afea-7db8f104317a has been approved by the restaurant. We'll let you know when it's ready!,pending
