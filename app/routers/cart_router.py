@@ -1,12 +1,21 @@
 from fastapi import APIRouter, Header
 from app.schemas.cart_schema import CartCreate, CartResponse, CartUpdate
-from app.services.cart_service import add_to_cart, delete_from_cart, update_cart
+from app.services.cart_service import add_to_cart, delete_from_cart, update_cart, get_cart_by_customer
 from app.services.cart_service import add_to_cart, delete_from_cart
 from app.schemas.Token import Token
 from app.services.session_manager_service import get_user_from_session
 from fastapi import HTTPException
 
 router = APIRouter(prefix="/cart", tags=["cart"])
+
+@router.get("/get", response_model=CartResponse, status_code=200)
+def get_cart(customer_id: str):
+    """Gets a single cart by customer id and if not found, raises an error"""
+    cart = get_cart_by_customer(customer_id)
+    if not cart:
+        raise HTTPException(status_code=404, detail="Cart not found")
+    return cart
+
 
 @router.post("/food_item/add", response_model = CartResponse, status_code=201)
 def add_item(cart_item: CartCreate, token: str = Header(...)):

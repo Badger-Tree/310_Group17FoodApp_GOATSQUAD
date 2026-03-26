@@ -15,6 +15,47 @@ class Token:
     def __init__(self, token): 
         self.token = token
 
+
+def test_get_cart_success():
+    """Tests that getting a cart buy customer id is successful"""
+
+    mock_cart = {
+        "customer_id": "2",
+        "cart_id": "GHDJDKSLAJ",
+        "cart_items": [
+            {
+                "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
+                "food_item_id": 2,
+                "quantity": 3,
+                "price_per_item": 5.99,
+                "subtotal": 17.97
+            },
+
+             {
+                "cart_item_id": "61NVWKSM2AVSFDFKSLAJA",
+                "food_item_id": 1,
+                "quantity": 1,
+                "price_per_item": 15.5,
+                "subtotal": 15.5
+            }
+        ],
+        "total": 33.47
+    }
+
+    with patch("app.routers.cart_router.get_cart_by_customer", return_value = mock_cart):
+        response = client.get("/cart/get", params={"customer_id": "2"})
+        assert response.status_code == 200
+        assert len(response.json()) == 4
+        assert response.json()["customer_id"]== "2"
+
+
+def test_get_cart_invalid():
+    """Tests that getting a cart buy customer id that does not exists raises an error"""
+    with patch("app.routers.cart_router.get_cart_by_customer", return_value = False):
+        response = client.get("/cart/get", params={"customer_id": "99"})
+        assert response.status_code == 404
+
+
 def test_cart_add_success(mocker):
     """Successfully adds a cart item to a cart with valid customer id, food item id, and quantity"""
     mock_cart_create = {"food_item_id": 2, "quantity": 3}
@@ -40,16 +81,11 @@ def test_cart_add_success(mocker):
     mocker.patch("app.services.cart_service.save_cart", return_value=None)
     mocker.patch("app.services.cart_item_service.add_cart_item", side_effect=mock_add_cart_item)
 
-    response = client.post(
-        "/cart/food_item/add",
-        json=mock_cart_create,
-        headers={"token": "RANDOMTOKEN"}
-    )
-
+    response = client.post("/cart/food_item/add", json=mock_cart_create, headers={"token": "RANDOMTOKEN"})
     assert response.status_code == 201 
 
 
-def test_cart_wrong_customer(mocker):
+def test_add_cart_wrong_customer(mocker):
     """Tests that adding an item to the cart with the wrong token raises an error because customer_id does not exist"""
     mock_cart_create = {"food_item_id": 2, "quantity": 3}
     mock_user = MockUser(id="2")
