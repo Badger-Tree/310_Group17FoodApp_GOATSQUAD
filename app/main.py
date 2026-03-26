@@ -15,10 +15,12 @@ app = FastAPI()
 
 @app.get("/health")
 def health():
+    """checks if server is alive and returns ok status"""
     return {"status": "ok"}
 
 @app.get("/")
 def root():
+    """creates a get endpoint at root url, confirms that api is running"""
     return {"message": "GoatSquad is Live!"}
 
 app.include_router(authentication_router)
