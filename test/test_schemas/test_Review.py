@@ -140,18 +140,6 @@ def test_ReviewCreate_invalid_rating():
                     "rating" : 6}
     with pytest.raises(ValidationError): ReviewCreate(**input_data)
 
-
-
-
-    
-    # result = ReviewBase(**input_data)
-    # assert result.customer_id == "2"
-    # assert result.restaurant_id == 3
-    # assert result.review == "ok food"
-    # assert result.rating == 5
-    
-    
-    
 def test_ReviewResponse_valid():
     """tests that ReviewResponse is created successfully with valid input"""
     input_data = {"review_id" : "1",
