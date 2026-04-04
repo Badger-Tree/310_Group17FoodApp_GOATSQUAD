@@ -1,0 +1,43 @@
+Date: April 2, 2026
+Type: Team Meeting
+Attendees: Ailish, Colleen, Megan, Hitesh
+
+Key Discussion Points:
+  1. Additional features for M4
+  2. M4 submissions
+
+What was accomplished during the meeting:
+  1. Started planning for the presentation
+  2. Decided on additional features for M4
+  3.
+
+Responsibilities:
+
+General:
+- Testing
+- Code review
+- Making sure the sprint backlog is organized and followed
+- Additional feature implementation
+
+Tesh:
+- Refactoring code
+- Create the scrum documents
+- Additional M4 feature: implementing a order history page with sorting
+
+Colleen:
+- Refactor code
+- Additional M4 feature: system allows users to rate and review completed orders or restaurants.
+
+Megan:
+- Refactor code
+- Additional M4 feature: save order and restaurants to favorites so customer can order again.
+
+Ailish:
+- Refactor code
+- Additional M4 feature: food/restuarant popularity - track how often a food or restaurant is ordered, use that with displaying results on website.
+
+  
+Action Items (Things to get done as a group) and Responsibilities:
+  1. Start thinking about presentation and prepare for other deliverables.
+  2. Refactor Codee
+  3. Implement M4 features
