@@ -1,13 +1,11 @@
 from datetime import datetime
-
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 import unittest.mock
 from unittest.mock import patch
-
 import pytest
 from app.routers.review import router
-from app.schemas.Review import ReviewCreate
+from app.schemas.Review import ReviewCreate, ReviewResponse
 from app.schemas.Role import UserRole
 from app.schemas.User import UserResponse
 
@@ -53,8 +51,8 @@ def mock_load_reviews():
                 "review_id": "review123",
                 "customer_id": "cust456",
                 "restaurant_id": 789,
-                "review": 4,
-                "rating": "ok food"
+                "review": "ok food",
+                "rating": 4
             }]
 
 def test_create_review_success(mock_customer_response, mock_orders, mock_load_reviews):
@@ -112,3 +110,20 @@ def test_create_review_customer_already_reviewed(mock_customer_response, mock_or
                         )
             assert response.status_code == 422
             mock_save.assert_not_called()
+
+def test_get_review_success(mock_load_reviews):
+    """tests that get_review will pass a get request to get_review_service and return a ReviewResponse given a valid review_id"""
+    with patch("app.services.review_service.load_reviews", return_value=mock_load_reviews):
+        response = client.get("/reviews/get_review/review123")
+        assert response.status_code == 201
+        assert response.json()["review_id"] == "review123"
+        assert response.json()["customer_id"] == "cust456"
+        assert response.json()["restaurant_id"] == 789
+        assert response.json()["review"] == "ok food"
+        assert response.json()["rating"] == 4
+        
+def test_get_review_not_found(mock_load_reviews):
+    """tests that get_review will pass a get request to get_review_service and return a ReviewResponse given a valid review_id"""
+    with patch("app.services.review_service.load_reviews", return_value=mock_load_reviews):
+        response = client.get("/reviews/get_review/reviewnotfound")
+        assert response.status_code == 404 

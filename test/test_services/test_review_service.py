@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 import pytest
 from app.schemas.Review import ReviewCreate
-from app.services.review_service import did_customer_order,has_customer_reviewed,create_review_service
+from app.services.review_service import did_customer_order, get_review_service,has_customer_reviewed,create_review_service
 
 mock_orders= [{
                 "order_id": "order123",
@@ -18,8 +18,8 @@ mock_reviews = [{
                 "review_id": "review123",
                 "customer_id": "cust456",
                 "restaurant_id": 789,
-                "review": 4,
-                "rating": "ok food"
+                "review": "ok food",
+                "rating": 4
                 }]
 mock_input = {
                 "restaurant_id": 444,
@@ -95,3 +95,21 @@ def test_create_review_service_customer_already_reviewed(mocker):
 
     with pytest.raises(HTTPException) as testException: create_review_service("cust456", mock_input)
     assert testException.value.status_code ==422
+
+def test_get_review_service_success(mocker):
+    """tests that get_review_service will return a ReviewResponse given a matching review_id"""
+    mocker.patch("app.services.review_service.load_reviews", return_value = mock_reviews)
+    
+    result = get_review_service("review123")
+    assert result.review_id == "review123"
+    assert result.customer_id == "cust456"
+    assert result.restaurant_id == 789
+    assert result.review == "ok food"
+    assert result.rating == 4
+    
+def test_get_review_service_invalid_input(mocker):
+    """tests that get_review_service will return an exception if provided review_id is not found"""
+    mocker.patch("app.services.review_service.load_reviews", return_value = mock_reviews)
+    
+    with pytest.raises(HTTPException) as testException: get_review_service("idnotfound")
+    assert testException.value.status_code ==404
