@@ -63,4 +63,15 @@ def get_review_by_restaurant_service(restaurant_id: int) -> List[ReviewResponse]
     if restaurant_reviews:
         return restaurant_reviews
     raise HTTPException(status_code=404, detail=f"no reviews found for restaurant {restaurant_id}")
-    
+
+def delete_review_service(review_id: str):
+    reviews = load_reviews()
+    found_review = False
+    for index, review in enumerate(reviews):
+        if review["review_id"] == review_id:
+            reviews.pop(index)
+            found_review = True
+    if not found_review:
+        raise HTTPException(status_code=404, detail=f"review {review_id} not found")
+    save_reviews(reviews)
+    return
