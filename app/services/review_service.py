@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import HTTPException
 from app.repositories.reviews_repo import load_all as load_reviews, save_all as save_reviews
 import uuid
@@ -50,3 +52,15 @@ def get_review_service(review_id: str)-> ReviewResponse:
         if review_id == review["review_id"]:
             return ReviewResponse(**review)
     raise HTTPException(status_code=404, detail=f"review {review_id} not found")
+
+def get_review_by_restaurant_service(restaurant_id) -> List[ReviewResponse]:
+    """returns a list of ReviewResponses associated with provided restaurant or an exception if any exist"""
+    reviews = load_reviews()
+    restaurant_reviews = []
+    for review in reviews:
+        if restaurant_id == review["restaurant_id"]:
+            restaurant_reviews.append(ReviewResponse(**review))
+    if restaurant_reviews:
+        return restaurant_reviews
+    raise HTTPException(status_code=404, detail=f"no reviews found for restaurant {restaurant_id}")
+    
