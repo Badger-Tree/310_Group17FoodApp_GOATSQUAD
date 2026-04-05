@@ -6,7 +6,7 @@ import unittest.mock
 from unittest.mock import patch
 
 import pytest
-from app.routers.order import router
+from app.routers.review import router
 from app.schemas.Review import ReviewCreate
 from app.schemas.Role import UserRole
 from app.schemas.User import UserResponse
@@ -36,6 +36,16 @@ def mock_orders():
                 "total_amount": 26.66,
                 "created_date": "2026-02-20T12:34:56",
                 "delivery_address_id": "addr202"
+            },{
+                "order_id": "order123",
+                "customer_id": "cust456",
+                "restaurant_id": 444,
+                "cart_id": "cart101",
+                "delivery_id": "delivery",
+                "status": "PENDING",
+                "total_amount": 26.66,
+                "created_date": "2026-02-20T12:34:56",
+                "delivery_address_id": "addr202"
             }]
 @pytest.fixture
 def mock_load_reviews():
@@ -46,24 +56,59 @@ def mock_load_reviews():
                 "review": 4,
                 "rating": "ok food"
             }]
-            
-@pytest.fixture
-def mock_input():
-    input =  {
-                "restaurant_id": 444,
-                "review": "good food",
-                "rating": 3
-            }
-    return ReviewCreate(**input)
 
-
-def test_create_review(mock_customer_response, mock_orders, mock_load_reviews,mock_input):
+def test_create_review_success(mock_customer_response, mock_orders, mock_load_reviews):
     """tests that create_review router will successfully pass a ReviewCreate and customer_id to create_review_service given valid input and session"""
-    patch("app.routers.order.get_user_from_session", return_value = mock_customer_response)
-    patch("app.services.order_service.load_orders", return_value = mock_orders)
-    patch("app.services.review_service.load_reviews", return_value = mock_load_reviews)
-    patch("app.services.review_service.save_reviews")
-        
-    input = mock_input
-    response = client.post("/reviews/create_review",headers={"token":"123"})
-    
+    with patch("app.routers.review.get_user_from_session", return_value=mock_customer_response), \
+        patch("app.services.review_service.get_orders_by_userid_service", return_value=mock_orders), \
+        patch("app.services.review_service.load_reviews", return_value=mock_load_reviews), \
+        patch("app.services.review_service.save_reviews") as mock_save:
+            
+            mock_input = ReviewCreate(restaurant_id= 444,
+                                        review= "good food",
+                                        rating= 3)
+            response = client.post(
+                        "/reviews/create_review/",
+                        json=mock_input.dict(),
+                        headers={"token": "cust456"}
+                    )
+            assert response.status_code == 201
+            mock_save.assert_called_once()
+            
+def test_create_review_customer_hasnt_ordered(mock_customer_response, mock_orders, mock_load_reviews):
+    """tests that create_review router will return an error message if a customer has not ordered from given restaurant"""
+    with patch("app.routers.review.get_user_from_session", return_value=mock_customer_response), \
+        patch("app.services.review_service.get_orders_by_userid_service", return_value=mock_orders), \
+        patch("app.services.review_service.load_reviews", return_value=mock_load_reviews), \
+        patch("app.services.review_service.save_reviews") as mock_save:
+            
+            mock_input = ReviewCreate(restaurant_id=565,
+                                        review= "good food",
+                                        rating= 3
+                                        )
+            response = client.post(
+                        "/reviews/create_review/",
+                        json=mock_input.dict(),
+                        headers={"token": "cust456"}
+                        )
+            assert response.status_code == 422
+            mock_save.assert_not_called()
+            
+def test_create_review_customer_already_reviewed(mock_customer_response, mock_orders, mock_load_reviews):
+    """tests that create_review router will return an error message if a customer has already reviewed a given restaurant"""
+    with patch("app.routers.review.get_user_from_session", return_value=mock_customer_response), \
+        patch("app.services.review_service.get_orders_by_userid_service", return_value=mock_orders), \
+        patch("app.services.review_service.load_reviews", return_value=mock_load_reviews), \
+        patch("app.services.review_service.save_reviews") as mock_save:
+            
+            mock_input = ReviewCreate(restaurant_id=789,
+                                        review= "good food",
+                                        rating= 3
+                                        )
+            response = client.post(
+                        "/reviews/create_review/",
+                        json=mock_input.dict(),
+                        headers={"token": "cust456"}
+                        )
+            assert response.status_code == 422
+            mock_save.assert_not_called()

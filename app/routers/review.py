@@ -12,4 +12,4 @@ def create_review(payload: ReviewCreate, token: str = Header(...)):
     session = Token(token=token)
     current_user = get_user_from_session(session)
     current_user_id = current_user.id
-    create_review_service(current_user_id, payload)
+    return create_review_service(current_user_id, payload)

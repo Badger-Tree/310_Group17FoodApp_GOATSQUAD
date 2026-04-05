@@ -24,11 +24,11 @@ def has_customer_reviewed(customer_id, restaurant_id) -> bool:
     
 def create_review_service(customer_id: str,payload: ReviewCreate):
     """Intakes a CreateOrder object and sends it to the orders report"""
-    if did_customer_order(customer_id, payload.restaurant_id) == False:
+    if not did_customer_order(customer_id, payload.restaurant_id):
+        raise HTTPException(status_code=422, detail=f"Customer has not ordered from restaurant") 
+
+    if has_customer_reviewed(customer_id, payload.restaurant_id): 
         raise HTTPException(status_code=422, detail=f"Customer has already reviewed restaurant")
-    
-    if has_customer_reviewed(customer_id, payload.restaurant_id) == True:
-        raise HTTPException(status_code=422, detail=f"Customer has not ordered from restaurant")   
      
     reviews = load_reviews()
     review_id = str(uuid.uuid4())
