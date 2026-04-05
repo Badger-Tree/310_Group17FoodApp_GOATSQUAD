@@ -128,19 +128,20 @@ def test_get_review_not_found(mock_load_reviews):
         response = client.get("/reviews/get_review/reviewnotfound")
         assert response.status_code == 404 
 
-def test_get_review_by_restaurant_success():
+def test_get_review_by_restaurant_success(mock_load_reviews):
     """tests that get_review_by_restaurant will return a list of ReviewResponses
     given a restaurant_id with matching reviews"""
     with patch("app.services.review_service.load_reviews", return_value=mock_load_reviews):
-        response = client.get("/reviews/get_review_by_restaurant/review123")
+        response = client.get("/reviews/get_review_by_restaurant/789")
         assert response.status_code == 200
-        assert len(response) == 1
-        assert response[0].json()["review_id"] == "review123"
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["review_id"] == "review123"
         
-def test_get_review_by_restaurant_not_found():
+def test_get_review_by_restaurant_not_found(mock_load_reviews):
     """tests that get_review_by_restaurant will return an exception if no reviews are found matching provided restaurant id"""
     with patch("app.services.review_service.load_reviews", return_value=mock_load_reviews):
-        response = client.get("/reviews/get_review_by_restaurant/review123")
+        response = client.get("/reviews/get_review_by_restaurant/555")
         assert response.status_code == 404
         
         

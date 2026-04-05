@@ -53,7 +53,7 @@ def get_review_service(review_id: str)-> ReviewResponse:
             return ReviewResponse(**review)
     raise HTTPException(status_code=404, detail=f"review {review_id} not found")
 
-def get_review_by_restaurant_service(restaurant_id) -> List[ReviewResponse]:
+def get_review_by_restaurant_service(restaurant_id: int) -> List[ReviewResponse]:
     """returns a list of ReviewResponses associated with provided restaurant or an exception if any exist"""
     reviews = load_reviews()
     restaurant_reviews = []
