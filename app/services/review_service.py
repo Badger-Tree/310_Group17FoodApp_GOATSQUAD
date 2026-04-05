@@ -42,3 +42,11 @@ def create_review_service(customer_id: str,payload: ReviewCreate):
     reviews.append(review)
     save_reviews(reviews)
     return ReviewResponse(**review)
+
+def get_review_service(review_id: str)-> ReviewResponse:
+    """returns a ReviewResponse from csv if the review_id exists"""
+    reviews = load_reviews()
+    for review in reviews:
+        if review_id == review["review_id"]:
+            return ReviewResponse(**review)
+    raise HTTPException(status_code=404, detail=f"review {review_id} not found")
