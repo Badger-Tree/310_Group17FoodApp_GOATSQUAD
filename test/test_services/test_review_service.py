@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 import pytest
 from app.schemas.Review import ReviewCreate
-from app.services.review_service import did_customer_order, get_review_by_restaurant_service, get_review_service,has_customer_reviewed,create_review_service
+from app.services.review_service import did_customer_order, get_review_by_restaurant_service, get_review_service,has_customer_reviewed,create_review_service,delete_review_service
 
 mock_orders= [{
                 "order_id": "order123",
@@ -135,3 +135,34 @@ def test_get_review_by_restaurant_service_not_found(mocker):
     
     with pytest.raises(HTTPException) as testException: get_review_by_restaurant_service(111)
     assert testException.value.status_code ==404
+    
+def test_delete_review_service_success(mocker):
+    """tests that delete_review_service will delete a review given valid input"""
+    mock_data = [{
+        "review_id": "review123",
+        "customer_id": "cust456",
+        "restaurant_id": 789,
+        "review": "ok food",
+        "rating": 4
+        }]
+    mocker.patch("app.services.review_service.load_reviews", return_value = mock_data)
+    mock_save = mocker.patch("app.services.review_service.save_reviews")
+    
+    delete_review_service("review123")
+    mock_save.assert_called_once()
+    
+def test_delete_review_service_not_found(mocker):
+    """tests that delete_review_service will delete a review given valid input"""
+    mock_data = [{
+        "review_id": "review123",
+        "customer_id": "cust456",
+        "restaurant_id": 789,
+        "review": "ok food",
+        "rating": 4
+        }]
+    mocker.patch("app.services.review_service.load_reviews", return_value = mock_data)
+    mock_save = mocker.patch("app.services.review_service.save_reviews")
+    
+    with pytest.raises(HTTPException) as testException: delete_review_service("notfound")
+    assert testException.value.status_code ==404
+    mock_save.assert_not_called()

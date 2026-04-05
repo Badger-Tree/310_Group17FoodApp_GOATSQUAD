@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException, Header, status
 from app.schemas.Token import Token
-from app.services.review_service import create_review_service, get_review_by_restaurant_service, get_review_service
+from app.services.review_service import create_review_service, get_review_by_restaurant_service, get_review_service,delete_review_service
 from app.schemas.Review import ReviewCreate, ReviewResponse
 from app.services.session_manager_service import get_user_from_session
 
@@ -25,3 +25,14 @@ def get_review(review_id:str):
 def get_review_by_restaurant(restaurant_id:int):
     """passes request to get_review_service and returns a list of ReviewResponse objects for one restaurant"""
     return get_review_by_restaurant_service(restaurant_id)
+
+@router.delete("/delete/{review_id}",status_code=status.HTTP_204_NO_CONTENT)
+def delete_review(review_id:str, token: str = Header(...)):
+    """checks if review is being deleted by the user who submits it and passes request to delete_review_service"""
+    session = Token(token=token)
+    current_user = get_user_from_session(session)
+    current_review = get_review_service(review_id)
+    if current_user.id != current_review.customer_id:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    delete_review_service(review_id)
+    return

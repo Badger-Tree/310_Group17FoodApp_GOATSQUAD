@@ -54,7 +54,14 @@ def mock_load_reviews():
                 "review": "ok food",
                 "rating": 4
             }]
-
+@pytest.fixture
+def mock_review_response():
+    return ReviewResponse(review_id= "review123",
+                customer_id= "cust456",
+                restaurant_id= 789,
+                review= "ok food",
+                rating= 4)
+    
 def test_create_review_success(mock_customer_response, mock_orders, mock_load_reviews):
     """tests that create_review router will successfully pass a ReviewCreate and customer_id to create_review_service given valid input and session"""
     with patch("app.routers.review.get_user_from_session", return_value=mock_customer_response), \
@@ -144,4 +151,45 @@ def test_get_review_by_restaurant_not_found(mock_load_reviews):
         response = client.get("/reviews/get_review_by_restaurant/555")
         assert response.status_code == 404
         
-        
+def test_delete_review_success(mock_load_reviews,mock_customer_response,mock_review_response):
+    """tests that delete_review will successfully route a delete request to delete_review_service given valid input"""
+    with patch("app.routers.review.get_user_from_session", return_value=mock_customer_response), \
+        patch("app.routers.review.get_review_service", return_value=mock_review_response),\
+        patch("app.services.review_service.load_reviews", return_value=mock_load_reviews), \
+        patch("app.services.review_service.save_reviews") as mock_save:
+            
+            response = client.delete(
+                        "/reviews/delete/review123",
+                        headers={"token": "cust456"}
+                        )
+            assert response.status_code == 204
+            mock_save.assert_called_once()
+            
+def test_delete_review_not_found(mock_load_reviews,mock_customer_response,mock_review_response):
+    """tests that delete_review will return an exception if it cannot find the requested review to delete"""
+    with patch("app.routers.review.get_user_from_session", return_value=mock_customer_response), \
+        patch("app.routers.review.get_review_service", return_value=mock_review_response),\
+        patch("app.services.review_service.load_reviews", return_value=mock_load_reviews), \
+        patch("app.services.review_service.save_reviews") as mock_save:
+            
+            response = client.delete(
+                        "/reviews/delete/notfound",
+                        headers={"token": "cust456"}
+                        )
+            assert response.status_code == 404
+            mock_save.assert_not_called()
+            
+def test_delete_review_service_user_found(mock_load_reviews,mock_customer_response,mock_review_response):
+    """tests that delete_review will raise an error if it cannot find the user in the sesion"""
+    with patch("app.routers.review.get_user_from_session", side_effect=HTTPException(status_code=401)), \
+        patch("app.routers.review.get_review_service", return_value=mock_review_response),\
+        patch("app.services.review_service.load_reviews", return_value=mock_load_reviews), \
+        patch("app.services.review_service.save_reviews") as mock_save:
+            
+            response = client.delete(
+                        "/reviews/delete/notfound",
+                        headers={"token": "cust456"}
+                        )
+            assert response.status_code == 401
+            mock_save.assert_not_called()
+            
