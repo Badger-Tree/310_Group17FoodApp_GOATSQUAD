@@ -22,7 +22,6 @@ mock_reviews = [{
                 "rating": "ok food"
                 }]
 mock_input = {
-                "customer_id": "cust456",
                 "restaurant_id": 444,
                 "review": "good food",
                 "rating": 3
@@ -70,7 +69,7 @@ def test_create_review_service_success(mocker):
     mocker.patch("app.services.review_service.load_reviews", return_value = mock_reviews)
     mocker.patch("app.services.review_service.save_reviews", return_value = mock_save)
 
-    result = create_review_service(mock_input)
+    result = create_review_service("cust456", mock_input)
     assert type(result.review_id) == str
     assert result.customer_id == "cust456"
     assert result.restaurant_id == 444
@@ -84,7 +83,7 @@ def test_create_review_service_customer_hasnt_ordered(mocker):
     mocker.patch("app.services.review_service.load_reviews", return_value = mock_reviews)
     mocker.patch("app.services.review_service.save_reviews", return_value = mock_save)
 
-    with pytest.raises(HTTPException) as testException: create_review_service(mock_input)
+    with pytest.raises(HTTPException) as testException: create_review_service("cust456", mock_input)
     assert testException.value.status_code ==422
     
 def test_create_review_service_customer_already_reviewed(mocker):
@@ -94,5 +93,5 @@ def test_create_review_service_customer_already_reviewed(mocker):
     mocker.patch("app.services.review_service.load_reviews", return_value = mock_reviews)
     mocker.patch("app.services.review_service.save_reviews", return_value = mock_save)
 
-    with pytest.raises(HTTPException) as testException: create_review_service(mock_input)
+    with pytest.raises(HTTPException) as testException: create_review_service("cust456", mock_input)
     assert testException.value.status_code ==422

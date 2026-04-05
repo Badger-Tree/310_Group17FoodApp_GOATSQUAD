@@ -4,8 +4,6 @@ import uuid
 from app.schemas.Review import ReviewCreate, ReviewResponse
 from app.services.order_service import get_orders_by_userid_service
 
-
-# get_orders_by_restaurant_service
 get_orders_by_userid_service
 
 def did_customer_order(customer_id:str, restaurant_id: int) -> bool:
@@ -24,19 +22,19 @@ def has_customer_reviewed(customer_id, restaurant_id) -> bool:
             return True
     return False
     
-def create_review_service(payload: ReviewCreate):
+def create_review_service(customer_id: str,payload: ReviewCreate):
     """Intakes a CreateOrder object and sends it to the orders report"""
-    if did_customer_order(payload.customer_id, payload.restaurant_id) == False:
+    if did_customer_order(customer_id, payload.restaurant_id) == False:
         raise HTTPException(status_code=422, detail=f"Customer has already reviewed restaurant")
     
-    if has_customer_reviewed(payload.customer_id, payload.restaurant_id) == True:
+    if has_customer_reviewed(customer_id, payload.restaurant_id) == True:
         raise HTTPException(status_code=422, detail=f"Customer has not ordered from restaurant")   
      
     reviews = load_reviews()
     review_id = str(uuid.uuid4())
     
     review = {"review_id": review_id,
-                "customer_id": payload.customer_id,
+                "customer_id": customer_id,
                 "restaurant_id": payload.restaurant_id,
                 "review": payload.review,
                 "rating": payload.rating
