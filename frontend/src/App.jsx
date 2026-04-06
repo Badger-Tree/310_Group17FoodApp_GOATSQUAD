@@ -53,6 +53,9 @@ function App() {
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [pastOrders, setPastOrders] = useState([]);
+  const [staffAssignments, setStaffAssignments] = useState([]);
+  const [loadingStaffAssignments, setLoadingStaffAssignments] = useState(false);
+  const [staffAssignmentError, setStaffAssignmentError] = useState('');
   const [auth, setAuth] = useState(() => {
     if (typeof window === 'undefined') {
       return null;
@@ -125,9 +128,36 @@ function App() {
       loadCart(auth.user_id);
       loadAddresses(auth.user_id);
       loadUserProfile(auth.user_id);
-      loadPastOrders(auth.user_id);
+      if (auth.role === 'CUSTOMER') {
+        loadPastOrders(auth.user_id);
+      }
+      if (auth.role === 'STAFF') {
+        loadStaffAssignments(auth.user_id);
+      }
     }
   }, [auth]);
+
+  const loadStaffAssignments = async (userId) => {
+    if (!userId) return;
+    setLoadingStaffAssignments(true);
+    setStaffAssignmentError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/staff-assignments/staff/${encodeURIComponent(userId)}`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`Unable to load staff assignments (${response.status})`);
+      }
+      const data = await response.json();
+      setStaffAssignments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setStaffAssignmentError(`Unable to load staff assignments. ${err.message}`);
+      setStaffAssignments([]);
+    } finally {
+      setLoadingStaffAssignments(false);
+    }
+  };
 
   const authHeaders = () => ({
     token: auth?.token || '',
@@ -347,19 +377,17 @@ function App() {
   const handleLogout = async () => {
     setAuthError('');
     try {
-      if (!auth?.token) {
-        setShowProfilePage(false);
-        setAuth(null);
-        return;
+      if (auth?.token) {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: 'POST',
+          headers: { token: auth.token },
+        });
       }
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
-        headers: { token: auth.token },
-      });
     } catch (err) {
       console.warn(err);
     } finally {
       setShowProfilePage(false);
+      setAuth(null);
     }
   };
 
@@ -740,37 +768,59 @@ function App() {
               </form>
             )}
 
-            <section className="order-history-card">
-              <h3>Past orders</h3>
-              {loadingOrders && <p>Loading past orders...</p>}
-              {!loadingOrders && pastOrders.length === 0 && <p>No past orders found.</p>}
-              {!loadingOrders && pastOrders.length > 0 && (
-                <div className="order-history-list">
-                  {pastOrders.map((order) => (
-                    <article key={order.order_id} className="order-card">
-                      <p><strong>Order #</strong> {order.order_id}</p>
-                      <p><strong>Status:</strong> {order.status}</p>
-                      <p><strong>Placed:</strong> {new Date(order.created_date).toLocaleString()}</p>
-                      <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
-                      <p><strong>Restaurant:</strong> {order.restaurant_id}</p>
-                      <p><strong>Delivery address:</strong> {order.delivery_address || order.delivery_address_id}</p>
-                      {order.items && order.items.length > 0 && (
-                        <div className="order-items">
-                          <h4>Items</h4>
-                          <ul>
-                            {order.items.map((item) => (
-                              <li key={`${order.order_id}-${item.food_item_id}`}>
-                                {item.quantity} x {item.food_item_id} @ ${formatMoney(item.price_per_item || item.price)}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
+            {auth?.role === 'STAFF' ? (
+              <section className="staff-assignments-card">
+                <h3>Staff assignments</h3>
+                {loadingStaffAssignments && <p>Loading staff assignments...</p>}
+                {staffAssignmentError && <p className="error-text">{staffAssignmentError}</p>}
+                {!loadingStaffAssignments && staffAssignments.length === 0 && (
+                  <p>No staff assignments found for your account.</p>
+                )}
+                {!loadingStaffAssignments && staffAssignments.length > 0 && (
+                  <div className="staff-assignment-list">
+                    {staffAssignments.map((assignment) => (
+                      <article key={assignment.assignment_id} className="assignment-card">
+                        <p><strong>Assignment ID:</strong> {assignment.assignment_id}</p>
+                        <p><strong>Restaurant:</strong> {assignment.restaurant_id}</p>
+                        <p><strong>Role:</strong> {assignment.assignment}</p>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ) : (
+              <section className="order-history-card">
+                <h3>Past orders</h3>
+                {loadingOrders && <p>Loading past orders...</p>}
+                {!loadingOrders && pastOrders.length === 0 && <p>No past orders found.</p>}
+                {!loadingOrders && pastOrders.length > 0 && (
+                  <div className="order-history-list">
+                    {pastOrders.map((order) => (
+                      <article key={order.order_id} className="order-card">
+                        <p><strong>Order #</strong> {order.order_id}</p>
+                        <p><strong>Status:</strong> {order.status}</p>
+                        <p><strong>Placed:</strong> {new Date(order.created_date).toLocaleString()}</p>
+                        <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
+                        <p><strong>Restaurant:</strong> {order.restaurant_id}</p>
+                        <p><strong>Delivery address:</strong> {order.delivery_address || order.delivery_address_id}</p>
+                        {order.items && order.items.length > 0 && (
+                          <div className="order-items">
+                            <h4>Items</h4>
+                            <ul>
+                              {order.items.map((item) => (
+                                <li key={`${order.order_id}-${item.food_item_id}`}>
+                                  {item.quantity} x {item.food_item_id} @ ${formatMoney(item.price_per_item || item.price)}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
           </section>
         ) : (
           <>
