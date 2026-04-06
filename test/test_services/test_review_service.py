@@ -1,19 +1,28 @@
 from fastapi import HTTPException
 import pytest
+from app.schemas import OrderItem
+from app.schemas.Order import OrderResponse
 from app.schemas.Review import ReviewCreate
 from app.services.review_service import did_customer_order, get_review_by_restaurant_service, get_review_service,has_customer_reviewed,create_review_service,delete_review_service
 
-mock_orders= [{
-                "order_id": "order123",
-                "customer_id": "cust456",
-                "restaurant_id": 789,
-                "cart_id": "cart101",
-                "delivery_id": "delivery",
-                "status": "PENDING",
-                "total_amount": 26.66,
-                "created_date": "2026-02-20T12:34:56",
-                "delivery_address_id": "addr202"
-            }]
+mock_orders = [OrderResponse(order_id= "order123",
+                customer_id= "cust456",
+                restaurant_id= 789,
+                cart_id= "cart101",
+                delivery_id= "delivery",
+                status= "PENDING",
+                total_amount= 26.66,
+                created_date= "2026-02-20T12:34:56",
+                delivery_address_id= "addr202",
+                items=[OrderItem.OrderItemResponse(
+                    food_item_id= 1,
+                    quantity= 1,
+                    price_per_item= "1.00",
+                    order_item_id= "1",
+                    order_id= "order123"
+                    )
+                       ])]
+
 mock_reviews = [{
                 "review_id": "review123",
                 "customer_id": "cust456",
