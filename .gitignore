@@ -20,3 +20,4 @@ pycache/
 admin-frontend/node_modules/@rollup/rollup-win32-x64-msvc/rollup.win32-x64-msvc.node
 .gitignore
 app/services/review_service.py
+admin-frontend/node_modules/@esbuild/win32-x64/esbuild.exe
