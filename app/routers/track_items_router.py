@@ -15,12 +15,3 @@ def get_stats_for_restaurants():
     return stats
 
 
-"""
-@router.get("/restaurant/{restaurant_id}/stats", response_model=List[TrackFoodResponse], status_code=200)
-def get_stats_for_items(restaurant_id: int):
-    Gets the stats on food items
-    stats = get_stats_on_items(restaurant_id)  
-    if not stats:
-        raise HTTPException(status_code=404, detail="Error, no food stats available")
-    return stats
-"""

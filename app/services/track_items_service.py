@@ -37,9 +37,6 @@ def get_stats_on_restaurants():
 
 
 """
-def get_stats_on_items(restaurant_id=None):
-    items = load_order_items()
-    food_stats = get_stats(items, "food_item_id")
-    return food_stats
+def get_stats_on_items(restaurant_id=None): will be here 
 
 """

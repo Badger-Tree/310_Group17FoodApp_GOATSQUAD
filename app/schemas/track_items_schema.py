@@ -9,13 +9,3 @@ class TrackRestaurantBase(BaseModel):
 class TrackRestaurantResponse(TrackRestaurantBase): 
     pass
 
-"""
-
-class TrackFoodBase(BaseModel):
-    food_item_id: str
-    count: int
-
-class TrackFoodResponse(TrackFoodBase): 
-    pass
-
-"""
