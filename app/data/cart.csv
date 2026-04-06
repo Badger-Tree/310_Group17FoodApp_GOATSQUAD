@@ -1,4 +1,5 @@
 customer_id,cart_id,cart_items,total
-6724b24d-7388-45e1-a5d6-ab0bca59626b,01KMM4J5XC7TFZP66JJFNT3XSD,"[{""cart_item_id"": ""01KNGJCSXYW6KM9TSTFHVKJD0Y"", ""food_item_id"": 1, ""quantity"": 3, ""price_per_item"": 15.5, ""subtotal"": 46.5}]",46.5
+6724b24d-7388-45e1-a5d6-ab0bca59626b,01KMM4J5XC7TFZP66JJFNT3XSD,[],0.0
 558faba1-02ab-4545-9e5d-80d9b934681f,01KMM4JCMZQQ83459B5G15MA9E,[],0.0
 b1c95dc0-750f-4035-ba04-d3a9196da20a,01KMM4JFPG90XPY9PPE9XMX7V6,[],0.0
+dc38faab-322d-4677-95c4-5507ccd16e10,01KNJA43Q5B913375T4GRFVHT8,"[{""cart_item_id"": ""01KNJA4CCVH2ZJVEM4241HDN7P"", ""food_item_id"": 1, ""quantity"": 1, ""price_per_item"": 15.5, ""subtotal"": 15.5}]",15.5
