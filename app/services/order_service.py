@@ -1,11 +1,11 @@
 import random
 from typing import List, Optional
 from fastapi import HTTPException
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from app.repositories.orders_repo import load_all as load_orders, save_all as save_all_orders
 from app.repositories.order_items_repo import load_all as load_order_items, save_all as save_all_order_items
 from app.schemas.Address import AddressResponse
-from app.schemas.Order import OrderResponse
+from app.schemas.Order import OrderHistoryResponse, OrderResponse
 from app.schemas.OrderItem import OrderItemResponse # type: ignore
 from app.schemas.OrderStatus import OrderStatus
 import uuid
@@ -18,6 +18,7 @@ from app.services.food_item_service import get_food_by_id
 from app.services.inventory_service import add_stock, check_availability, subtract_stock
 from app.services.notification_service import notify_order_placed, notify_order_status_update, notify_payment_status,notify_refund_issued,notify_order_status_update_customer_cancels
 from app.services.payment_service import process_payment_service, process_refund_service
+from app.repositories.restaurants_repo_csv import load_all as load_restaurants
 
 def validate_cart(customer_id) -> CartResponse:
     """Checks if a cart exists and returns either an exception or a CartResponse"""
@@ -330,3 +331,144 @@ def accept_order_service(orderid:str) -> OrderResponse:
             else:
                 raise HTTPException(status_code=400, detail = "Cannot accept order")
     raise HTTPException(status_code=404, detail="Order not found")
+
+
+#Order History feature by Tesh
+def get_order_history_service(
+        customer_id: str, 
+        restaurant = None, 
+        cuisine = None, 
+        accepted = None, 
+        sort_by="date", 
+        sort_order="desc",
+        date = None
+        )-> List[OrderHistoryResponse]:
+    """Method gets a list of OrderResponse objects matching to the currently logged in user and displays their previous orders"""
+   
+    orders = load_orders()
+    order_items = load_order_items()
+    restaurants = load_restaurants()
+
+    filtered_orders = filter_order_history_by_customer_id(orders, customer_id)
+
+    order_history = []
+
+    for order in filtered_orders:
+        restaurant_info = next(
+            (r for r in restaurants 
+                if str(r["restaurant_id"]) == str(order["restaurant_id"])), None
+             )
+        
+        if restaurant_info is None:
+            continue
+
+        items_response = []
+        for item in order_items:
+            if item.get("order_id") == order.get("order_id"):
+                items_response.append(OrderItemResponse(**item))
+        
+        order_history_response = OrderHistoryResponse(
+            **order,
+            items = items_response,
+            restaurant_name = restaurant_info["restaurant_name"],
+            cuisine = restaurant_info["cuisine"]
+        )
+
+        order_history.append(order_history_response)
+    
+    if restaurant:
+        order_history = filter_order_history_by_restaurant(order_history, restaurant)
+    
+    if cuisine:
+        order_history = filter_order_history_by_cuisine(order_history, cuisine)
+
+    if date is not None:
+        order_history = filter_order_history_by_date(order_history, date)
+    
+    if accepted is not None:
+        order_history = filter_order_history_by_accepted(order_history, accepted)
+    
+    normalized_sort_by = sort_by.lower().strip() if isinstance(sort_by, str) else "date"
+
+    if normalized_sort_by == "restaurant":
+        order_history = sort_order_history_by_restaurant(order_history, sort_order)
+    elif normalized_sort_by == "cuisine":
+        order_history = sort_order_history_by_cuisine(order_history, sort_order)
+    else:
+         order_history = sort_order_history_by_date(order_history, sort_order)  
+        
+    return order_history
+
+
+    
+
+#Helper functions
+def filter_order_history_by_customer_id(orders, customer_id):
+    customer_orders = []
+    for order in orders:
+        if order.get("customer_id") == customer_id:
+            customer_orders.append(order)
+    return customer_orders
+
+def filter_order_history_by_restaurant(orders, restaurant):
+    restaurant_orders = []
+    restaurant_query = restaurant.lower().strip()
+    for order in orders:
+        if restaurant_query in order.restaurant_name.lower().strip():
+            restaurant_orders.append(order)
+    return restaurant_orders
+
+def sort_order_history_by_restaurant(orders, sort_order):
+    
+    if sort_order is None or sort_order.lower().strip() == "asc":
+        sorted_orders = sorted(orders, key=lambda x: x.restaurant_name.lower().strip())
+    elif sort_order.lower().strip() == "desc":
+        sorted_orders = sorted(orders, key=lambda x: x.restaurant_name.lower().strip(), reverse=True)
+    else:
+        raise HTTPException(status_code=400, detail="Invalid sort order. Must be 'asc' or 'desc'.")
+    return sorted_orders
+    
+def filter_order_history_by_cuisine(orders, cuisine):
+    cuisine_orders = []
+    for order in orders:
+        if order.cuisine.lower().strip() == cuisine.lower().strip():
+            cuisine_orders.append(order)
+    return cuisine_orders
+
+def sort_order_history_by_cuisine(orders, sort_order):
+    
+    if sort_order is None or sort_order.lower().strip() == "asc":
+        sorted_orders = sorted(orders, key=lambda x: x.cuisine.lower().strip())
+    elif sort_order.lower().strip() == "desc":
+        sorted_orders = sorted(orders, key=lambda x: x.cuisine.lower().strip(), reverse=True)
+    else:
+        raise HTTPException(status_code=400, detail="Invalid sort order. Must be 'asc' or 'desc'.")
+    return sorted_orders
+
+def filter_order_history_by_date(orders, date):
+    date_orders = []
+    for order in orders:
+        if order.created_date.date() == date:
+            date_orders.append(order)
+    return date_orders
+
+def sort_order_history_by_date(orders, sort_order):
+    
+    if sort_order is None or sort_order.lower().strip() == "asc":
+        sorted_orders = sorted(orders, key=lambda x: x.created_date)
+    elif sort_order.lower().strip() == "desc":
+        sorted_orders = sorted(orders, key=lambda x: x.created_date, reverse=True)
+    else:
+        raise HTTPException(status_code=400, detail="Invalid sort order. Must be 'asc' or 'desc'.")
+    return sorted_orders
+
+def filter_order_history_by_accepted(orders, accepted):
+    accepted_orders = []
+    for order in orders:
+        if accepted and order.status == OrderStatus.ACCEPTED:
+            accepted_orders.append(order)
+        elif not accepted and order.status != OrderStatus.ACCEPTED:
+            accepted_orders.append(order)
+    return accepted_orders
+
+
