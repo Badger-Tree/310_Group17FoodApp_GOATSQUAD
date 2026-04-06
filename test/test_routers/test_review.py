@@ -5,6 +5,7 @@ import unittest.mock
 from unittest.mock import patch
 import pytest
 from app.routers.review import router
+from app.schemas.Order import OrderResponse
 from app.schemas.Review import ReviewCreate, ReviewResponse
 from app.schemas.Role import UserRole
 from app.schemas.User import UserResponse
@@ -21,30 +22,32 @@ def mock_customer_response():
         last_name="took",
         role=UserRole.CUSTOMER,
         created_date=datetime(2026, 2, 20, 12, 34, 56))
-    
+
 @pytest.fixture
 def mock_orders():
-        return[{
-                "order_id": "order123",
-                "customer_id": "cust456",
-                "restaurant_id": 789,
-                "cart_id": "cart101",
-                "delivery_id": "delivery",
-                "status": "PENDING",
-                "total_amount": 26.66,
-                "created_date": "2026-02-20T12:34:56",
-                "delivery_address_id": "addr202"
-            },{
-                "order_id": "order123",
-                "customer_id": "cust456",
-                "restaurant_id": 444,
-                "cart_id": "cart101",
-                "delivery_id": "delivery",
-                "status": "PENDING",
-                "total_amount": 26.66,
-                "created_date": "2026-02-20T12:34:56",
-                "delivery_address_id": "addr202"
-            }]
+    return [
+        OrderResponse(
+            order_id="order123",
+            customer_id="cust456",
+            restaurant_id=789,
+            cart_id="cart101",
+            delivery_id="delivery",
+            status="PENDING",
+            total_amount=26.66,
+            created_date=datetime(2026, 2, 20, 12, 34, 56),
+            delivery_address_id="addr202"
+        ),OrderResponse(
+            order_id="order123",
+            customer_id="cust456",
+            restaurant_id=444,
+            cart_id="cart101",
+            delivery_id="delivery",
+            status="PENDING",
+            total_amount=26.66,
+            created_date=datetime(2026, 2, 20, 12, 34, 56),
+            delivery_address_id="addr202"
+        )
+    ]
 @pytest.fixture
 def mock_load_reviews():
         return [{
