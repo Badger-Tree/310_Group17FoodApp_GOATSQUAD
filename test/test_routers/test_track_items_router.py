@@ -7,8 +7,8 @@ client = TestClient(app)
 
 mock_restaurant_stats_list = [
     {
-        "restaurant_id": 789,
-        "count": 1
+        "restaurant_id": "Burger Barn",
+        "order_count": 1
     }, 
     
 ]
@@ -19,8 +19,8 @@ def test_get_stats_for_restaurant_valid(mocker):
     response = client.get("/stat/restaurant/stats")
 
     assert response.status_code == 200
-    assert response.json()[0]["restaurant_id"] == 789
-    assert response.json()[0]["count"] == 1
+    assert response.json()[0]["restaurant_name"] == "Burger Barn"
+    assert response.json()[0]["order_count"] == 1
 
 
 def test_get_stats_for_restaurant_invalid(mocker):

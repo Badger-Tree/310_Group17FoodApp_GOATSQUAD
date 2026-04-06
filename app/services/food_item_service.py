@@ -14,7 +14,12 @@ def create_food_item(payload: FoodItemCreate):
     items = load_all()
 
     restaurant_data = load_restaurants()
-    exists = any(r["restaurant_id"] == payload.restaurant_id for r in restaurant_data)
+    exists = False
+    for r in restaurant_data:
+        if r["restaurant_id"] == payload.restaurant_id:
+            exists = True
+            break
+
     if not exists:
         raise HTTPException(status_code=404, detail="Restaurant not found")
 

@@ -29,8 +29,8 @@ def save_all(items: List[Dict[str, Any]]) -> None:
     tmp = DATA_PATH.with_suffix(".tmp")
 
     fields = [                                     
-    "restaurant_id",   
-    "count"              
+    "restaurant_name",   
+    "order_count"              
     ]
     
     with tmp.open("w", encoding="utf-8") as f:

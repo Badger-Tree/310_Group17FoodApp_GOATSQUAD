@@ -12,9 +12,15 @@ def test_create_food_item_with_inventory(mocker):
 
     mock_inventory = mocker.patch("app.services.food_item_service.inventory_service.create_inventory_record")
 
+    def fake_load_restaurants():
+        return [{"restaurant_id": 1, "restaurant_name": "Dominos"}]
+
+    import app.services.food_item_service as service
+    service.load_restaurants = fake_load_restaurants
+
     payload = FoodItemCreate (
         food_name="Cheesecake",
-        restaurant_id=2,
+        restaurant_id= 1,
         price=Decimal("7.0"),
         description="Fluffy original cheesecake",
         course="dessert",

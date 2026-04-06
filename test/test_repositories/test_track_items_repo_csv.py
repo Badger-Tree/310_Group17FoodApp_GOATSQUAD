@@ -11,8 +11,8 @@ def test_save_and_load_repository_restaurant():
 
     try:
         item_obj = TrackRestaurantResponse(
-            restaurant_id= 999, 
-            count = 1
+            restaurant_name= "Dominos", 
+            order_count = 1
             )
     
         test_items = [item_obj.model_dump()]
@@ -21,8 +21,8 @@ def test_save_and_load_repository_restaurant():
         loaded_items = track_items_repo_csv.load_all()
 
         assert len(loaded_items) > 0
-        assert loaded_items[0]["restaurant_id"] == 999
-        assert loaded_items[0]["count"] == 1
+        assert loaded_items[0]["restaurant_name"] == "Dominos"
+        assert loaded_items[0]["order_count"] == 1
 
     finally:
         if test_csv.exists():
