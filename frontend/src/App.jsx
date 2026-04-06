@@ -38,6 +38,15 @@ function App() {
   const [addressMessage, setAddressMessage] = useState('');
   const [orderError, setOrderError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState('');
+  const [favorites, setFavorites] = useState([]);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
+  const [favoritesError, setFavoritesError] = useState('');
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [ordersError, setOrdersError] = useState('');
+  const [inventory, setInventory] = useState({});
+  const [loadingInventory, setLoadingInventory] = useState(false);
+  const [inventoryError, setInventoryError] = useState('');
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
   const selectedRestaurant = restaurants.find((restaurant) => String(restaurant.restaurant_id) === String(selectedRestaurantId)) || null;
   const restaurantFoodItems = selectedRestaurant
@@ -107,6 +116,7 @@ function App() {
       setCart(null);
       setAddresses([]);
       setSelectedAddressId('');
+      setFavorites([]);
       return;
     }
 
@@ -114,6 +124,8 @@ function App() {
     if (auth.user_id) {
       loadCart(auth.user_id);
       loadAddresses(auth.user_id);
+      loadFavorites();
+      loadOrders();
     }
   }, [auth]);
 
@@ -121,6 +133,230 @@ function App() {
     token: auth?.token || '',
     'Content-Type': 'application/json',
   });
+
+  const loadFavorites = async () => {
+    if (!auth?.token) return;
+    setLoadingFavorites(true);
+    setFavoritesError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/favorites/me`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`Unable to load favorites (${response.status})`);
+      }
+      const data = await response.json();
+      setFavorites(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setFavoritesError(err.message);
+      setFavorites([]);
+    } finally {
+      setLoadingFavorites(false);
+    }
+  };
+
+  const isRestaurantFavorite = (restaurantId) =>
+    favorites.some((fav) => String(fav.restaurant_id) === String(restaurantId));
+
+  const handleToggleRestaurantFavorite = async (restaurantId, currentlyFavorite) => {
+    if (!auth?.token) {
+      setFavoritesError('Please log in to manage favorites.');
+      return;
+    }
+
+    setFavoritesError('');
+    const method = currentlyFavorite ? 'DELETE' : 'POST';
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/favorites/RESTAURANT/${encodeURIComponent(restaurantId)}`,
+        {
+          method,
+          headers: authHeaders(),
+        }
+      );
+
+      if (!response.ok && !(method === 'DELETE' && response.status === 204)) {
+        const body = await response.text();
+        throw new Error(`Favorite update failed (${response.status}) ${body}`);
+      }
+      await loadFavorites();
+    } catch (err) {
+      setFavoritesError(err.message);
+    }
+  };
+
+  const loadOrders = async () => {
+    if (!auth?.token) return;
+    setLoadingOrders(true);
+    setOrdersError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/get_order_by_user/${encodeURIComponent(auth.user_id)}`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`Unable to load orders (${response.status})`);
+      }
+      const data = await response.json();
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setOrdersError(err.message);
+      setOrders([]);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    if (!auth?.token) {
+      setOrdersError('Please log in to manage orders.');
+      return;
+    }
+
+    setOrdersError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/cancel_order_customer/${encodeURIComponent(orderId)}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Cancel order failed (${response.status}) ${body}`);
+      }
+      await loadOrders();
+    } catch (err) {
+      setOrdersError(err.message);
+    }
+  };
+
+  const handleAcceptOrder = async (orderId) => {
+    if (!auth?.token) {
+      setOrdersError('Please log in to manage orders.');
+      return;
+    }
+
+    setOrdersError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/accept_order/${encodeURIComponent(orderId)}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Accept order failed (${response.status}) ${body}`);
+      }
+      await loadOrders();
+    } catch (err) {
+      setOrdersError(err.message);
+    }
+  };
+
+  const handleCancelOrderStaff = async (orderId) => {
+    if (!auth?.token) {
+      setOrdersError('Please log in to manage orders.');
+      return;
+    }
+
+    setOrdersError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/cancel_order_restaurant/${encodeURIComponent(orderId)}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Cancel order failed (${response.status}) ${body}`);
+      }
+      await loadOrders();
+    } catch (err) {
+      setOrdersError(err.message);
+    }
+  };
+
+  const loadInventoryForFoodItem = async (foodItemId) => {
+    if (!auth?.token) return;
+    setLoadingInventory(true);
+    setInventoryError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/inventory/${encodeURIComponent(foodItemId)}`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        if (response.status === 404) {
+          setInventory((prev) => ({ ...prev, [foodItemId]: null }));
+          return;
+        }
+        throw new Error(`Unable to load inventory (${response.status})`);
+      }
+      const data = await response.json();
+      setInventory((prev) => ({ ...prev, [foodItemId]: data }));
+    } catch (err) {
+      setInventoryError(err.message);
+      setInventory((prev) => ({ ...prev, [foodItemId]: null }));
+    } finally {
+      setLoadingInventory(false);
+    }
+  };
+
+  const handleUpdateInventory = async (foodItemId, newQuantity) => {
+    if (!auth?.token) {
+      setInventoryError('Please log in to manage inventory.');
+      return;
+    }
+
+    setInventoryError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/inventory/${encodeURIComponent(foodItemId)}`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ quantity: newQuantity }),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Update inventory failed (${response.status}) ${body}`);
+      }
+      const updatedInventory = await response.json();
+      setInventory((prev) => ({ ...prev, [foodItemId]: updatedInventory }));
+    } catch (err) {
+      setInventoryError(err.message);
+    }
+  };
+
+  const handleToggleOrderFavorite = async (orderId, currentlyFavorite) => {
+    if (!auth?.token) {
+      setFavoritesError('Please log in to manage favorites.');
+      return;
+    }
+
+    setFavoritesError('');
+    const method = currentlyFavorite ? 'DELETE' : 'POST';
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/favorites/ORDER/${encodeURIComponent(orderId)}`,
+        {
+          method,
+          headers: authHeaders(),
+        }
+      );
+
+      if (!response.ok && !(method === 'DELETE' && response.status === 204)) {
+        const body = await response.text();
+        throw new Error(`Favorite update failed (${response.status}) ${body}`);
+      }
+      await loadFavorites();
+    } catch (err) {
+      setFavoritesError(err.message);
+    }
+  };
+
+  const isOrderFavorite = (orderId) =>
+    favorites.some((fav) => String(fav.order_id) === String(orderId));
 
   const handleSelectRestaurant = (restaurantId) => {
     setSelectedRestaurantId(restaurantId);
@@ -743,11 +979,206 @@ function App() {
                     <strong>Hours:</strong> {restaurant.open_hour} - {restaurant.closed_hour}
                   </p>
                   <p><strong>Status:</strong> {restaurant.restaurant_status}</p>
-                  <button type="button" onClick={() => handleSelectRestaurant(restaurant.restaurant_id)}>
-                    View menu
-                  </button>
+                  <div className="restaurant-card-actions">
+                    <button type="button" onClick={() => handleSelectRestaurant(restaurant.restaurant_id)}>
+                      View menu
+                    </button>
+                    <button
+                      type="button"
+                      className={`favorite-button ${isRestaurantFavorite(restaurant.restaurant_id) ? 'favorited' : ''}`}
+                      onClick={() => handleToggleRestaurantFavorite(restaurant.restaurant_id, isRestaurantFavorite(restaurant.restaurant_id))}
+                    >
+                      {isRestaurantFavorite(restaurant.restaurant_id) ? 'Unfavorite' : 'Add favorite'}
+                    </button>
+                  </div>
                 </article>
               ))}
+            </div>
+          )}
+        </section>
+
+        <section className="card">
+          <h2>Your Favorite Restaurants</h2>
+          {!auth && <p>Log in to save favorite restaurants and manage them here.</p>}
+          {auth && loadingFavorites && <p>Loading favorites...</p>}
+          {auth && favoritesError && <p className="error-text">{favoritesError}</p>}
+          {auth && !loadingFavorites && favorites.filter((fav) => fav.restaurant_id).length === 0 && (
+            <p>You have no favorite restaurants yet. Use the button on any restaurant card to add one.</p>
+          )}
+          {auth && !loadingFavorites && favorites.filter((fav) => fav.restaurant_id).length > 0 && (
+            <div className="favorite-list">
+              {favorites
+                .filter((fav) => fav.restaurant_id)
+                .map((restaurant) => (
+                  <article key={restaurant.restaurant_id} className="favorite-card">
+                    <h3>{restaurant.restaurant_name}</h3>
+                    <p><strong>Cuisine:</strong> {restaurant.cuisine}</p>
+                    <p><strong>Address:</strong> {restaurant.address}</p>
+                    <div className="favorite-actions">
+                      <button type="button" onClick={() => handleSelectRestaurant(restaurant.restaurant_id)}>
+                        View menu
+                      </button>
+                      <button
+                        type="button"
+                        className="favorite-button favorited"
+                        onClick={() => handleToggleRestaurantFavorite(restaurant.restaurant_id, true)}
+                      >
+                        Remove favorite
+                      </button>
+                    </div>
+                  </article>
+                ))}
+            </div>
+          )}
+        </section>
+
+        <section className="card">
+          <h2>My Orders</h2>
+          {!auth && <p>Log in to view and manage your orders.</p>}
+          {auth && loadingOrders && <p>Loading orders...</p>}
+          {auth && ordersError && <p className="error-text">{ordersError}</p>}
+          {auth && !loadingOrders && orders.length === 0 && (
+            <p>You have no orders yet. Add items to your cart and submit an order to get started.</p>
+          )}
+          {auth && !loadingOrders && orders.length > 0 && (
+            <div className="orders-list">
+              {orders.map((order) => (
+                <article key={order.order_id} className="order-card">
+                  <div className="order-header">
+                    <h3>Order #{order.order_id}</h3>
+                    <span className={`order-status status-${order.status.toLowerCase()}`}>
+                      {order.status}
+                    </span>
+                    <button
+                      type="button"
+                      className={`favorite-button ${isOrderFavorite(order.order_id) ? 'favorited' : ''}`}
+                      onClick={() => handleToggleOrderFavorite(order.order_id, isOrderFavorite(order.order_id))}
+                    >
+                      {isOrderFavorite(order.order_id) ? 'Unfavorite' : 'Favorite'}
+                    </button>
+                  </div>
+                  <p><strong>Restaurant:</strong> {order.restaurant_id}</p>
+                  <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
+                  <p><strong>Created:</strong> {new Date(order.created_date).toLocaleString()}</p>
+                  <div className="order-items">
+                    <h4>Items:</h4>
+                    <ul>
+                      {order.items.map((item, index) => (
+                        <li key={index}>
+                          {item.food_item_name} x{item.quantity} - ${formatMoney(item.price_per_item * item.quantity)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="order-actions">
+                    {(order.status === 'PENDING' || order.status === 'ACCEPTED') && auth.role === 'CUSTOMER' && (
+                      <button type="button" className="danger" onClick={() => handleCancelOrder(order.order_id)}>
+                        Cancel Order
+                      </button>
+                    )}
+                    {order.status === 'PENDING' && auth.role === 'STAFF' && (
+                      <>
+                        <button type="button" onClick={() => handleAcceptOrder(order.order_id)}>
+                          Accept Order
+                        </button>
+                        <button type="button" className="danger" onClick={() => handleCancelOrderStaff(order.order_id)}>
+                          Cancel Order
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {auth && auth.role === 'STAFF' && (
+          <section className="card">
+            <h2>Inventory Management</h2>
+            {inventoryError && <p className="error-text">{inventoryError}</p>}
+            <div className="inventory-grid">
+              {foodItems.map((item) => {
+                const itemId = item.food_item_id ?? item.id;
+                const itemInventory = inventory[itemId];
+                return (
+                  <article key={itemId} className="inventory-card">
+                    <h3>{item.food_name ?? item.name ?? 'Unnamed item'}</h3>
+                    <p><strong>Restaurant:</strong> {item.restaurant_id}</p>
+                    <p><strong>Price:</strong> ${formatMoney(item.price)}</p>
+                    <div className="inventory-controls">
+                      <label>
+                        Current Stock
+                        <input
+                          type="number"
+                          min="0"
+                          value={itemInventory?.quantity ?? 0}
+                          onChange={(event) => {
+                            const newQuantity = Math.max(0, Number(event.target.value) || 0);
+                            if (itemInventory) {
+                              handleUpdateInventory(itemId, newQuantity);
+                            }
+                          }}
+                        />
+                      </label>
+                      {!itemInventory && (
+                        <button
+                          type="button"
+                          onClick={() => loadInventoryForFoodItem(itemId)}
+                        >
+                          Load Inventory
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        <section className="card">
+          <h2>Your Favorite Orders</h2>
+          {!auth && <p>Log in to save favorite orders and manage them here.</p>}
+          {auth && loadingFavorites && <p>Loading favorites...</p>}
+          {auth && favoritesError && <p className="error-text">{favoritesError}</p>}
+          {auth && !loadingFavorites && favorites.filter((fav) => fav.order_id).length === 0 && (
+            <p>You have no favorite orders yet. Use the favorite button on any order to add one.</p>
+          )}
+          {auth && !loadingFavorites && favorites.filter((fav) => fav.order_id).length > 0 && (
+            <div className="favorite-orders-list">
+              {favorites
+                .filter((fav) => fav.order_id)
+                .map((order) => (
+                  <article key={order.order_id} className="favorite-order-card">
+                    <div className="order-header">
+                      <h3>Order #{order.order_id}</h3>
+                      <span className={`order-status status-${order.status.toLowerCase()}`}>
+                        {order.status}
+                      </span>
+                      <button
+                        type="button"
+                        className="favorite-button favorited"
+                        onClick={() => handleToggleOrderFavorite(order.order_id, true)}
+                      >
+                        Remove favorite
+                      </button>
+                    </div>
+                    <p><strong>Restaurant:</strong> {order.restaurant_id}</p>
+                    <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
+                    <p><strong>Created:</strong> {new Date(order.created_date).toLocaleString()}</p>
+                    <div className="order-items">
+                      <h4>Items:</h4>
+                      <ul>
+                        {order.items.map((item, index) => (
+                          <li key={index}>
+                            {item.food_item_name} x{item.quantity} - ${formatMoney(item.price_per_item * item.quantity)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </article>
+                ))}
             </div>
           )}
         </section>
