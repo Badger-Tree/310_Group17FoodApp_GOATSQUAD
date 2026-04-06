@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
@@ -9,6 +10,75 @@ function formatMoney(value) {
 }
 
 function App() {
+  // --- Review form state and handlers for completed orders ---
+  const [reviewForms, setReviewForms] = useState({});
+  const handleOpenReviewForm = (orderId) => {
+    setReviewForms((prev) => ({
+      ...prev,
+      [orderId]: { open: true, rating: 5, review: '', submitting: false, error: '' },
+    }));
+  };
+  const handleCloseReviewForm = (orderId) => {
+    setReviewForms((prev) => ({
+      ...prev,
+      [orderId]: { ...prev[orderId], open: false },
+    }));
+  };
+  const handleReviewInputChange = (orderId, field, value) => {
+    setReviewForms((prev) => ({
+      ...prev,
+      [orderId]: { ...prev[orderId], [field]: value },
+    }));
+  };
+  const handleSubmitReview = async (order) => {
+    const { rating, review } = reviewForms[order.order_id] || {};
+    setReviewForms((prev) => ({
+      ...prev,
+      [order.order_id]: { ...prev[order.order_id], submitting: true, error: '' },
+    }));
+    try {
+      const payload = {
+        restaurant_id: order.restaurant_id,
+        rating: Number(rating),
+        review: review,
+      };
+      const response = await fetch(`${API_BASE_URL}/reviews/create_review/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          token: auth.token,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Review failed (${response.status}) ${body}`);
+      }
+      setReviewForms((prev) => ({ ...prev, [order.order_id]: { ...prev[order.order_id], open: false, submitting: false } }));
+      setOrderSuccess('Review submitted!');
+      if (selectedRestaurantId && String(selectedRestaurantId) === String(order.restaurant_id)) {
+        setLoadingReviews(true);
+        setReviewError('');
+        fetch(`${API_BASE_URL}/reviews/get_review_by_restaurant/${encodeURIComponent(order.restaurant_id)}`)
+          .then((response) => {
+            if (!response.ok) throw new Error(`Unable to load reviews (${response.status})`);
+            return response.json();
+          })
+          .then((data) => {
+            setRestaurantReviews(Array.isArray(data) ? data : []);
+          })
+          .catch((err) => {
+            setReviewError(`Unable to load reviews. ${err.message}`);
+            setRestaurantReviews([]);
+          })
+          .finally(() => {
+            setLoadingReviews(false);
+          });
+      }
+    } catch (err) {
+      setReviewForms((prev) => ({ ...prev, [order.order_id]: { ...prev[order.order_id], submitting: false, error: err.message } }));
+    }
+  };
   const [restaurants, setRestaurants] = useState([]);
   const [foodItems, setFoodItems] = useState([]);
   const [cart, setCart] = useState(null);
@@ -44,6 +114,36 @@ function App() {
     ? foodItems.filter((item) => String(item.restaurant_id) === String(selectedRestaurant.restaurant_id))
     : foodItems;
   const [showProfilePage, setShowProfilePage] = useState(false);
+  // Reviews state
+  const [restaurantReviews, setRestaurantReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+    // Fetch reviews when a restaurant is selected
+    useEffect(() => {
+      if (!selectedRestaurantId) {
+        setRestaurantReviews([]);
+        setReviewError('');
+        setLoadingReviews(false);
+        return;
+      }
+      setLoadingReviews(true);
+      setReviewError('');
+      fetch(`${API_BASE_URL}/reviews/get_review_by_restaurant/${encodeURIComponent(selectedRestaurantId)}`)
+        .then((response) => {
+          if (!response.ok) throw new Error(`Unable to load reviews (${response.status})`);
+          return response.json();
+        })
+        .then((data) => {
+          setRestaurantReviews(Array.isArray(data) ? data : []);
+        })
+        .catch((err) => {
+          setReviewError(`Unable to load reviews. ${err.message}`);
+          setRestaurantReviews([]);
+        })
+        .finally(() => {
+          setLoadingReviews(false);
+        });
+    }, [selectedRestaurantId]);
   const [userProfile, setUserProfile] = useState(null);
   const [profileFirstName, setProfileFirstName] = useState('');
   const [profileLastName, setProfileLastName] = useState('');
@@ -56,6 +156,12 @@ function App() {
   const [staffAssignments, setStaffAssignments] = useState([]);
   const [loadingStaffAssignments, setLoadingStaffAssignments] = useState(false);
   const [staffAssignmentError, setStaffAssignmentError] = useState('');
+  const [selectedStaffRestaurantId, setSelectedStaffRestaurantId] = useState('');
+  const [restaurantOrders, setRestaurantOrders] = useState([]);
+  const [loadingRestaurantOrders, setLoadingRestaurantOrders] = useState(false);
+  const [restaurantOrderError, setRestaurantOrderError] = useState('');
+  const [orderActionMessage, setOrderActionMessage] = useState('');
+  const [orderActionError, setOrderActionError] = useState('');
   const [auth, setAuth] = useState(() => {
     if (typeof window === 'undefined') {
       return null;
@@ -150,12 +256,101 @@ function App() {
         throw new Error(`Unable to load staff assignments (${response.status})`);
       }
       const data = await response.json();
-      setStaffAssignments(Array.isArray(data) ? data : []);
+      const assignments = Array.isArray(data) ? data : [];
+      setStaffAssignments(assignments);
+      if (assignments.length > 0 && !selectedStaffRestaurantId) {
+        setSelectedStaffRestaurantId(String(assignments[0].restaurant_id));
+      }
     } catch (err) {
       setStaffAssignmentError(`Unable to load staff assignments. ${err.message}`);
       setStaffAssignments([]);
     } finally {
       setLoadingStaffAssignments(false);
+    }
+  };
+
+  const loadRestaurantOrders = async (restaurantId) => {
+    if (!restaurantId) {
+      setRestaurantOrders([]);
+      return;
+    }
+    setLoadingRestaurantOrders(true);
+    setRestaurantOrderError('');
+    setOrderActionMessage('');
+    setOrderActionError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/get_order_by_restaurant/${encodeURIComponent(restaurantId)}`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`Unable to load restaurant orders (${response.status})`);
+      }
+      const data = await response.json();
+      setRestaurantOrders(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setRestaurantOrderError(`Unable to load restaurant orders. ${err.message}`);
+      setRestaurantOrders([]);
+    } finally {
+      setLoadingRestaurantOrders(false);
+    }
+  };
+
+  useEffect(() => {
+    if (auth?.role === 'STAFF' && selectedStaffRestaurantId) {
+      loadRestaurantOrders(selectedStaffRestaurantId);
+    } else {
+      setRestaurantOrders([]);
+    }
+  }, [selectedStaffRestaurantId, auth]);
+
+  const handleAcceptOrder = async (orderId) => {
+    if (!auth?.token) {
+      setOrderActionError('Please log in to approve orders.');
+      return;
+    }
+    setOrderActionMessage('');
+    setOrderActionError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/accept_order/${encodeURIComponent(orderId)}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Approve failed (${response.status}) ${body}`);
+      }
+      await response.json();
+      setOrderActionMessage('Order approved successfully.');
+      loadRestaurantOrders(selectedStaffRestaurantId);
+    } catch (err) {
+      setOrderActionError(err.message);
+    }
+  };
+
+  const handleCancelOrderRestaurant = async (orderId) => {
+    if (!auth?.token) {
+      setOrderActionError('Please log in to cancel orders.');
+      return;
+    }
+    setOrderActionMessage('');
+    setOrderActionError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/cancel_order_restaurant/${encodeURIComponent(orderId)}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Cancel failed (${response.status}) ${body}`);
+      }
+      await response.json();
+      setOrderActionMessage('Order canceled successfully.');
+      loadRestaurantOrders(selectedStaffRestaurantId);
+    } catch (err) {
+      setOrderActionError(err.message);
     }
   };
 
@@ -477,6 +672,9 @@ function App() {
       const orderData = await response.json();
       setOrderSuccess(`Order ${orderData.order_id} created successfully! Status: ${orderData.status}`);
       await loadCart(auth.user_id);
+      if (auth?.user_id) {
+        loadPastOrders(auth.user_id);
+      }
     } catch (err) {
       setOrderError(err.message);
     }
@@ -777,15 +975,83 @@ function App() {
                   <p>No staff assignments found for your account.</p>
                 )}
                 {!loadingStaffAssignments && staffAssignments.length > 0 && (
-                  <div className="staff-assignment-list">
-                    {staffAssignments.map((assignment) => (
-                      <article key={assignment.assignment_id} className="assignment-card">
-                        <p><strong>Assignment ID:</strong> {assignment.assignment_id}</p>
-                        <p><strong>Restaurant:</strong> {assignment.restaurant_id}</p>
-                        <p><strong>Role:</strong> {assignment.assignment}</p>
-                      </article>
-                    ))}
-                  </div>
+                  <>
+                    <div className="staff-assignment-list">
+                      {staffAssignments.map((assignment) => (
+                        <article key={assignment.assignment_id} className="assignment-card">
+                          <p><strong>Assignment ID:</strong> {assignment.assignment_id}</p>
+                          <p><strong>Restaurant:</strong> {assignment.restaurant_id}</p>
+                          <p><strong>Role:</strong> {assignment.assignment}</p>
+                        </article>
+                      ))}
+                    </div>
+
+                    <div className="restaurant-order-management-card">
+                      <h4>Manage restaurant orders</h4>
+                      <label>
+                        Select restaurant
+                        <select
+                          value={selectedStaffRestaurantId}
+                          onChange={(event) => setSelectedStaffRestaurantId(event.target.value)}
+                        >
+                          {Array.from(new Set(staffAssignments.map((assignment) => String(assignment.restaurant_id)))).map((restaurantId) => (
+                            <option key={restaurantId} value={restaurantId}>
+                              {restaurantId}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      {orderActionMessage && <p className="success-text">{orderActionMessage}</p>}
+                      {orderActionError && <p className="error-text">{orderActionError}</p>}
+                      {loadingRestaurantOrders && <p>Loading restaurant orders...</p>}
+                      {restaurantOrderError && <p className="error-text">{restaurantOrderError}</p>}
+                      {!loadingRestaurantOrders && !restaurantOrderError && restaurantOrders.length === 0 && (
+                        <p>No orders found for this restaurant.</p>
+                      )}
+                      {!loadingRestaurantOrders && restaurantOrders.length > 0 && (
+                        <div className="order-history-list">
+                          {restaurantOrders.map((order) => (
+                            <article key={order.order_id} className="order-card">
+                              <p><strong>Order #</strong> {order.order_id}</p>
+                              <p><strong>Status:</strong> {order.status}</p>
+                              <p><strong>Placed:</strong> {new Date(order.created_date).toLocaleString()}</p>
+                              <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
+                              <p><strong>Customer:</strong> {order.customer_id}</p>
+                              <p><strong>Delivery address:</strong> {order.delivery_address || order.delivery_address_id}</p>
+                              {order.items && order.items.length > 0 && (
+                                <div className="order-items">
+                                  <h4>Items</h4>
+                                  <ul>
+                                    {order.items.map((item) => (
+                                      <li key={`${order.order_id}-${item.food_item_id}`}>
+                                        {item.quantity} x {item.food_item_id} @ ${formatMoney(item.price_per_item || item.price)}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              {order.status !== 'COMPLETED' && (
+                                <div className="order-action-buttons">
+                                  {order.status === 'PENDING' && (
+                                    <button type="button" onClick={() => handleAcceptOrder(order.order_id)}>
+                                      Approve
+                                    </button>
+                                  )}
+                                  <button type="button" className="danger" onClick={() => handleCancelOrderRestaurant(order.order_id)}>
+                                    Cancel
+                                  </button>
+                                </div>
+                              )}
+                              {order.status === 'COMPLETED' && (
+                                <p>Order actions are not available for completed orders.</p>
+                              )}
+                            </article>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
               </section>
             ) : (
@@ -815,6 +1081,94 @@ function App() {
                             </ul>
                           </div>
                         )}
+                        {/* Cancel button for PENDING orders */}
+                        {order.status === 'PENDING' && (
+                          <button
+                            type="button"
+                            className="danger"
+                            style={{ marginTop: '0.5em' }}
+                            onClick={async () => {
+                              if (!auth?.token) return;
+                              setOrderError('');
+                              setOrderSuccess('');
+                              try {
+                                const response = await fetch(`${API_BASE_URL}/orders/cancel_order_customer/${encodeURIComponent(order.order_id)}`, {
+                                  method: 'PUT',
+                                  headers: { token: auth.token },
+                                });
+                                if (!response.ok) {
+                                  const body = await response.text();
+                                  throw new Error(`Cancel failed (${response.status}) ${body}`);
+                                }
+                                setOrderSuccess(`Order ${order.order_id} canceled successfully.`);
+                                // Refresh orders
+                                loadPastOrders(auth.user_id);
+                              } catch (err) {
+                                setOrderError(err.message);
+                              }
+                            }}
+                          >
+                            Cancel Order
+                          </button>
+                        )}
+                        {/* Review form for COMPLETED orders, only if user hasn't already reviewed this restaurant */}
+                        {order.status === 'COMPLETED' && (() => {
+                          // Check if user has already reviewed this restaurant
+                          const alreadyReviewed = restaurantReviews.some(
+                            (review) => (review.user_id === auth?.user_id || review.reviewer_id === auth?.user_id) && String(review.restaurant_id) === String(order.restaurant_id)
+                          );
+                          if (alreadyReviewed) {
+                            return <p style={{ marginTop: '0.5em', color: '#888' }}>You have already reviewed this restaurant.</p>;
+                          }
+                          return (
+                            <div style={{ marginTop: '0.5em' }}>
+                              {!(reviewForms[order.order_id]?.open) ? (
+                                <button type="button" onClick={() => handleOpenReviewForm(order.order_id)}>
+                                  Leave a Review
+                                </button>
+                              ) : (
+                                <form
+                                  onSubmit={e => {
+                                    e.preventDefault();
+                                    handleSubmitReview(order);
+                                  }}
+                                  style={{ marginTop: '0.5em', border: '1px solid #ccc', padding: '0.5em', borderRadius: '4px' }}
+                                >
+                                  <label>
+                                    Rating:
+                                    <select
+                                      value={reviewForms[order.order_id]?.rating || 5}
+                                      onChange={e => handleReviewInputChange(order.order_id, 'rating', e.target.value)}
+                                      required
+                                    >
+                                      {[5,4,3,2,1,0].map(val => (
+                                        <option key={val} value={val}>{val}</option>
+                                      ))}
+                                    </select>
+                                  </label>
+                                  <label style={{ display: 'block', marginTop: '0.5em' }}>
+                                    Review:
+                                    <textarea
+                                      value={reviewForms[order.order_id]?.review || ''}
+                                      onChange={e => handleReviewInputChange(order.order_id, 'review', e.target.value)}
+                                      minLength={1}
+                                      required
+                                      rows={2}
+                                      style={{ width: '100%' }}
+                                    />
+                                  </label>
+                                  <div style={{ marginTop: '0.5em' }}>
+                                    <button type="submit" disabled={reviewForms[order.order_id]?.submitting}>Submit Review</button>
+                                    <button type="button" className="secondary" style={{ marginLeft: '0.5em' }} onClick={() => handleCloseReviewForm(order.order_id)}>
+                                      Cancel
+                                    </button>
+                                  </div>
+                                  {reviewForms[order.order_id]?.error && <p className="error-text">{reviewForms[order.order_id].error}</p>}
+                                </form>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </article>
                     ))}
                   </div>
@@ -834,6 +1188,27 @@ function App() {
                     </button>
                   )}
                 </div>
+                {/* Show reviews when a restaurant is selected */}
+                {selectedRestaurant && (
+                  <section className="restaurant-reviews-card">
+                    <h3>Reviews</h3>
+                    {loadingReviews && <p>Loading reviews...</p>}
+                    {reviewError && <p className="error-text">{reviewError}</p>}
+                    {!loadingReviews && !reviewError && restaurantReviews.length === 0 && (
+                      <p>No reviews found for this restaurant.</p>
+                    )}
+                    {!loadingReviews && !reviewError && restaurantReviews.length > 0 && (
+                      <ul className="review-list">
+                        {restaurantReviews.map((review) => (
+                          <li key={review.review_id} className="review-item">
+                            <strong>{review.reviewer_name || review.user_id || 'Anonymous'}:</strong> {review.rating ? `⭐${review.rating}` : ''}<br />
+                            <span>{review.comment || review.review_text || ''}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                )}
                 {loadingFood && <p>Loading food items...</p>}
                 {foodError && <p className="error-text">{foodError}</p>}
                 {!loadingFood && !foodError && restaurantFoodItems.length === 0 && (
