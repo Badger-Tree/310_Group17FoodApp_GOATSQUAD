@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, HTTPException, Header, Query, status
+from fastapi import APIRouter, HTTPException, Header, status
 from app.schemas.Order import OrderCreate, OrderHistoryResponse, OrderResponse
 from app.schemas.Role import UserRole
 from app.schemas.Token import Token
@@ -98,13 +98,10 @@ def get_order_history(
     cuisine: str | None = None,
     accepted: bool | None = None,
     date: date | None = None,
-    sort_by: str = Query(
-        default="date",
-        description="Sort by restaurant, cuisine, or date."
-    ),
+    sort_by: str = "date",
     sort_order: str = "desc"):
     """Returns a list of orders associated with a user. 
-    Input: user id from session, optional query parameters: restaurant name (string), cuisine (string), accepted (boolean), date (date), sort_by string ("restaurant", "cuisine", "date"), sort_order string ("asc" or "desc")
+    Input: user id from session, optional query parameters: restaurant name (string), cuisine (string), accepted (boolean), date (date), sort_by string ("date", "restaurant_name", "cuisine"), sort_order string ("asc" or "desc")
     Output: List of OrderResponse objects
     """
     session = Token(token=token)

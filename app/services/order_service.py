@@ -388,11 +388,9 @@ def get_order_history_service(
     if accepted is not None:
         order_history = filter_order_history_by_accepted(order_history, accepted)
     
-    normalized_sort_by = sort_by.lower().strip() if isinstance(sort_by, str) else "date"
-
-    if normalized_sort_by == "restaurant":
+    if sort_by == "restaurant":
         order_history = sort_order_history_by_restaurant(order_history, sort_order)
-    elif normalized_sort_by == "cuisine":
+    elif sort_by == "cuisine":
         order_history = sort_order_history_by_cuisine(order_history, sort_order)
     else:
          order_history = sort_order_history_by_date(order_history, sort_order)  
@@ -412,9 +410,8 @@ def filter_order_history_by_customer_id(orders, customer_id):
 
 def filter_order_history_by_restaurant(orders, restaurant):
     restaurant_orders = []
-    restaurant_query = restaurant.lower().strip()
     for order in orders:
-        if restaurant_query in order.restaurant_name.lower().strip():
+        if restaurant.lower().strip() in order.restaurant_name.lower().strip():
             restaurant_orders.append(order)
     return restaurant_orders
 
@@ -470,5 +467,6 @@ def filter_order_history_by_accepted(orders, accepted):
         elif not accepted and order.status != OrderStatus.ACCEPTED:
             accepted_orders.append(order)
     return accepted_orders
+
 
 
