@@ -13,8 +13,26 @@ from app.routers.staff_assignment_router import router as staff_assignment_route
 from app.routers.track_items_router import router as track_items_router
 from app.routers.review import router as review_router
 from app.routers.favorite_router import router as favorite_router
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:5173",  # your Vite frontend
+    "http://localhost:3000",  # optional, if you run CRA
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # allow requests from these origins
+    allow_credentials=True,
+    allow_methods=["*"],     # allow GET, POST, etc.
+    allow_headers=["*"],     # allow headers
+)
+
+# -------------------------
+# Health & root endpoints
+# -------------------------
 
 @app.get("/health")
 def health():

@@ -14,10 +14,10 @@ def load_all() -> List[Dict[str, Any]]:
         items = list(reader)
     
     for item in items:
-        if "restaurant_id" in item:
-            item["restaurant_id"] = int(item["restaurant_id"])
-        if "count" in item:
-            item["count"] = int(item["count"])
+        if "restaurant_name" in item:
+            item["restaurant_name"] = str(item["restaurant_name"])
+        if "order_count" in item:
+            item["order_count"] = int(item["order_count"])
     
     return items
    

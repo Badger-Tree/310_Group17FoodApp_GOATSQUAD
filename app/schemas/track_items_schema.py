@@ -4,8 +4,9 @@ from pydantic import PositiveInt
 
 class TrackRestaurantBase(BaseModel):
     restaurant_id: PositiveInt
-    count: PositiveInt
+    order_count: PositiveInt
 
-class TrackRestaurantResponse(TrackRestaurantBase): 
-    pass
+class TrackRestaurantResponse(BaseModel): 
+    restaurant_name: str
+    order_count: PositiveInt
 
