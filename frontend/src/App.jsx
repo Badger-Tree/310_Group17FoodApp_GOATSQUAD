@@ -22,6 +22,27 @@ function App() {
   const [authError, setAuthError] = useState('');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [signupFirstName, setSignupFirstName] = useState('');
+  const [signupLastName, setSignupLastName] = useState('');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [signupRole, setSignupRole] = useState('CUSTOMER');
+  const [signupError, setSignupError] = useState('');
+  const [signupMessage, setSignupMessage] = useState('');
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState('');
+  const [newAddressStreet, setNewAddressStreet] = useState('');
+  const [newAddressCity, setNewAddressCity] = useState('');
+  const [newAddressPostalCode, setNewAddressPostalCode] = useState('');
+  const [newAddressInstructions, setNewAddressInstructions] = useState('');
+  const [addressMessage, setAddressMessage] = useState('');
+  const [orderError, setOrderError] = useState('');
+  const [orderSuccess, setOrderSuccess] = useState('');
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
+  const selectedRestaurant = restaurants.find((restaurant) => String(restaurant.restaurant_id) === String(selectedRestaurantId)) || null;
+  const restaurantFoodItems = selectedRestaurant
+    ? foodItems.filter((item) => String(item.restaurant_id) === String(selectedRestaurant.restaurant_id))
+    : foodItems;
   const [auth, setAuth] = useState(() => {
     if (typeof window === 'undefined') {
       return null;
@@ -84,12 +105,15 @@ function App() {
     if (!auth) {
       localStorage.removeItem(AUTH_STORAGE_KEY);
       setCart(null);
+      setAddresses([]);
+      setSelectedAddressId('');
       return;
     }
 
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
     if (auth.user_id) {
       loadCart(auth.user_id);
+      loadAddresses(auth.user_id);
     }
   }, [auth]);
 
@@ -97,6 +121,14 @@ function App() {
     token: auth?.token || '',
     'Content-Type': 'application/json',
   });
+
+  const handleSelectRestaurant = (restaurantId) => {
+    setSelectedRestaurantId(restaurantId);
+  };
+
+  const handleClearSelectedRestaurant = () => {
+    setSelectedRestaurantId(null);
+  };
 
   const loadCart = async (customerId) => {
     if (!customerId) return;
@@ -118,6 +150,75 @@ function App() {
       setCartError(`Unable to load cart. ${err.message}`);
     } finally {
       setLoadingCart(false);
+    }
+  };
+
+  const loadAddresses = async (customerId) => {
+    if (!customerId) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/addresses/by-customer/${encodeURIComponent(customerId)}`);
+      if (!response.ok) {
+        throw new Error(`Unable to load addresses (${response.status})`);
+      }
+      const data = await response.json();
+      setAddresses(Array.isArray(data) ? data : []);
+      if (Array.isArray(data) && data.length > 0) {
+        setSelectedAddressId(data[0].address_id);
+      }
+    } catch (err) {
+      console.warn(`Address load failed: ${err.message}`);
+      setAddresses([]);
+      setSelectedAddressId('');
+    }
+  };
+
+  const handleAddNewAddress = async (event) => {
+    event.preventDefault();
+    setAddressMessage('');
+    setOrderError('');
+    setOrderSuccess('');
+
+    if (!auth?.token) {
+      setAddressMessage('Please log in before adding an address.');
+      return;
+    }
+
+    if (!newAddressStreet.trim() || !newAddressCity.trim() || !newAddressPostalCode.trim()) {
+      setAddressMessage('Street, city, and postal code are required.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/addresses/new`, {
+        method: 'POST',
+        headers: {
+          token: auth.token,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          street: newAddressStreet,
+          city: newAddressCity,
+          postal_code: newAddressPostalCode,
+          instructions: newAddressInstructions || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Adding address failed (${response.status}) ${body}`);
+      }
+
+      const newAddress = await response.json();
+      const updatedAddresses = [...addresses, newAddress];
+      setAddresses(updatedAddresses);
+      setSelectedAddressId(newAddress.address_id);
+      setNewAddressStreet('');
+      setNewAddressCity('');
+      setNewAddressPostalCode('');
+      setNewAddressInstructions('');
+      setAddressMessage('Address added. Ready to submit order.');
+    } catch (err) {
+      setAddressMessage(err.message);
     }
   };
 
@@ -159,6 +260,97 @@ function App() {
       console.warn(err);
     } finally {
       setAuth(null);
+    }
+  };
+
+  const handleSignup = async (event) => {
+    event.preventDefault();
+    setSignupError('');
+    setSignupMessage('');
+
+    const endpoint = signupRole === 'STAFF' ? '/users/new-staff' : '/users/new-customer';
+    const payload = {
+      email: signupEmail,
+      first_name: signupFirstName,
+      last_name: signupLastName,
+      password: signupPassword,
+    };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Signup failed (${response.status}) ${body}`);
+      }
+
+      const createdUser = await response.json();
+      setSignupMessage(`Account created for ${createdUser.email} as ${createdUser.role}. Logging in...`);
+      setSignupFirstName('');
+      setSignupLastName('');
+      setSignupEmail('');
+      setSignupPassword('');
+      setSignupRole('CUSTOMER');
+
+      const loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: createdUser.email, password: payload.password }),
+      });
+
+      if (!loginResponse.ok) {
+        const body = await loginResponse.text();
+        throw new Error(`Signup succeeded but login failed (${loginResponse.status}) ${body}`);
+      }
+
+      const authData = await loginResponse.json();
+      setAuth(authData);
+      setSignupMessage(`Account created and logged in as ${createdUser.role}.`);
+    } catch (err) {
+      setSignupError(err.message);
+    }
+  };
+
+  const handleSubmitOrder = async () => {
+    setOrderError('');
+    setOrderSuccess('');
+    setAddressMessage('');
+
+    if (!auth?.token) {
+      setOrderError('Please log in before submitting an order.');
+      return;
+    }
+
+    if (!selectedAddressId.trim()) {
+      setOrderError('Please choose an address or add a new one before submitting the order.');
+      return;
+    }
+
+    if (!cart?.cart_items || cart.cart_items.length === 0) {
+      setOrderError('Your cart is empty. Add items before submitting an order.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/create_order/${encodeURIComponent(selectedAddressId)}`, {
+        method: 'POST',
+        headers: { token: auth.token },
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Order submission failed (${response.status}) ${body}`);
+      }
+
+      const orderData = await response.json();
+      setOrderSuccess(`Order ${orderData.order_id} created successfully! Status: ${orderData.status}`);
+      await loadCart(auth.user_id);
+    } catch (err) {
+      setOrderError(err.message);
     }
   };
 
@@ -291,6 +483,8 @@ function App() {
     );
   };
 
+  const cartHasItems = cart?.cart_items?.length > 0;
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -310,47 +504,116 @@ function App() {
               <button type="button" onClick={handleLogout}>Logout</button>
             </div>
           ) : (
-            <form className="login-form" onSubmit={handleLogin}>
-              <label>
-                Email
-                <input
-                  type="email"
-                  value={loginEmail}
-                  onChange={(event) => setLoginEmail(event.target.value)}
-                  required
-                  placeholder="you@example.com"
-                />
-              </label>
-              <label>
-                Password
-                <input
-                  type="password"
-                  value={loginPassword}
-                  onChange={(event) => setLoginPassword(event.target.value)}
-                  required
-                  placeholder="Enter password"
-                />
-              </label>
-              <button type="submit">Login</button>
-              {authError && <p className="error-text">{authError}</p>}
-            </form>
+            <>
+              <form className="login-form" onSubmit={handleLogin}>
+                <label>
+                  Email
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(event) => setLoginEmail(event.target.value)}
+                    required
+                    placeholder="you@example.com"
+                  />
+                </label>
+                <label>
+                  Password
+                  <input
+                    type="password"
+                    value={loginPassword}
+                    onChange={(event) => setLoginPassword(event.target.value)}
+                    required
+                    placeholder="Enter password"
+                  />
+                </label>
+                <button type="submit">Login</button>
+                {authError && <p className="error-text">{authError}</p>}
+              </form>
+
+              <div className="signup-section">
+                <h3>Create an account</h3>
+                <form className="signup-form" onSubmit={handleSignup}>
+                  <label>
+                    First Name
+                    <input
+                      type="text"
+                      value={signupFirstName}
+                      onChange={(event) => setSignupFirstName(event.target.value)}
+                      required
+                      placeholder="First name"
+                    />
+                  </label>
+                  <label>
+                    Last Name
+                    <input
+                      type="text"
+                      value={signupLastName}
+                      onChange={(event) => setSignupLastName(event.target.value)}
+                      required
+                      placeholder="Last name"
+                    />
+                  </label>
+                  <label>
+                    Email
+                    <input
+                      type="email"
+                      value={signupEmail}
+                      onChange={(event) => setSignupEmail(event.target.value)}
+                      required
+                      placeholder="you@example.com"
+                    />
+                  </label>
+                  <label>
+                    Password
+                    <input
+                      type="password"
+                      value={signupPassword}
+                      onChange={(event) => setSignupPassword(event.target.value)}
+                      required
+                      placeholder="Create a password"
+                    />
+                  </label>
+                  <label>
+                    Account Type
+                    <select value={signupRole} onChange={(event) => setSignupRole(event.target.value)}>
+                      <option value="CUSTOMER">Customer</option>
+                      <option value="STAFF">Staff</option>
+                    </select>
+                  </label>
+                  <button type="submit">Create account</button>
+                </form>
+                {signupError && <p className="error-text">{signupError}</p>}
+                {signupMessage && <p className="success-text">{signupMessage}</p>}
+              </div>
+            </>
           )}
         </section>
 
         <section className="card grid-card">
           <div>
-            <h2>Food Catalog</h2>
+            <div className="food-header-row">
+              <h2>{selectedRestaurant ? `${selectedRestaurant.restaurant_name} Menu` : 'Food Catalog'}</h2>
+              {selectedRestaurant && (
+                <button type="button" className="secondary" onClick={handleClearSelectedRestaurant}>
+                  Back to restaurants
+                </button>
+              )}
+            </div>
             {loadingFood && <p>Loading food items...</p>}
             {foodError && <p className="error-text">{foodError}</p>}
-            {!loadingFood && !foodError && foodItems.length === 0 && <p>No food items found.</p>}
-            {!loadingFood && !foodError && foodItems.length > 0 && (
+            {!loadingFood && !foodError && restaurantFoodItems.length === 0 && (
+              <p>{selectedRestaurant ? 'No items found for this restaurant.' : 'No food items found.'}</p>
+            )}
+            {!loadingFood && !foodError && restaurantFoodItems.length > 0 && (
               <div className="food-grid">
-                {foodItems.map((item) => {
+                {restaurantFoodItems.map((item) => {
                   const itemId = item.food_item_id ?? item.id;
                   return (
                     <article key={itemId} className="food-card">
                       <h3>{item.food_name ?? item.name ?? 'Unnamed item'}</h3>
-                      <p><strong>Restaurant:</strong> {item.restaurant_id}</p>
+                      {selectedRestaurant ? null : (
+                        <p><strong>Restaurant:</strong> {item.restaurant_id}</p>
+                      )}
                       <p><strong>Price:</strong> ${formatMoney(item.price)}</p>
                       <p><strong>Course:</strong> {item.course}</p>
                       <div className="food-actions">
@@ -379,10 +642,83 @@ function App() {
             {loadingCart && <p>Loading cart...</p>}
             {cartError && <p className="error-text">{cartError}</p>}
             {!loadingCart && renderCartItems()}
-            {cart && cart.cart_items?.length > 0 && (
-              <div className="cart-summary">
-                <p><strong>Total:</strong> ${formatMoney(cart.total)}</p>
-              </div>
+            {cartHasItems && (
+              <>
+                <div className="cart-summary">
+                  <h3>Order summary</h3>
+                  <p><strong>Total:</strong> ${formatMoney(cart.total)}</p>
+                </div>
+                <div className="checkout-panel">
+                  <h3>Delivery address</h3>
+                  {addresses.length > 0 ? (
+                    <label>
+                      Choose existing address
+                      <select
+                        value={selectedAddressId}
+                        onChange={(event) => setSelectedAddressId(event.target.value)}
+                      >
+                        {addresses.map((address) => (
+                          <option key={address.address_id} value={address.address_id}>
+                            {`${address.street}, ${address.city}, ${address.postal_code}`}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : (
+                    <p>No saved addresses found. Add one below.</p>
+                  )}
+
+                  <div className="new-address-form">
+                    <h4>Add a new address</h4>
+                    <label>
+                      Street
+                      <input
+                        type="text"
+                        value={newAddressStreet}
+                        onChange={(event) => setNewAddressStreet(event.target.value)}
+                        placeholder="Street"
+                      />
+                    </label>
+                    <label>
+                      City
+                      <input
+                        type="text"
+                        value={newAddressCity}
+                        onChange={(event) => setNewAddressCity(event.target.value)}
+                        placeholder="City"
+                      />
+                    </label>
+                    <label>
+                      Postal code
+                      <input
+                        type="text"
+                        value={newAddressPostalCode}
+                        onChange={(event) => setNewAddressPostalCode(event.target.value)}
+                        placeholder="Postal code"
+                      />
+                    </label>
+                    <label>
+                      Instructions
+                      <input
+                        type="text"
+                        value={newAddressInstructions}
+                        onChange={(event) => setNewAddressInstructions(event.target.value)}
+                        placeholder="Delivery instructions (optional)"
+                      />
+                    </label>
+                    <button type="button" onClick={handleAddNewAddress}>
+                      Save address
+                    </button>
+                    {addressMessage && <p className="success-text">{addressMessage}</p>}
+                  </div>
+
+                  <button type="button" onClick={handleSubmitOrder}>
+                    Submit order
+                  </button>
+                  {orderError && <p className="error-text">{orderError}</p>}
+                  {orderSuccess && <p className="success-text">{orderSuccess}</p>}
+                </div>
+              </>
             )}
           </div>
         </section>
@@ -396,7 +732,10 @@ function App() {
           {!loadingRestaurants && !restaurantError && restaurants.length > 0 && (
             <div className="restaurant-list">
               {restaurants.map((restaurant) => (
-                <article key={restaurant.restaurant_id} className="restaurant-card">
+                <article
+                  key={restaurant.restaurant_id}
+                  className={`restaurant-card${selectedRestaurantId === String(restaurant.restaurant_id) ? ' selected' : ''}`}
+                >
                   <h3>{restaurant.restaurant_name}</h3>
                   <p><strong>Cuisine:</strong> {restaurant.cuisine}</p>
                   <p><strong>Address:</strong> {restaurant.address}</p>
@@ -404,6 +743,9 @@ function App() {
                     <strong>Hours:</strong> {restaurant.open_hour} - {restaurant.closed_hour}
                   </p>
                   <p><strong>Status:</strong> {restaurant.restaurant_status}</p>
+                  <button type="button" onClick={() => handleSelectRestaurant(restaurant.restaurant_id)}>
+                    View menu
+                  </button>
                 </article>
               ))}
             </div>
