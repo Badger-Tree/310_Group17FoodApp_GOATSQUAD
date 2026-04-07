@@ -108,6 +108,26 @@ function App() {
   const [addressMessage, setAddressMessage] = useState('');
   const [orderError, setOrderError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState('');
+  const [favorites, setFavorites] = useState([]);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
+  const [favoritesError, setFavoritesError] = useState('');
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [ordersError, setOrdersError] = useState('');
+  const [inventory, setInventory] = useState({});
+  const [loadingInventory, setLoadingInventory] = useState(false);
+  const [inventoryError, setInventoryError] = useState('');
+  const [foodItemsManagement, setFoodItemsManagement] = useState([]);
+  const [loadingFoodManagement, setLoadingFoodManagement] = useState(false);
+  const [foodManagementError, setFoodManagementError] = useState('');
+  const [showCreateFoodForm, setShowCreateFoodForm] = useState(false);
+  const [editingFoodItem, setEditingFoodItem] = useState(null);
+  const [newFoodName, setNewFoodName] = useState('');
+  const [newFoodRestaurantId, setNewFoodRestaurantId] = useState('');
+  const [newFoodPrice, setNewFoodPrice] = useState('');
+  const [newFoodDescription, setNewFoodDescription] = useState('');
+  const [newFoodCourse, setNewFoodCourse] = useState('');
+  const [newFoodInventoryQuantity, setNewFoodInventoryQuantity] = useState('');
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
   const selectedRestaurant = restaurants.find((restaurant) => String(restaurant.restaurant_id) === String(selectedRestaurantId)) || null;
   const restaurantFoodItems = selectedRestaurant
@@ -151,7 +171,7 @@ function App() {
   const [profileError, setProfileError] = useState('');
   const [profileMessage, setProfileMessage] = useState('');
   const [loadingProfile, setLoadingProfile] = useState(false);
-  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [loadingPastOrders, setLoadingPastOrders] = useState(false);
   const [pastOrders, setPastOrders] = useState([]);
   const [staffAssignments, setStaffAssignments] = useState([]);
   const [loadingStaffAssignments, setLoadingStaffAssignments] = useState(false);
@@ -226,6 +246,7 @@ function App() {
       setCart(null);
       setAddresses([]);
       setSelectedAddressId('');
+      setFavorites([]);
       return;
     }
 
@@ -239,6 +260,10 @@ function App() {
       }
       if (auth.role === 'STAFF') {
         loadStaffAssignments(auth.user_id);
+      }
+      loadFavorites();
+      if (auth.role === 'STAFF') {
+        loadFoodItemsManagement();
       }
     }
   }, [auth]);
@@ -359,6 +384,433 @@ function App() {
     'Content-Type': 'application/json',
   });
 
+  const loadFavorites = async () => {
+    if (!auth?.token) return;
+    setLoadingFavorites(true);
+    setFavoritesError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/favorites/me`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`Unable to load favorites (${response.status})`);
+      }
+      const data = await response.json();
+      setFavorites(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setFavoritesError(err.message);
+      setFavorites([]);
+    } finally {
+      setLoadingFavorites(false);
+    }
+  };
+
+  const isRestaurantFavorite = (restaurantId) =>
+    favorites.some((fav) => String(fav.restaurant_id) === String(restaurantId));
+
+  const handleToggleRestaurantFavorite = async (restaurantId, currentlyFavorite) => {
+    if (!auth?.token) {
+      setFavoritesError('Please log in to manage favorites.');
+      return;
+    }
+
+    setFavoritesError('');
+    const method = currentlyFavorite ? 'DELETE' : 'POST';
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/favorites/RESTAURANT/${encodeURIComponent(restaurantId)}`,
+        {
+          method,
+          headers: authHeaders(),
+        }
+      );
+
+      if (!response.ok && !(method === 'DELETE' && response.status === 204)) {
+        const body = await response.text();
+        throw new Error(`Favorite update failed (${response.status}) ${body}`);
+      }
+      await loadFavorites();
+    } catch (err) {
+      setFavoritesError(err.message);
+    }
+  };
+
+  const handleCancelOrderCustomer = async (orderId) => {
+    if (!auth?.token) {
+      setOrdersError('Please log in to manage orders.');
+      return;
+    }
+
+    setOrdersError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/cancel_order_customer/${encodeURIComponent(orderId)}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Cancel order failed (${response.status}) ${body}`);
+      }
+      // Reload the appropriate order list based on user role
+      if (auth?.role === 'CUSTOMER') {
+        await loadPastOrders(auth.user_id);
+      } else {
+        await loadRestaurantOrders(selectedStaffRestaurantId);
+      }
+    } catch (err) {
+      setOrdersError(err.message);
+    }
+  };
+
+  const handleAcceptOrderHistory = async (orderId) => {
+    if (!auth?.token) {
+      setOrdersError('Please log in to manage orders.');
+      return;
+    }
+
+    setOrdersError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/accept_order/${encodeURIComponent(orderId)}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Accept order failed (${response.status}) ${body}`);
+      }
+      await loadPastOrders(auth.user_id);
+    } catch (err) {
+      setOrdersError(err.message);
+    }
+  };
+
+  const handleCancelOrderStaffHistory = async (orderId) => {
+    if (!auth?.token) {
+      setOrdersError('Please log in to manage orders.');
+      return;
+    }
+
+    setOrdersError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/cancel_order_restaurant/${encodeURIComponent(orderId)}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Cancel order failed (${response.status}) ${body}`);
+      }
+      await loadPastOrders(auth.user_id);
+    } catch (err) {
+      setOrdersError(err.message);
+    }
+  };
+
+  const loadInventoryForFoodItem = async (foodItemId) => {
+    if (!auth?.token) return;
+    setLoadingInventory(true);
+    setInventoryError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/inventory/${encodeURIComponent(foodItemId)}`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        if (response.status === 404) {
+          setInventory((prev) => ({ ...prev, [foodItemId]: null }));
+          return;
+        }
+        throw new Error(`Unable to load inventory (${response.status})`);
+      }
+      const data = await response.json();
+      setInventory((prev) => ({ ...prev, [foodItemId]: data }));
+    } catch (err) {
+      setInventoryError(err.message);
+      setInventory((prev) => ({ ...prev, [foodItemId]: null }));
+    } finally {
+      setLoadingInventory(false);
+    }
+  };
+
+  const handleUpdateInventory = async (foodItemId, newQuantity) => {
+    if (!auth?.token) {
+      setInventoryError('Please log in to manage inventory.');
+      return;
+    }
+
+    setInventoryError('');
+    try {
+      // First try to update existing inventory
+      let response = await fetch(`${API_BASE_URL}/inventory/${encodeURIComponent(foodItemId)}`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ quantity: newQuantity }),
+      });
+
+      if (response.status === 404) {
+        // If inventory doesn't exist, create it
+        response = await fetch(`${API_BASE_URL}/inventory/`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ food_item_id: foodItemId, quantity: newQuantity }),
+        });
+      }
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Update inventory failed (${response.status}) ${body}`);
+      }
+      const updatedInventory = await response.json();
+      setInventory((prev) => ({ ...prev, [foodItemId]: updatedInventory }));
+    } catch (err) {
+      setInventoryError(err.message);
+    }
+  };
+
+  const handleToggleOrderFavorite = async (orderId, currentlyFavorite) => {
+    if (!auth?.token) {
+      setFavoritesError('Please log in to manage favorites.');
+      return;
+    }
+
+    setFavoritesError('');
+    const method = currentlyFavorite ? 'DELETE' : 'POST';
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/favorites/ORDER/${encodeURIComponent(orderId)}`,
+        {
+          method,
+          headers: authHeaders(),
+        }
+      );
+
+      if (!response.ok && !(method === 'DELETE' && response.status === 204)) {
+        const body = await response.text();
+        throw new Error(`Favorite update failed (${response.status}) ${body}`);
+      }
+      await loadFavorites();
+    } catch (err) {
+      setFavoritesError(err.message);
+    }
+  };
+
+  const isOrderFavorite = (orderId) =>
+    favorites.some((fav) => String(fav.order_id) === String(orderId));
+
+  const loadFoodItemsManagement = async () => {
+    if (!auth?.token) return;
+    setLoadingFoodManagement(true);
+    setFoodManagementError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/food-items`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`Unable to load food items (${response.status})`);
+      }
+      const data = await response.json();
+      setFoodItemsManagement(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setFoodManagementError(err.message);
+      setFoodItemsManagement([]);
+    } finally {
+      setLoadingFoodManagement(false);
+    }
+  };
+
+  const handleCreateFoodItem = async (event) => {
+    event.preventDefault();
+    if (!auth?.token) {
+      setFoodManagementError('Please log in to manage food items.');
+      return;
+    }
+
+    setFoodManagementError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/food-items`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          food_name: newFoodName,
+          restaurant_id: parseInt(newFoodRestaurantId),
+          price: parseFloat(newFoodPrice),
+          description: newFoodDescription,
+          course: newFoodCourse,
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Create food item failed (${response.status}) ${body}`);
+      }
+
+      const newFoodItem = await response.json();
+      setFoodItemsManagement((prev) => [...prev, newFoodItem]);
+      setFoodItems((prev) => [...prev, newFoodItem]);
+
+      // Reset form
+      setNewFoodName('');
+      setNewFoodRestaurantId('');
+      setNewFoodPrice('');
+      setNewFoodDescription('');
+      setNewFoodCourse('');
+      setShowCreateFoodForm(false);
+    } catch (err) {
+      setFoodManagementError(err.message);
+    }
+  };
+
+  const handleUpdateFoodItem = async (event) => {
+    event.preventDefault();
+    if (!auth?.token || !editingFoodItem) {
+      setFoodManagementError('Please log in to manage food items.');
+      return;
+    }
+
+    setFoodManagementError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/food-items/${editingFoodItem.food_item_id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          food_name: newFoodName,
+          price: parseFloat(newFoodPrice),
+          description: newFoodDescription,
+          course: newFoodCourse,
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Update food item failed (${response.status}) ${body}`);
+      }
+
+      const updatedFoodItem = await response.json();
+      setFoodItemsManagement((prev) =>
+        prev.map((item) =>
+          item.food_item_id === editingFoodItem.food_item_id ? updatedFoodItem : item
+        )
+      );
+      setFoodItems((prev) =>
+        prev.map((item) =>
+          item.food_item_id === editingFoodItem.food_item_id ? updatedFoodItem : item
+        )
+      );
+
+      // Update inventory quantity
+      if (newFoodInventoryQuantity !== '') {
+        try {
+          // First try to update existing inventory
+          let inventoryResponse = await fetch(`${API_BASE_URL}/inventory/${encodeURIComponent(editingFoodItem.food_item_id)}`, {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: JSON.stringify({ quantity: parseInt(newFoodInventoryQuantity) }),
+          });
+
+          if (inventoryResponse.status === 404) {
+            // If inventory doesn't exist, create it
+            inventoryResponse = await fetch(`${API_BASE_URL}/inventory/`, {
+              method: 'POST',
+              headers: authHeaders(),
+              body: JSON.stringify({ food_item_id: editingFoodItem.food_item_id, quantity: parseInt(newFoodInventoryQuantity) }),
+            });
+          }
+
+          if (inventoryResponse.ok) {
+            const updatedInventory = await inventoryResponse.json();
+            setInventory((prev) => ({ ...prev, [editingFoodItem.food_item_id]: updatedInventory }));
+          } else {
+            const body = await inventoryResponse.text();
+            console.warn(`Inventory update failed (${inventoryResponse.status}): ${body}`);
+          }
+        } catch (inventoryErr) {
+          console.warn('Failed to update inventory:', inventoryErr);
+        }
+      }
+
+      // Reset form
+      setEditingFoodItem(null);
+      setNewFoodName('');
+      setNewFoodPrice('');
+      setNewFoodDescription('');
+      setNewFoodCourse('');
+      setNewFoodInventoryQuantity('');
+    } catch (err) {
+      setFoodManagementError(err.message);
+    }
+  };
+
+  const handleDeleteFoodItem = async (foodItemId) => {
+    if (!auth?.token) {
+      setFoodManagementError('Please log in to manage food items.');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this food item?')) {
+      return;
+    }
+
+    setFoodManagementError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/food-items/${foodItemId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Delete food item failed (${response.status}) ${body}`);
+      }
+
+      setFoodItemsManagement((prev) =>
+        prev.filter((item) => item.food_item_id !== foodItemId)
+      );
+      setFoodItems((prev) =>
+        prev.filter((item) => item.food_item_id !== foodItemId)
+      );
+    } catch (err) {
+      setFoodManagementError(err.message);
+    }
+  };
+
+  const handleEditFoodItem = async (foodItem) => {
+    setEditingFoodItem(foodItem);
+    setNewFoodName(foodItem.food_name);
+    setNewFoodPrice(foodItem.price.toString());
+    setNewFoodDescription(foodItem.description);
+    setNewFoodCourse(foodItem.course);
+
+    // Load inventory quantity for this food item
+    try {
+      const response = await fetch(`${API_BASE_URL}/inventory/${foodItem.food_item_id}`, {
+        headers: authHeaders(),
+      });
+      if (response.ok) {
+        const inventoryData = await response.json();
+        setNewFoodInventoryQuantity(inventoryData.quantity.toString());
+      } else {
+        setNewFoodInventoryQuantity('0');
+      }
+    } catch (err) {
+      console.warn('Failed to load inventory for editing:', err);
+      setNewFoodInventoryQuantity('0');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingFoodItem(null);
+    setNewFoodName('');
+    setNewFoodPrice('');
+    setNewFoodDescription('');
+    setNewFoodCourse('');
+    setNewFoodInventoryQuantity('');
+  };
+
   const handleSelectRestaurant = (restaurantId) => {
     setSelectedRestaurantId(restaurantId);
   };
@@ -399,7 +851,7 @@ function App() {
 
   const loadPastOrders = async (userId) => {
     if (!userId) return;
-    setLoadingOrders(true);
+    setLoadingPastOrders(true);
     setProfileError('');
 
     try {
@@ -413,7 +865,7 @@ function App() {
       setProfileError(`Unable to load order history. ${err.message}`);
       setPastOrders([]);
     } finally {
-      setLoadingOrders(false);
+      setLoadingPastOrders(false);
     }
   };
 
@@ -1058,8 +1510,8 @@ function App() {
               <section className="order-history-card">
                 <h3>Past orders</h3>
                 {loadingOrders && <p>Loading past orders...</p>}
-                {!loadingOrders && pastOrders.length === 0 && <p>No past orders found.</p>}
-                {!loadingOrders && pastOrders.length > 0 && (
+                {!loadingPastOrders && pastOrders.length === 0 && <p>No past orders found.</p>}
+                {!loadingPastOrders && pastOrders.length > 0 && (
                   <div className="order-history-list">
                     {pastOrders.map((order) => (
                       <article key={order.order_id} className="order-card">
@@ -1353,11 +1805,394 @@ function App() {
                         <strong>Hours:</strong> {restaurant.open_hour} - {restaurant.closed_hour}
                       </p>
                       <p><strong>Status:</strong> {restaurant.restaurant_status}</p>
+                      <div className="restaurant-card-actions">
+                    <button type="button" onClick={() => handleSelectRestaurant(restaurant.restaurant_id)}>
+                          View menu
+                        </button>
+                        <button
+                      type="button"
+                      className={`favorite-button ${isRestaurantFavorite(restaurant.restaurant_id) ? 'favorited' : ''}`}
+                      onClick={() => handleToggleRestaurantFavorite(restaurant.restaurant_id, isRestaurantFavorite(restaurant.restaurant_id))}
+                    >
+                      {isRestaurantFavorite(restaurant.restaurant_id) ? 'Unfavorite' : 'Add favorite'}
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="card">
+          <h2>Your Favorite Restaurants</h2>
+          {!auth && <p>Log in to save favorite restaurants and manage them here.</p>}
+          {auth && loadingFavorites && <p>Loading favorites...</p>}
+          {auth && favoritesError && <p className="error-text">{favoritesError}</p>}
+          {auth && !loadingFavorites && favorites.filter((fav) => fav.restaurant_id).length === 0 && (
+            <p>You have no favorite restaurants yet. Use the button on any restaurant card to add one.</p>
+          )}
+          {auth && !loadingFavorites && favorites.filter((fav) => fav.restaurant_id).length > 0 && (
+            <div className="favorite-list">
+              {favorites
+                .filter((fav) => fav.restaurant_id)
+                .map((restaurant) => (
+                  <article key={restaurant.restaurant_id} className="favorite-card">
+                    <h3>{restaurant.restaurant_name}</h3>
+                    <p><strong>Cuisine:</strong> {restaurant.cuisine}</p>
+                    <p><strong>Address:</strong> {restaurant.address}</p>
+                    <div className="favorite-actions">
                       <button type="button" onClick={() => handleSelectRestaurant(restaurant.restaurant_id)}>
                         View menu
                       </button>
-                    </article>
-                  ))}
+                      <button
+                        type="button"
+                        className="favorite-button favorited"
+                        onClick={() => handleToggleRestaurantFavorite(restaurant.restaurant_id, true)}
+                      >
+                        Remove favorite
+                      </button>
+                    </div>
+                  </article>
+                ))}
+            </div>
+          )}
+        </section>
+
+        <section className="card">
+          <h2>My Orders</h2>
+          {!auth && <p>Log in to view and manage your orders.</p>}
+          {auth && loadingOrders && <p>Loading orders...</p>}
+          {auth && ordersError && <p className="error-text">{ordersError}</p>}
+          {auth && !loadingOrders && orders.length === 0 && (
+            <p>You have no orders yet. Add items to your cart and submit an order to get started.</p>
+          )}
+          {auth && !loadingOrders && orders.length > 0 && (
+            <div className="orders-list">
+              {orders.map((order) => (
+                <article key={order.order_id} className="order-card">
+                  <div className="order-header">
+                    <h3>Order #{order.order_id}</h3>
+                    <span className={`order-status status-${order.status.toLowerCase()}`}>
+                      {order.status}
+                    </span>
+                    <button
+                      type="button"
+                      className={`favorite-button ${isOrderFavorite(order.order_id) ? 'favorited' : ''}`}
+                      onClick={() => handleToggleOrderFavorite(order.order_id, isOrderFavorite(order.order_id))}
+                    >
+                      {isOrderFavorite(order.order_id) ? 'Unfavorite' : 'Favorite'}
+                    </button>
+                  </div>
+                  <p><strong>Restaurant:</strong> {order.restaurant_id}</p>
+                  <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
+                  <p><strong>Created:</strong> {new Date(order.created_date).toLocaleString()}</p>
+                  <div className="order-items">
+                    <h4>Items:</h4>
+                    <ul>
+                      {order.items.map((item, index) => (
+                        <li key={index}>
+                          {item.food_item_name} x{item.quantity} - ${formatMoney(item.price_per_item * item.quantity)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="order-actions">
+                    {(order.status === 'PENDING' || order.status === 'ACCEPTED') && auth.role === 'CUSTOMER' && (
+                      <button type="button" className="danger" onClick={() => handleCancelOrderCustomer(order.order_id)}>
+                        Cancel Order
+                      </button>
+                    )}
+                    {order.status === 'PENDING' && auth.role === 'STAFF' && (
+                      <>
+                        <button type="button" onClick={() => handleAcceptOrderHistory(order.order_id)}>
+                          Accept Order
+                        </button>
+                        <button type="button" className="danger" onClick={() => handleCancelOrderStaffHistory(order.order_id)}>
+                          Cancel Order
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {auth && auth.role === 'STAFF' && (
+          <section className="card">
+            <h2>Inventory Management</h2>
+            {inventoryError && <p className="error-text">{inventoryError}</p>}
+            <div className="inventory-grid">
+              {foodItems.map((item) => {
+                const itemId = item.food_item_id ?? item.id;
+                const itemInventory = inventory[itemId];
+                return (
+                  <article key={itemId} className="inventory-card">
+                    <h3>{item.food_name ?? item.name ?? 'Unnamed item'}</h3>
+                    <p><strong>Restaurant:</strong> {item.restaurant_id}</p>
+                    <p><strong>Price:</strong> ${formatMoney(item.price)}</p>
+                    <div className="inventory-controls">
+                      <label>
+                        Current Stock
+                        <input
+                          type="number"
+                          min="0"
+                          value={itemInventory?.quantity ?? ''}
+                          placeholder={itemInventory ? '' : 'Click Load Inventory first'}
+                          onChange={(event) => {
+                            const newQuantity = Math.max(0, Number(event.target.value) || 0);
+                            handleUpdateInventory(itemId, newQuantity);
+                          }}
+                        />
+                      </label>
+                      {!itemInventory && (
+                        <button
+                          type="button"
+                          onClick={() => loadInventoryForFoodItem(itemId)}
+                        >
+                          Load Inventory
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {auth && auth.role === 'STAFF' && (
+          <section className="card">
+            <div className="food-management-header">
+              <h2>Food Item Management</h2>
+              <button
+                type="button"
+                onClick={() => setShowCreateFoodForm(!showCreateFoodForm)}
+              >
+                {showCreateFoodForm ? 'Cancel' : 'Add New Food Item'}
+              </button>
+            </div>
+
+            {foodManagementError && <p className="error-text">{foodManagementError}</p>}
+
+            {showCreateFoodForm && (
+              <form className="food-form" onSubmit={handleCreateFoodItem}>
+                <h3>Create New Food Item</h3>
+                <div className="form-grid">
+                  <label>
+                    Name
+                    <input
+                      type="text"
+                      value={newFoodName}
+                      onChange={(event) => setNewFoodName(event.target.value)}
+                      required
+                      placeholder="Food item name"
+                    />
+                  </label>
+                  <label>
+                    Restaurant ID
+                    <select
+                      value={newFoodRestaurantId}
+                      onChange={(event) => setNewFoodRestaurantId(event.target.value)}
+                      required
+                    >
+                      <option value="">Select Restaurant</option>
+                      {restaurants.map((restaurant) => (
+                        <option key={restaurant.restaurant_id} value={restaurant.restaurant_id}>
+                          {restaurant.restaurant_name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Price
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={newFoodPrice}
+                      onChange={(event) => setNewFoodPrice(event.target.value)}
+                      required
+                      placeholder="0.00"
+                    />
+                  </label>
+                  <label>
+                    Course
+                    <select
+                      value={newFoodCourse}
+                      onChange={(event) => setNewFoodCourse(event.target.value)}
+                      required
+                    >
+                      <option value="">Select Course</option>
+                      <option value="Appetizer">Appetizer</option>
+                      <option value="Main">Main</option>
+                      <option value="Dessert">Dessert</option>
+                      <option value="Beverage">Beverage</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Description
+                  <textarea
+                    value={newFoodDescription}
+                    onChange={(event) => setNewFoodDescription(event.target.value)}
+                    required
+                    placeholder="Food item description"
+                    rows="3"
+                  />
+                </label>
+                <div className="form-actions">
+                  <button type="submit">Create Food Item</button>
+                  <button type="button" onClick={() => setShowCreateFoodForm(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {editingFoodItem && (
+              <form className="food-form" onSubmit={handleUpdateFoodItem}>
+                <h3>Edit Food Item: {editingFoodItem.food_name}</h3>
+                <div className="form-grid">
+                  <label>
+                    Name
+                    <input
+                      type="text"
+                      value={newFoodName}
+                      onChange={(event) => setNewFoodName(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Price
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={newFoodPrice}
+                      onChange={(event) => setNewFoodPrice(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Inventory Quantity
+                    <input
+                      type="number"
+                      min="0"
+                      value={newFoodInventoryQuantity}
+                      onChange={(event) => setNewFoodInventoryQuantity(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Course
+                    <select
+                      value={newFoodCourse}
+                      onChange={(event) => setNewFoodCourse(event.target.value)}
+                      required
+                    >
+                      <option value="Appetizer">Appetizer</option>
+                      <option value="Main">Main</option>
+                      <option value="Dessert">Dessert</option>
+                      <option value="Beverage">Beverage</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Description
+                  <textarea
+                    value={newFoodDescription}
+                    onChange={(event) => setNewFoodDescription(event.target.value)}
+                    required
+                    rows="3"
+                  />
+                </label>
+                <div className="form-actions">
+                  <button type="submit">Update Food Item</button>
+                  <button type="button" onClick={handleCancelEdit}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="food-management-grid">
+              {loadingFoodManagement && <p>Loading food items...</p>}
+              {!loadingFoodManagement && foodItemsManagement.length === 0 && (
+                <p>No food items found.</p>
+              )}
+              {!loadingFoodManagement && foodItemsManagement.length > 0 && (
+                foodItemsManagement.map((item) => (
+                  <article key={item.food_item_id} className="food-management-card">
+                    <div className="food-info">
+                      <h3>{item.food_name}</h3>
+                      <p><strong>Restaurant:</strong> {restaurants.find(r => r.restaurant_id === item.restaurant_id)?.restaurant_name || item.restaurant_id}</p>
+                      <p><strong>Price:</strong> ${formatMoney(item.price)}</p>
+                      <p><strong>Course:</strong> {item.course}</p>
+                      <p><strong>Description:</strong> {item.description}</p>
+                    </div>
+                    <div className="food-actions">
+                      <button type="button" onClick={() => handleEditFoodItem(item)}>
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="danger"
+                        onClick={() => handleDeleteFoodItem(item.food_item_id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </article>
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
+        <section className="card">
+          <h2>Your Favorite Orders</h2>
+          {!auth && <p>Log in to save favorite orders and manage them here.</p>}
+          {auth && loadingFavorites && <p>Loading favorites...</p>}
+          {auth && favoritesError && <p className="error-text">{favoritesError}</p>}
+          {auth && !loadingFavorites && favorites.filter((fav) => fav.order_id).length === 0 && (
+            <p>You have no favorite orders yet. Use the favorite button on any order to add one.</p>
+          )}
+          {auth && !loadingFavorites && favorites.filter((fav) => fav.order_id).length > 0 && (
+            <div className="favorite-orders-list">
+              {favorites
+                .filter((fav) => fav.order_id)
+                .map((order) => (
+                  <article key={order.order_id} className="favorite-order-card">
+                    <div className="order-header">
+                      <h3>Order #{order.order_id}</h3>
+                      <span className={`order-status status-${order.status.toLowerCase()}`}>
+                        {order.status}
+                      </span>
+                      <button
+                        type="button"
+                        className="favorite-button favorited"
+                        onClick={() => handleToggleOrderFavorite(order.order_id, true)}
+                      >
+                        Remove favorite
+                      </button>
+                    </div>
+                    <p><strong>Restaurant:</strong> {order.restaurant_id}</p>
+                    <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
+                    <p><strong>Created:</strong> {new Date(order.created_date).toLocaleString()}</p>
+                    <div className="order-items">
+                      <h4>Items:</h4>
+                      <ul>
+                        {order.items.map((item, index) => (
+                          <li key={index}>
+                            {item.food_item_name} x{item.quantity} - ${formatMoney(item.price_per_item * item.quantity)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </article>
+                    ))}
                 </div>
               )}
             </section>

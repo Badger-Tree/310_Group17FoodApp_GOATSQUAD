@@ -2,3 +2,7 @@ restaurant_id,owner_id,restaurant_name,cuisine,address,open_hour,closed_hour,res
 101,5a1a68d08-99cd-4cf8-9cd4-571551e062f3,Mario's Pizza,Italian,123 Main St.,09:00,21:00,active
 102,5a1a68d08-99cd-4cf8-9cd4-571551e062f3,Sakura Sushi,Japanese,456 Side St.,11:00,22:00,active
 103,5a1a68d08-99cd-4cf8-9cd4-571551e062f3,Taco Loco,Mexican,789 Top St.,10:00,20:00,active
+<<<<<<< HEAD
+
+=======
+>>>>>>> feature/setup-front-end

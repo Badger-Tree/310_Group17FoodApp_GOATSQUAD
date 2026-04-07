@@ -467,6 +467,3 @@ def filter_order_history_by_accepted(orders, accepted):
         elif not accepted and order.status != OrderStatus.ACCEPTED:
             accepted_orders.append(order)
     return accepted_orders
-
-
-
