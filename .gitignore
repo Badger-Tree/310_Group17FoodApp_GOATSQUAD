@@ -18,6 +18,10 @@ app/services/__pycache__/user_service.cpython-314.pyc
 pycache/
 *.pyc
 admin-frontend/node_modules/@rollup/rollup-win32-x64-msvc/rollup.win32-x64-msvc.node
+.gitignore
+app/services/review_service.py
+admin-frontend/node_modules/@rollup/rollup-win32-x64-msvc/rollup.win32-x64-msvc.node
+admin-frontend/node_modules/@esbuild/win32-x64/esbuild.exe
 admin-frontend/node_modules/@esbuild/win32-x64/esbuild.exe
 .gitignore
 app/services/review_service.py
