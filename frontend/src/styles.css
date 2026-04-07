@@ -314,3 +314,112 @@ button.favorite-button.favorited {
   border-radius: 0.5rem;
   border: 1px solid #d1d5db;
 }
+
+.food-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.food-management-header h2 {
+  margin: 0;
+}
+
+.food-form {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.food-form h3 {
+  margin: 0 0 1rem;
+  color: #374151;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-grid label {
+  display: grid;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.form-grid input,
+.form-grid select {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.food-management-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+}
+
+.food-management-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.9rem;
+  padding: 1rem;
+  background: #fafbff;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.food-info {
+  flex: 1;
+}
+
+.food-info h3 {
+  margin: 0 0 0.5rem;
+}
+
+.food-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.food-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 120px;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.error-text {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.success-text {
+  color: #059669;
+  font-weight: 600;
+}

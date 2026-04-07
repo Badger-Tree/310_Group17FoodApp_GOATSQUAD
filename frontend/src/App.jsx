@@ -47,6 +47,16 @@ function App() {
   const [inventory, setInventory] = useState({});
   const [loadingInventory, setLoadingInventory] = useState(false);
   const [inventoryError, setInventoryError] = useState('');
+  const [foodItemsManagement, setFoodItemsManagement] = useState([]);
+  const [loadingFoodManagement, setLoadingFoodManagement] = useState(false);
+  const [foodManagementError, setFoodManagementError] = useState('');
+  const [showCreateFoodForm, setShowCreateFoodForm] = useState(false);
+  const [editingFoodItem, setEditingFoodItem] = useState(null);
+  const [newFoodName, setNewFoodName] = useState('');
+  const [newFoodRestaurantId, setNewFoodRestaurantId] = useState('');
+  const [newFoodPrice, setNewFoodPrice] = useState('');
+  const [newFoodDescription, setNewFoodDescription] = useState('');
+  const [newFoodCourse, setNewFoodCourse] = useState('');
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
   const selectedRestaurant = restaurants.find((restaurant) => String(restaurant.restaurant_id) === String(selectedRestaurantId)) || null;
   const restaurantFoodItems = selectedRestaurant
@@ -57,10 +67,13 @@ function App() {
       return null;
     }
     const saved = localStorage.getItem(AUTH_STORAGE_KEY);
-    return saved ? JSON.parse(saved) : null;
+    const parsed = saved ? JSON.parse(saved) : null;
+    console.log('Initial auth state:', parsed);
+    return parsed;
   });
 
   useEffect(() => {
+    console.log('Auth state in useEffect:', auth);
     const loadRestaurants = async () => {
       setLoadingRestaurants(true);
       setRestaurantError('');
@@ -126,6 +139,9 @@ function App() {
       loadAddresses(auth.user_id);
       loadFavorites();
       loadOrders();
+      if (auth.role === 'STAFF') {
+        loadFoodItemsManagement();
+      }
     }
   }, [auth]);
 
@@ -357,6 +373,167 @@ function App() {
 
   const isOrderFavorite = (orderId) =>
     favorites.some((fav) => String(fav.order_id) === String(orderId));
+
+  const loadFoodItemsManagement = async () => {
+    if (!auth?.token) return;
+    setLoadingFoodManagement(true);
+    setFoodManagementError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/food-items`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`Unable to load food items (${response.status})`);
+      }
+      const data = await response.json();
+      setFoodItemsManagement(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setFoodManagementError(err.message);
+      setFoodItemsManagement([]);
+    } finally {
+      setLoadingFoodManagement(false);
+    }
+  };
+
+  const handleCreateFoodItem = async (event) => {
+    event.preventDefault();
+    if (!auth?.token) {
+      setFoodManagementError('Please log in to manage food items.');
+      return;
+    }
+
+    setFoodManagementError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/food-items`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          food_name: newFoodName,
+          restaurant_id: parseInt(newFoodRestaurantId),
+          price: parseFloat(newFoodPrice),
+          description: newFoodDescription,
+          course: newFoodCourse,
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Create food item failed (${response.status}) ${body}`);
+      }
+
+      const newFoodItem = await response.json();
+      setFoodItemsManagement((prev) => [...prev, newFoodItem]);
+      setFoodItems((prev) => [...prev, newFoodItem]);
+
+      // Reset form
+      setNewFoodName('');
+      setNewFoodRestaurantId('');
+      setNewFoodPrice('');
+      setNewFoodDescription('');
+      setNewFoodCourse('');
+      setShowCreateFoodForm(false);
+    } catch (err) {
+      setFoodManagementError(err.message);
+    }
+  };
+
+  const handleUpdateFoodItem = async (event) => {
+    event.preventDefault();
+    if (!auth?.token || !editingFoodItem) {
+      setFoodManagementError('Please log in to manage food items.');
+      return;
+    }
+
+    setFoodManagementError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/food-items/${editingFoodItem.food_item_id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          food_name: newFoodName,
+          price: parseFloat(newFoodPrice),
+          description: newFoodDescription,
+          course: newFoodCourse,
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Update food item failed (${response.status}) ${body}`);
+      }
+
+      const updatedFoodItem = await response.json();
+      setFoodItemsManagement((prev) =>
+        prev.map((item) =>
+          item.food_item_id === editingFoodItem.food_item_id ? updatedFoodItem : item
+        )
+      );
+      setFoodItems((prev) =>
+        prev.map((item) =>
+          item.food_item_id === editingFoodItem.food_item_id ? updatedFoodItem : item
+        )
+      );
+
+      // Reset form
+      setEditingFoodItem(null);
+      setNewFoodName('');
+      setNewFoodPrice('');
+      setNewFoodDescription('');
+      setNewFoodCourse('');
+    } catch (err) {
+      setFoodManagementError(err.message);
+    }
+  };
+
+  const handleDeleteFoodItem = async (foodItemId) => {
+    if (!auth?.token) {
+      setFoodManagementError('Please log in to manage food items.');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this food item?')) {
+      return;
+    }
+
+    setFoodManagementError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/food-items/${foodItemId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Delete food item failed (${response.status}) ${body}`);
+      }
+
+      setFoodItemsManagement((prev) =>
+        prev.filter((item) => item.food_item_id !== foodItemId)
+      );
+      setFoodItems((prev) =>
+        prev.filter((item) => item.food_item_id !== foodItemId)
+      );
+    } catch (err) {
+      setFoodManagementError(err.message);
+    }
+  };
+
+  const handleEditFoodItem = (foodItem) => {
+    setEditingFoodItem(foodItem);
+    setNewFoodName(foodItem.food_name);
+    setNewFoodPrice(foodItem.price.toString());
+    setNewFoodDescription(foodItem.description);
+    setNewFoodCourse(foodItem.course);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingFoodItem(null);
+    setNewFoodName('');
+    setNewFoodPrice('');
+    setNewFoodDescription('');
+    setNewFoodCourse('');
+  };
 
   const handleSelectRestaurant = (restaurantId) => {
     setSelectedRestaurantId(restaurantId);
@@ -1093,7 +1270,10 @@ function App() {
           )}
         </section>
 
-        {auth && auth.role === 'STAFF' && (
+        {(() => {
+          console.log('Checking STAFF role:', auth?.role);
+          return auth && auth.role === 'STAFF';
+        })() && (
           <section className="card">
             <h2>Inventory Management</h2>
             {inventoryError && <p className="error-text">{inventoryError}</p>}
@@ -1133,6 +1313,185 @@ function App() {
                   </article>
                 );
               })}
+            </div>
+          </section>
+        )}
+
+        {auth && auth.role === 'STAFF' && (
+          <section className="card">
+            <div className="food-management-header">
+              <h2>Food Item Management</h2>
+              <button
+                type="button"
+                onClick={() => setShowCreateFoodForm(!showCreateFoodForm)}
+              >
+                {showCreateFoodForm ? 'Cancel' : 'Add New Food Item'}
+              </button>
+            </div>
+
+            {foodManagementError && <p className="error-text">{foodManagementError}</p>}
+
+            {showCreateFoodForm && (
+              <form className="food-form" onSubmit={handleCreateFoodItem}>
+                <h3>Create New Food Item</h3>
+                <div className="form-grid">
+                  <label>
+                    Name
+                    <input
+                      type="text"
+                      value={newFoodName}
+                      onChange={(event) => setNewFoodName(event.target.value)}
+                      required
+                      placeholder="Food item name"
+                    />
+                  </label>
+                  <label>
+                    Restaurant ID
+                    <select
+                      value={newFoodRestaurantId}
+                      onChange={(event) => setNewFoodRestaurantId(event.target.value)}
+                      required
+                    >
+                      <option value="">Select Restaurant</option>
+                      {restaurants.map((restaurant) => (
+                        <option key={restaurant.restaurant_id} value={restaurant.restaurant_id}>
+                          {restaurant.restaurant_name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Price
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={newFoodPrice}
+                      onChange={(event) => setNewFoodPrice(event.target.value)}
+                      required
+                      placeholder="0.00"
+                    />
+                  </label>
+                  <label>
+                    Course
+                    <select
+                      value={newFoodCourse}
+                      onChange={(event) => setNewFoodCourse(event.target.value)}
+                      required
+                    >
+                      <option value="">Select Course</option>
+                      <option value="Appetizer">Appetizer</option>
+                      <option value="Main">Main</option>
+                      <option value="Dessert">Dessert</option>
+                      <option value="Beverage">Beverage</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Description
+                  <textarea
+                    value={newFoodDescription}
+                    onChange={(event) => setNewFoodDescription(event.target.value)}
+                    required
+                    placeholder="Food item description"
+                    rows="3"
+                  />
+                </label>
+                <div className="form-actions">
+                  <button type="submit">Create Food Item</button>
+                  <button type="button" onClick={() => setShowCreateFoodForm(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {editingFoodItem && (
+              <form className="food-form" onSubmit={handleUpdateFoodItem}>
+                <h3>Edit Food Item: {editingFoodItem.food_name}</h3>
+                <div className="form-grid">
+                  <label>
+                    Name
+                    <input
+                      type="text"
+                      value={newFoodName}
+                      onChange={(event) => setNewFoodName(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Price
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={newFoodPrice}
+                      onChange={(event) => setNewFoodPrice(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Course
+                    <select
+                      value={newFoodCourse}
+                      onChange={(event) => setNewFoodCourse(event.target.value)}
+                      required
+                    >
+                      <option value="Appetizer">Appetizer</option>
+                      <option value="Main">Main</option>
+                      <option value="Dessert">Dessert</option>
+                      <option value="Beverage">Beverage</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Description
+                  <textarea
+                    value={newFoodDescription}
+                    onChange={(event) => setNewFoodDescription(event.target.value)}
+                    required
+                    rows="3"
+                  />
+                </label>
+                <div className="form-actions">
+                  <button type="submit">Update Food Item</button>
+                  <button type="button" onClick={handleCancelEdit}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="food-management-grid">
+              {loadingFoodManagement && <p>Loading food items...</p>}
+              {!loadingFoodManagement && foodItemsManagement.length === 0 && (
+                <p>No food items found.</p>
+              )}
+              {!loadingFoodManagement && foodItemsManagement.length > 0 && (
+                foodItemsManagement.map((item) => (
+                  <article key={item.food_item_id} className="food-management-card">
+                    <div className="food-info">
+                      <h3>{item.food_name}</h3>
+                      <p><strong>Restaurant:</strong> {restaurants.find(r => r.restaurant_id === item.restaurant_id)?.restaurant_name || item.restaurant_id}</p>
+                      <p><strong>Price:</strong> ${formatMoney(item.price)}</p>
+                      <p><strong>Course:</strong> {item.course}</p>
+                      <p><strong>Description:</strong> {item.description}</p>
+                    </div>
+                    <div className="food-actions">
+                      <button type="button" onClick={() => handleEditFoodItem(item)}>
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="danger"
+                        onClick={() => handleDeleteFoodItem(item.food_item_id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </article>
+                ))
+              )}
             </div>
           </section>
         )}
