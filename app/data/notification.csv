@@ -94,3 +94,38 @@ notification_id,recipient_user_id,notification_type,message,status
 93,aee7383f-b838-47b4-823e-7d0daf72e6ac,order,Order 8b0f0170-4e03-47bf-b553-77e25de70674 placed! We'll let you know when it's ready.,pending
 94,103,order,New order received: 8b0f0170-4e03-47bf-b553-77e25de70674. Please begin preparation.,pending
 95,aee7383f-b838-47b4-823e-7d0daf72e6ac,order,Your order 8b0f0170-4e03-47bf-b553-77e25de70674 has been approved by the restaurant. We'll let you know when it's ready!,pending
+96,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,Payment for order 3ca1052c-a11d-429a-b605-1506dd4d15ba was successful. The restaurant is preparing your meal!,pending
+97,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order 3ca1052c-a11d-429a-b605-1506dd4d15ba placed! We'll let you know when it's ready.,pending
+98,103,order,New order received: 3ca1052c-a11d-429a-b605-1506dd4d15ba. Please begin preparation.,pending
+99,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,Payment for order e802840a-5736-46ae-b75c-d31161cff667 was successful. The restaurant is preparing your meal!,pending
+100,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order e802840a-5736-46ae-b75c-d31161cff667 placed! We'll let you know when it's ready.,pending
+101,101,order,New order received: e802840a-5736-46ae-b75c-d31161cff667. Please begin preparation.,pending
+102,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,Payment for order 9a4cbda3-ec3d-41b9-835b-b5b26a18a39f was successful. The restaurant is preparing your meal!,pending
+103,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order 9a4cbda3-ec3d-41b9-835b-b5b26a18a39f placed! We'll let you know when it's ready.,pending
+104,101,order,New order received: 9a4cbda3-ec3d-41b9-835b-b5b26a18a39f. Please begin preparation.,pending
+105,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,Payment for order d0b30191-0935-4ba9-b154-903c59d5fac1 was successful. The restaurant is preparing your meal!,pending
+106,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order d0b30191-0935-4ba9-b154-903c59d5fac1 placed! We'll let you know when it's ready.,pending
+107,101,order,New order received: d0b30191-0935-4ba9-b154-903c59d5fac1. Please begin preparation.,pending
+108,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,A refund has been issued for your canceled order d0b30191-0935-4ba9-b154-903c59d5fac1. It may take a few business days to reflect in your account.,pending
+109,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order d0b30191-0935-4ba9-b154-903c59d5fac1 has been canceled by the customer.,failed
+110,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,A refund has been issued for your canceled order e802840a-5736-46ae-b75c-d31161cff667. It may take a few business days to reflect in your account.,pending
+111,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order e802840a-5736-46ae-b75c-d31161cff667 has been canceled by the customer.,failed
+112,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,A refund has been issued for your canceled order 9a4cbda3-ec3d-41b9-835b-b5b26a18a39f. It may take a few business days to reflect in your account.,pending
+113,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order 9a4cbda3-ec3d-41b9-835b-b5b26a18a39f has been canceled by the customer.,failed
+114,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,A refund has been issued for your canceled order 3ca1052c-a11d-429a-b605-1506dd4d15ba. It may take a few business days to reflect in your account.,pending
+115,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order 3ca1052c-a11d-429a-b605-1506dd4d15ba has been canceled by the customer.,failed
+116,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,Payment for order c2afa17c-a31d-4948-a9e1-b00212a8ed19 was successful. The restaurant is preparing your meal!,pending
+117,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order c2afa17c-a31d-4948-a9e1-b00212a8ed19 placed! We'll let you know when it's ready.,pending
+118,104,order,New order received: c2afa17c-a31d-4948-a9e1-b00212a8ed19. Please begin preparation.,pending
+119,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Your order c2afa17c-a31d-4948-a9e1-b00212a8ed19 has been approved by the restaurant. We'll let you know when it's ready!,pending
+120,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,A refund has been issued for your canceled order c2afa17c-a31d-4948-a9e1-b00212a8ed19. It may take a few business days to reflect in your account.,pending
+121,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,"Unfortunately, your order c2afa17c-a31d-4948-a9e1-b00212a8ed19 was canceled by the restaurant.",failed
+122,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,Payment for order af9866be-daf5-4f34-9a59-6e106a75d0f0 was successful. The restaurant is preparing your meal!,pending
+123,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order af9866be-daf5-4f34-9a59-6e106a75d0f0 placed! We'll let you know when it's ready.,pending
+124,104,order,New order received: af9866be-daf5-4f34-9a59-6e106a75d0f0. Please begin preparation.,pending
+125,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Your order af9866be-daf5-4f34-9a59-6e106a75d0f0 has been approved by the restaurant. We'll let you know when it's ready!,pending
+126,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,Payment for order 7dab8b85-5b7b-438b-b01b-f8aded254f9c failed. Please update your payment information and try again.,failed
+127,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,payment,Payment for order 07231523-6bd9-4754-9c11-23fb5f73831f was successful. The restaurant is preparing your meal!,pending
+128,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order 07231523-6bd9-4754-9c11-23fb5f73831f placed! We'll let you know when it's ready.,pending
+129,104,order,New order received: 07231523-6bd9-4754-9c11-23fb5f73831f. Please begin preparation.,pending
+130,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Your order 07231523-6bd9-4754-9c11-23fb5f73831f has been approved by the restaurant. We'll let you know when it's ready!,pending

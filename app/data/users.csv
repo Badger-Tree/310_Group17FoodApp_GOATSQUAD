@@ -8,3 +8,5 @@ a1a68d08-99cd-4cf8-9cd4-571551e062f3,staff@example.com,Owner,string,string,STAFF
 dc38faab-322d-4677-95c4-5507ccd16e10,pippin@example.com,New,User,string,CUSTOMER,2026-04-06T21:10:35.481789+00:00
 5410db0d-a7c2-4f30-bea2-d120750ff48d,new_staff@example.com,New,Staff,string,STAFF,2026-04-06T21:11:28.808695+00:00
 05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,test1@gmail.com,test,test,string,CUSTOMER,2026-04-07T20:53:24.306852+00:00
+6eb043eb-839b-4071-88d6-b5d0c0094d13,test2@gmail.com,test,test,string,STAFF,2026-04-07T21:27:26.317041+00:00
+e5943ba1-550c-4fd3-a769-cc869f2e5bf4,test3@gmail.com,test courier,test,string,STAFF,2026-04-07T22:11:16.604688+00:00

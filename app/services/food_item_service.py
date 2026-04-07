@@ -16,7 +16,7 @@ def create_food_item(payload: FoodItemCreate):
     restaurant_data = load_restaurants()
     exists = False
     for r in restaurant_data:
-        if r["restaurant_id"] == payload.restaurant_id:
+        if int(r["restaurant_id"]) == payload.restaurant_id:
             exists = True
             break
 

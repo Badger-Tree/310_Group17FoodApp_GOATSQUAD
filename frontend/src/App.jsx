@@ -9,6 +9,27 @@ function formatMoney(value) {
   return Number.isNaN(number) ? '-' : number.toFixed(2);
 }
 
+function getRestaurantDisplayName(order, restaurants) {
+  return (
+    order.restaurant_name ||
+    restaurants.find((restaurant) => String(restaurant.restaurant_id) === String(order.restaurant_id))?.restaurant_name ||
+    order.restaurant_id
+  );
+}
+
+function getFoodItemDisplayName(item, foodItems) {
+  return (
+    item.food_item_name ||
+    item.food_name ||
+    foodItems.find((food) => String(food.food_item_id) === String(item.food_item_id))?.food_name ||
+    `Item #${item.food_item_id}`
+  );
+}
+
+function isAuthMissingUserError(error) {
+  return typeof error?.message === 'string' && /404/.test(error.message);
+}
+
 function App() {
   // --- Review form state and handlers for completed orders ---
   const [reviewForms, setReviewForms] = useState({});
@@ -114,7 +135,14 @@ function App() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [ordersError, setOrdersError] = useState('');
+  const [orderFilterRestaurant, setOrderFilterRestaurant] = useState('');
+  const [orderFilterCuisine, setOrderFilterCuisine] = useState('');
+  const [orderFilterAccepted, setOrderFilterAccepted] = useState('all');
+  const [orderFilterDate, setOrderFilterDate] = useState('');
+  const [orderSortBy, setOrderSortBy] = useState('date');
+  const [orderSortOrder, setOrderSortOrder] = useState('desc');
   const [inventory, setInventory] = useState({});
+  const [inventoryDrafts, setInventoryDrafts] = useState({});
   const [loadingInventory, setLoadingInventory] = useState(false);
   const [inventoryError, setInventoryError] = useState('');
   const [foodItemsManagement, setFoodItemsManagement] = useState([]);
@@ -128,22 +156,93 @@ function App() {
   const [newFoodDescription, setNewFoodDescription] = useState('');
   const [newFoodCourse, setNewFoodCourse] = useState('');
   const [newFoodInventoryQuantity, setNewFoodInventoryQuantity] = useState('');
+  const [newRestaurantName, setNewRestaurantName] = useState('');
+  const [newRestaurantCuisine, setNewRestaurantCuisine] = useState('');
+  const [newRestaurantAddress, setNewRestaurantAddress] = useState('');
+  const [newRestaurantOpenHour, setNewRestaurantOpenHour] = useState('09:00');
+  const [newRestaurantClosedHour, setNewRestaurantClosedHour] = useState('21:00');
+  const [restaurantCreateError, setRestaurantCreateError] = useState('');
+  const [restaurantCreateMessage, setRestaurantCreateMessage] = useState('');
+  const [loadingPastOrders, setLoadingPastOrders] = useState(false);
+  const [pastOrders, setPastOrders] = useState([]);
+  const [staffAssignments, setStaffAssignments] = useState([]);
+  const [loadingStaffAssignments, setLoadingStaffAssignments] = useState(false);
+  const [staffAssignmentError, setStaffAssignmentError] = useState('');
+  const [selectedStaffRestaurantId, setSelectedStaffRestaurantId] = useState('');
+  const [restaurantOrders, setRestaurantOrders] = useState([]);
+  const [loadingRestaurantOrders, setLoadingRestaurantOrders] = useState(false);
+  const [restaurantOrderError, setRestaurantOrderError] = useState('');
+  const [restaurantCourierAssignments, setRestaurantCourierAssignments] = useState([]);
+  const [selectedCourierByOrder, setSelectedCourierByOrder] = useState({});
+  const [courierOrders, setCourierOrders] = useState([]);
+  const [loadingCourierOrders, setLoadingCourierOrders] = useState(false);
+  const [courierOrderError, setCourierOrderError] = useState('');
+  const [orderActionMessage, setOrderActionMessage] = useState('');
+  const [orderActionError, setOrderActionError] = useState('');
+  const [restaurantStaffAssignments, setRestaurantStaffAssignments] = useState([]);
+  const [loadingRestaurantStaffAssignments, setLoadingRestaurantStaffAssignments] = useState(false);
+  const [restaurantStaffAssignmentError, setRestaurantStaffAssignmentError] = useState('');
+  const [staffAssignmentMessage, setStaffAssignmentMessage] = useState('');
+  const [staffAssignmentFormEmail, setStaffAssignmentFormEmail] = useState('');
+  const [staffAssignmentFormRole, setStaffAssignmentFormRole] = useState('MANAGER');
+  const [staffDirectory, setStaffDirectory] = useState({});
+  const [auth, setAuth] = useState(null);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
   const selectedRestaurant = restaurants.find((restaurant) => String(restaurant.restaurant_id) === String(selectedRestaurantId)) || null;
   const restaurantFoodItems = selectedRestaurant
     ? foodItems.filter((item) => String(item.restaurant_id) === String(selectedRestaurant.restaurant_id))
     : foodItems;
+  const staffAssignedRestaurantIds = new Set(staffAssignments.map((assignment) => String(assignment.restaurant_id)));
+  const staffAccessibleRestaurants = auth?.role === 'STAFF'
+    ? restaurants.filter(
+        (restaurant) =>
+          String(restaurant.owner_id) === String(auth?.user_id) ||
+          staffAssignedRestaurantIds.has(String(restaurant.restaurant_id))
+      )
+    : [];
+  const activeStaffRestaurantId = staffAccessibleRestaurants.some(
+    (restaurant) => String(restaurant.restaurant_id) === String(selectedStaffRestaurantId)
+  )
+    ? String(selectedStaffRestaurantId)
+    : (staffAccessibleRestaurants[0] ? String(staffAccessibleRestaurants[0].restaurant_id) : '');
+  const managedInventoryItems = activeStaffRestaurantId
+    ? foodItems.filter((item) => String(item.restaurant_id) === activeStaffRestaurantId)
+    : [];
+  const managedFoodItems = activeStaffRestaurantId
+    ? foodItemsManagement.filter((item) => String(item.restaurant_id) === activeStaffRestaurantId)
+    : [];
+  const ownerRestaurant = auth?.role === 'STAFF'
+    ? staffAccessibleRestaurants.find((restaurant) => String(restaurant.owner_id) === String(auth?.user_id)) || null
+    : null;
+  const currentAssignmentRoles = Array.from(new Set(staffAssignments.map((assignment) => assignment.assignment)));
+  const canManageRestaurant = currentAssignmentRoles.includes('OWNER') || currentAssignmentRoles.includes('MANAGER');
+  const isCourierOnly = currentAssignmentRoles.includes('COURIER') && !canManageRestaurant;
   const [showProfilePage, setShowProfilePage] = useState(false);
   // Reviews state
   const [restaurantReviews, setRestaurantReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [reviewError, setReviewError] = useState('');
     // Fetch reviews when a restaurant is selected
-    useEffect(() => {
-      if (!selectedRestaurantId) {
-        setRestaurantReviews([]);
-        setReviewError('');
-        setLoadingReviews(false);
+  useEffect(() => {
+    if (auth?.role !== 'STAFF') {
+      return;
+    }
+    if (staffAccessibleRestaurants.length === 0) {
+      if (selectedStaffRestaurantId) {
+        setSelectedStaffRestaurantId('');
+      }
+      return;
+    }
+    if (!staffAccessibleRestaurants.some((restaurant) => String(restaurant.restaurant_id) === String(selectedStaffRestaurantId))) {
+      setSelectedStaffRestaurantId(String(staffAccessibleRestaurants[0].restaurant_id));
+    }
+  }, [auth?.role, selectedStaffRestaurantId, staffAccessibleRestaurants]);
+
+  useEffect(() => {
+    if (!selectedRestaurantId) {
+      setRestaurantReviews([]);
+      setReviewError('');
+      setLoadingReviews(false);
         return;
       }
       setLoadingReviews(true);
@@ -171,24 +270,16 @@ function App() {
   const [profileError, setProfileError] = useState('');
   const [profileMessage, setProfileMessage] = useState('');
   const [loadingProfile, setLoadingProfile] = useState(false);
-  const [loadingPastOrders, setLoadingPastOrders] = useState(false);
-  const [pastOrders, setPastOrders] = useState([]);
-  const [staffAssignments, setStaffAssignments] = useState([]);
-  const [loadingStaffAssignments, setLoadingStaffAssignments] = useState(false);
-  const [staffAssignmentError, setStaffAssignmentError] = useState('');
-  const [selectedStaffRestaurantId, setSelectedStaffRestaurantId] = useState('');
-  const [restaurantOrders, setRestaurantOrders] = useState([]);
-  const [loadingRestaurantOrders, setLoadingRestaurantOrders] = useState(false);
-  const [restaurantOrderError, setRestaurantOrderError] = useState('');
-  const [orderActionMessage, setOrderActionMessage] = useState('');
-  const [orderActionError, setOrderActionError] = useState('');
-  const [auth, setAuth] = useState(() => {
+
+  useEffect(() => {
     if (typeof window === 'undefined') {
-      return null;
+      return;
     }
     const saved = localStorage.getItem(AUTH_STORAGE_KEY);
-    return saved ? JSON.parse(saved) : null;
-  });
+    if (saved) {
+      setAuth(JSON.parse(saved));
+    }
+  }, []);
 
   useEffect(() => {
     const loadRestaurants = async () => {
@@ -321,13 +412,150 @@ function App() {
     }
   };
 
+  const loadRestaurantCourierAssignments = async (restaurantId) => {
+    if (!auth?.token || !restaurantId) {
+      setRestaurantCourierAssignments([]);
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/staff-assignments/restaurant/${encodeURIComponent(restaurantId)}`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`Unable to load couriers (${response.status})`);
+      }
+      const data = await response.json();
+      const assignments = Array.isArray(data) ? data : [];
+      setRestaurantCourierAssignments(assignments.filter((assignment) => assignment.assignment === 'COURIER'));
+    } catch (err) {
+      setRestaurantCourierAssignments([]);
+      setOrderActionError(err.message);
+    }
+  };
+
+  const loadCourierOrders = async () => {
+    if (!auth?.token) {
+      setCourierOrders([]);
+      return;
+    }
+    setLoadingCourierOrders(true);
+    setCourierOrderError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/deliveries/my-orders`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`Unable to load courier orders (${response.status})`);
+      }
+      const data = await response.json();
+      setCourierOrders(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setCourierOrderError(err.message);
+      setCourierOrders([]);
+    } finally {
+      setLoadingCourierOrders(false);
+    }
+  };
+
+  const loadRestaurantStaffAssignments = async (restaurantId) => {
+    if (!auth?.token || !restaurantId) {
+      setRestaurantStaffAssignments([]);
+      return;
+    }
+    setLoadingRestaurantStaffAssignments(true);
+    setRestaurantStaffAssignmentError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/staff-assignments/restaurant/${encodeURIComponent(restaurantId)}`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`Unable to load restaurant staff (${response.status})`);
+      }
+      const data = await response.json();
+      setRestaurantStaffAssignments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setRestaurantStaffAssignmentError(err.message);
+      setRestaurantStaffAssignments([]);
+    } finally {
+      setLoadingRestaurantStaffAssignments(false);
+    }
+  };
+
   useEffect(() => {
     if (auth?.role === 'STAFF' && selectedStaffRestaurantId) {
       loadRestaurantOrders(selectedStaffRestaurantId);
+      loadRestaurantCourierAssignments(selectedStaffRestaurantId);
     } else {
       setRestaurantOrders([]);
+      setRestaurantCourierAssignments([]);
     }
   }, [selectedStaffRestaurantId, auth]);
+
+  useEffect(() => {
+    if (auth?.role === 'STAFF' && isCourierOnly) {
+      loadCourierOrders();
+    } else {
+      setCourierOrders([]);
+    }
+  }, [auth?.role, auth?.token, isCourierOnly]);
+
+  useEffect(() => {
+    if (auth?.role === 'CUSTOMER' && auth?.user_id) {
+      loadPastOrders(auth.user_id);
+    }
+  }, [
+    auth?.role,
+    auth?.user_id,
+    orderFilterRestaurant,
+    orderFilterCuisine,
+    orderFilterAccepted,
+    orderFilterDate,
+    orderSortBy,
+    orderSortOrder,
+  ]);
+
+  useEffect(() => {
+    if (ownerRestaurant?.restaurant_id) {
+      loadRestaurantStaffAssignments(ownerRestaurant.restaurant_id);
+    } else {
+      setRestaurantStaffAssignments([]);
+    }
+  }, [ownerRestaurant?.restaurant_id, auth?.token]);
+
+  useEffect(() => {
+    const staffIds = Array.from(
+      new Set(
+        [...staffAssignments, ...restaurantStaffAssignments]
+          .map((assignment) => assignment?.staff_id)
+          .filter(Boolean)
+      )
+    ).filter((staffId) => !staffDirectory[staffId]);
+
+    if (staffIds.length === 0) {
+      return;
+    }
+
+    Promise.all(
+      staffIds.map(async (staffId) => {
+        const response = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(staffId)}`);
+        if (!response.ok) {
+          return [staffId, null];
+        }
+        const data = await response.json();
+        return [staffId, data];
+      })
+    ).then((entries) => {
+      setStaffDirectory((prev) => {
+        const next = { ...prev };
+        for (const [staffId, data] of entries) {
+          next[staffId] = data;
+        }
+        return next;
+      });
+    });
+  }, [staffAssignments, restaurantStaffAssignments, staffDirectory]);
 
   const handleAcceptOrder = async (orderId) => {
     if (!auth?.token) {
@@ -379,10 +607,90 @@ function App() {
     }
   };
 
+  const handleAssignCourierToOrder = async (order) => {
+    if (!auth?.token) {
+      setOrderActionError('Please log in to assign a courier.');
+      return;
+    }
+    const courierId = selectedCourierByOrder[order.order_id];
+    if (!courierId) {
+      setOrderActionError('Choose a courier first.');
+      return;
+    }
+    if (!order.delivery_id) {
+      setOrderActionError('This order does not have a delivery record yet. Accept it first.');
+      return;
+    }
+
+    setOrderActionMessage('');
+    setOrderActionError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/deliveries/assign/${encodeURIComponent(order.delivery_id)}/${encodeURIComponent(courierId)}`, {
+        method: 'PUT',
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Assign courier failed (${response.status}) ${body}`);
+      }
+
+      setOrderActionMessage('Courier assigned successfully.');
+      await loadRestaurantOrders(selectedStaffRestaurantId);
+    } catch (err) {
+      setOrderActionError(err.message);
+    }
+  };
+
+  const handlePickupDelivery = async (deliveryId) => {
+    if (!deliveryId) {
+      setCourierOrderError('This order does not have a delivery assigned.');
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/deliveries/pickup/${encodeURIComponent(deliveryId)}`, {
+        method: 'PUT',
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Update failed (${response.status}) ${body}`);
+      }
+      await loadCourierOrders();
+    } catch (err) {
+      setCourierOrderError(err.message);
+    }
+  };
+
+  const handleCompleteDelivery = async (deliveryId) => {
+    if (!deliveryId) {
+      setCourierOrderError('This order does not have a delivery assigned.');
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/deliveries/complete/${encodeURIComponent(deliveryId)}`, {
+        method: 'PUT',
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Update failed (${response.status}) ${body}`);
+      }
+      await loadCourierOrders();
+    } catch (err) {
+      setCourierOrderError(err.message);
+    }
+  };
+
   const authHeaders = () => ({
     token: auth?.token || '',
     'Content-Type': 'application/json',
   });
+
+  const resolveStaffUserByEmail = async (email) => {
+    const response = await fetch(`${API_BASE_URL}/users/by-email/${encodeURIComponent(email)}`);
+    if (!response.ok) {
+      throw new Error(`Unable to find staff user (${response.status})`);
+    }
+    return response.json();
+  };
 
   const loadFavorites = async () => {
     if (!auth?.token) return;
@@ -522,15 +830,18 @@ function App() {
       if (!response.ok) {
         if (response.status === 404) {
           setInventory((prev) => ({ ...prev, [foodItemId]: null }));
+          setInventoryDrafts((prev) => ({ ...prev, [foodItemId]: '' }));
           return;
         }
         throw new Error(`Unable to load inventory (${response.status})`);
       }
       const data = await response.json();
       setInventory((prev) => ({ ...prev, [foodItemId]: data }));
+      setInventoryDrafts((prev) => ({ ...prev, [foodItemId]: String(data.quantity ?? '') }));
     } catch (err) {
       setInventoryError(err.message);
       setInventory((prev) => ({ ...prev, [foodItemId]: null }));
+      setInventoryDrafts((prev) => ({ ...prev, [foodItemId]: '' }));
     } finally {
       setLoadingInventory(false);
     }
@@ -566,6 +877,7 @@ function App() {
       }
       const updatedInventory = await response.json();
       setInventory((prev) => ({ ...prev, [foodItemId]: updatedInventory }));
+      setInventoryDrafts((prev) => ({ ...prev, [foodItemId]: String(updatedInventory.quantity ?? '') }));
     } catch (err) {
       setInventoryError(err.message);
     }
@@ -598,6 +910,325 @@ function App() {
     }
   };
 
+  const handleAssignStaffMember = async (event) => {
+    event.preventDefault();
+    if (!auth?.token) {
+      setRestaurantStaffAssignmentError('Please log in to manage staff assignments.');
+      return;
+    }
+    setRestaurantStaffAssignmentError('');
+    setStaffAssignmentMessage('');
+
+    try {
+      const staffUser = await resolveStaffUserByEmail(staffAssignmentFormEmail.trim());
+      const response = await fetch(`${API_BASE_URL}/staff-assignments/assign_staff`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          staff_id: staffUser.id,
+          assignment: staffAssignmentFormRole,
+        }),
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Assign staff failed (${response.status}) ${body}`);
+      }
+
+      setStaffAssignmentFormEmail('');
+      setStaffAssignmentFormRole('MANAGER');
+      setStaffAssignmentMessage(`Assigned ${staffUser.email} as ${staffAssignmentFormRole}.`);
+      await loadRestaurantStaffAssignments(ownerRestaurant?.restaurant_id);
+      await loadStaffAssignments(auth.user_id);
+    } catch (err) {
+      setRestaurantStaffAssignmentError(err.message);
+    }
+  };
+
+  const handleUpdateStaffAssignmentRole = async (staffId, assignment) => {
+    if (!auth?.token) {
+      setRestaurantStaffAssignmentError('Please log in to manage staff assignments.');
+      return;
+    }
+    setRestaurantStaffAssignmentError('');
+    setStaffAssignmentMessage('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/staff-assignments/update_staff/${encodeURIComponent(staffId)}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ assignment }),
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Update assignment failed (${response.status}) ${body}`);
+      }
+
+      setStaffAssignmentMessage(`Updated role to ${assignment}.`);
+      await loadRestaurantStaffAssignments(ownerRestaurant?.restaurant_id);
+      await loadStaffAssignments(auth.user_id);
+    } catch (err) {
+      setRestaurantStaffAssignmentError(err.message);
+    }
+  };
+
+  const handleRemoveStaffAssignment = async (staffId) => {
+    if (!auth?.token) {
+      setRestaurantStaffAssignmentError('Please log in to manage staff assignments.');
+      return;
+    }
+    setRestaurantStaffAssignmentError('');
+    setStaffAssignmentMessage('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/staff-assignments/remove_staff/${encodeURIComponent(staffId)}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Remove assignment failed (${response.status}) ${body}`);
+      }
+
+      setStaffAssignmentMessage('Staff assignment removed.');
+      await loadRestaurantStaffAssignments(ownerRestaurant?.restaurant_id);
+      await loadStaffAssignments(auth.user_id);
+    } catch (err) {
+      setRestaurantStaffAssignmentError(err.message);
+    }
+  };
+
+  const renderStaffAssignmentManager = () => {
+    if (!ownerRestaurant) {
+      return null;
+    }
+
+    return (
+      <div className="restaurant-order-management-card">
+        <h4>Manage Staff Assignments</h4>
+        <p><strong>Owner restaurant:</strong> {ownerRestaurant.restaurant_name} ({ownerRestaurant.restaurant_id})</p>
+        {staffAssignmentMessage && <p className="success-text">{staffAssignmentMessage}</p>}
+        {restaurantStaffAssignmentError && <p className="error-text">{restaurantStaffAssignmentError}</p>}
+
+        <form className="food-form" onSubmit={handleAssignStaffMember}>
+          <div className="form-grid">
+            <label>
+              Staff email
+              <input
+                type="email"
+                value={staffAssignmentFormEmail}
+                onChange={(event) => setStaffAssignmentFormEmail(event.target.value)}
+                placeholder="staff@example.com"
+                required
+              />
+            </label>
+            <label>
+              Assignment role
+              <select
+                value={staffAssignmentFormRole}
+                onChange={(event) => setStaffAssignmentFormRole(event.target.value)}
+                required
+              >
+                <option value="MANAGER">MANAGER</option>
+                <option value="COURIER">COURIER</option>
+                <option value="OWNER">OWNER</option>
+              </select>
+            </label>
+          </div>
+          <div className="form-actions">
+            <button type="submit">Assign Staff</button>
+          </div>
+        </form>
+
+        {loadingRestaurantStaffAssignments && <p>Loading restaurant staff...</p>}
+        {!loadingRestaurantStaffAssignments && restaurantStaffAssignments.length === 0 && (
+          <p>No staff assignments found for this restaurant yet.</p>
+        )}
+        {!loadingRestaurantStaffAssignments && restaurantStaffAssignments.length > 0 && (
+          <div className="staff-assignment-list">
+            {restaurantStaffAssignments.map((assignment) => (
+              <article key={`${assignment.restaurant_id}-${assignment.staff_id}`} className="assignment-card">
+                <p><strong>Name:</strong> {staffDirectory[assignment.staff_id]?.first_name ?? 'Unknown'} {staffDirectory[assignment.staff_id]?.last_name ?? ''}</p>
+                <p><strong>Staff ID:</strong> {assignment.staff_id}</p>
+                <p><strong>Assignment ID:</strong> {assignment.assignment_id}</p>
+                <p><strong>Current Role:</strong> {assignment.assignment}</p>
+                {assignment.staff_id !== auth?.user_id && (
+                  <>
+                    <label>
+                      Change role
+                      <select
+                        value={assignment.assignment}
+                        onChange={(event) => handleUpdateStaffAssignmentRole(assignment.staff_id, event.target.value)}
+                      >
+                        <option value="MANAGER">MANAGER</option>
+                        <option value="COURIER">COURIER</option>
+                        <option value="OWNER">OWNER</option>
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      className="danger"
+                      onClick={() => handleRemoveStaffAssignment(assignment.staff_id)}
+                    >
+                      Remove Assignment
+                    </button>
+                  </>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderRestaurantOrderManager = () => (
+    <div className="restaurant-order-management-card">
+      <h4>Incoming Restaurant Orders</h4>
+      <label>
+        Select restaurant
+        <select
+          value={selectedStaffRestaurantId}
+          onChange={(event) => setSelectedStaffRestaurantId(event.target.value)}
+        >
+          {Array.from(new Set(staffAssignments.map((assignment) => String(assignment.restaurant_id)))).map((restaurantId) => (
+            <option key={restaurantId} value={restaurantId}>
+              {restaurantId}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      {orderActionMessage && <p className="success-text">{orderActionMessage}</p>}
+      {orderActionError && <p className="error-text">{orderActionError}</p>}
+      {loadingRestaurantOrders && <p>Loading restaurant orders...</p>}
+      {restaurantOrderError && <p className="error-text">{restaurantOrderError}</p>}
+      {!loadingRestaurantOrders && !restaurantOrderError && restaurantOrders.length === 0 && (
+        <p>No orders found for this restaurant.</p>
+      )}
+      {!loadingRestaurantOrders && restaurantOrders.length > 0 && (
+        <div className="order-history-list">
+          {restaurantOrders.map((order) => {
+            const assignedCourier = restaurantCourierAssignments.find(
+              (assignment) => assignment.staff_id === selectedCourierByOrder[order.order_id]
+            );
+            return (
+              <article key={order.order_id} className="order-card">
+                <p><strong>Order #</strong> {order.order_id}</p>
+                <p><strong>Status:</strong> {order.status}</p>
+                <p><strong>Placed:</strong> {new Date(order.created_date).toLocaleString()}</p>
+                <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
+                <p><strong>Customer:</strong> {order.customer_id}</p>
+                <p><strong>Delivery address:</strong> {order.delivery_address || order.delivery_address_id}</p>
+                <p><strong>Delivery ID:</strong> {order.delivery_id || 'Not created yet'}</p>
+                {order.items && order.items.length > 0 && (
+                  <div className="order-items">
+                    <h4>Items</h4>
+                    <ul>
+                      {order.items.map((item) => (
+                        <li key={`${order.order_id}-${item.food_item_id}`}>
+                          {item.quantity} x {item.food_item_id} @ ${formatMoney(item.price_per_item || item.price)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {order.status === 'PENDING' && (
+                  <div className="order-action-buttons">
+                    <button type="button" onClick={() => handleAcceptOrder(order.order_id)}>
+                      Accept Order
+                    </button>
+                    <button type="button" className="danger" onClick={() => handleCancelOrderRestaurant(order.order_id)}>
+                      Cancel
+                    </button>
+                  </div>
+                )}
+                {order.status === 'ACCEPTED' && (
+                  <div className="order-action-buttons">
+                    <label>
+                      Assign courier
+                      <select
+                        value={selectedCourierByOrder[order.order_id] ?? ''}
+                        onChange={(event) =>
+                          setSelectedCourierByOrder((prev) => ({ ...prev, [order.order_id]: event.target.value }))
+                        }
+                      >
+                        <option value="">Select courier</option>
+                        {restaurantCourierAssignments.map((assignment) => (
+                          <option key={`${order.order_id}-${assignment.staff_id}`} value={assignment.staff_id}>
+                            {staffDirectory[assignment.staff_id]?.first_name ?? assignment.staff_id}
+                            {staffDirectory[assignment.staff_id]?.last_name ? ` ${staffDirectory[assignment.staff_id].last_name}` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <button type="button" onClick={() => handleAssignCourierToOrder(order)}>
+                      Assign Courier
+                    </button>
+                    <button type="button" className="danger" onClick={() => handleCancelOrderRestaurant(order.order_id)}>
+                      Cancel
+                    </button>
+                    {assignedCourier && (
+                      <p><strong>Selected Courier:</strong> {staffDirectory[assignedCourier.staff_id]?.first_name ?? assignedCourier.staff_id} {staffDirectory[assignedCourier.staff_id]?.last_name ?? ''}</p>
+                    )}
+                  </div>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderCourierOrderManager = () => (
+    <div className="restaurant-order-management-card">
+      <h4>Assigned Deliveries</h4>
+      {courierOrderError && <p className="error-text">{courierOrderError}</p>}
+      {loadingCourierOrders && <p>Loading assigned deliveries...</p>}
+      {!loadingCourierOrders && courierOrders.length === 0 && (
+        <p>No deliveries have been assigned to you yet.</p>
+      )}
+      {!loadingCourierOrders && courierOrders.length > 0 && (
+        <div className="order-history-list">
+          {courierOrders.map((order) => (
+            <article key={order.order_id} className="order-card">
+              <p><strong>Order #</strong> {order.order_id}</p>
+              <p><strong>Status:</strong> {order.status}</p>
+              <p><strong>Placed:</strong> {new Date(order.created_date).toLocaleString()}</p>
+              <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
+              <p><strong>Delivery address:</strong> {order.delivery_address || order.delivery_address_id}</p>
+              <p><strong>Delivery ID:</strong> {order.delivery_id || 'Missing'}</p>
+              {order.items && order.items.length > 0 && (
+                <div className="order-items">
+                  <h4>Items</h4>
+                  <ul>
+                    {order.items.map((item) => (
+                      <li key={`${order.order_id}-${item.food_item_id}`}>
+                        {item.quantity} x {item.food_item_id} @ ${formatMoney(item.price_per_item || item.price)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="order-action-buttons">
+                {order.status === 'ACCEPTED' && (
+                  <button type="button" onClick={() => handlePickupDelivery(order.delivery_id)}>
+                    Mark Out for Delivery
+                  </button>
+                )}
+                {order.status === 'OUT_FOR_DELIVERY' && (
+                  <button type="button" onClick={() => handleCompleteDelivery(order.delivery_id)}>
+                    Mark Delivered
+                  </button>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   const isOrderFavorite = (orderId) =>
     favorites.some((fav) => String(fav.order_id) === String(orderId));
 
@@ -620,6 +1251,50 @@ function App() {
       setFoodItemsManagement([]);
     } finally {
       setLoadingFoodManagement(false);
+    }
+  };
+
+  const handleCreateRestaurant = async (event) => {
+    event.preventDefault();
+    if (!auth?.token) {
+      setRestaurantCreateError('Please log in to create a restaurant.');
+      return;
+    }
+
+    setRestaurantCreateError('');
+    setRestaurantCreateMessage('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/restaurants/`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          restaurant_name: newRestaurantName,
+          cuisine: newRestaurantCuisine,
+          address: newRestaurantAddress,
+          open_hour: newRestaurantOpenHour,
+          closed_hour: newRestaurantClosedHour,
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Create restaurant failed (${response.status}) ${body}`);
+      }
+
+      const createdRestaurant = await response.json();
+      setRestaurants((prev) => [...prev, createdRestaurant]);
+      setSelectedStaffRestaurantId(String(createdRestaurant.restaurant_id));
+      setNewFoodRestaurantId(String(createdRestaurant.restaurant_id));
+      setRestaurantCreateMessage(`Restaurant ${createdRestaurant.restaurant_name} created successfully.`);
+      setNewRestaurantName('');
+      setNewRestaurantCuisine('');
+      setNewRestaurantAddress('');
+      setNewRestaurantOpenHour('09:00');
+      setNewRestaurantClosedHour('21:00');
+      await loadStaffAssignments(auth.user_id);
+    } catch (err) {
+      setRestaurantCreateError(err.message);
     }
   };
 
@@ -843,6 +1518,12 @@ function App() {
       setProfileLastName(data.last_name ?? '');
       setProfilePassword('');
     } catch (err) {
+      if (isAuthMissingUserError(err)) {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        setAuth(null);
+        setProfileError('Your saved session no longer matches a user in this backend. Please log in again.');
+        return;
+      }
       setProfileError(`Unable to load profile. ${err.message}`);
     } finally {
       setLoadingProfile(false);
@@ -853,19 +1534,54 @@ function App() {
     if (!userId) return;
     setLoadingPastOrders(true);
     setProfileError('');
+    setLoadingOrders(true);
+    setOrdersError('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/orders/get_order_by_user/${encodeURIComponent(userId)}`);
-      if (!response.ok) {
-        throw new Error(`Unable to load orders (${response.status})`);
+      let data;
+      const params = new URLSearchParams();
+      if (orderFilterRestaurant.trim()) {
+        params.set('restaurant', orderFilterRestaurant.trim());
       }
-      const data = await response.json();
-      setPastOrders(Array.isArray(data) ? data : []);
+      if (orderFilterCuisine.trim()) {
+        params.set('cuisine', orderFilterCuisine.trim());
+      }
+      if (orderFilterAccepted !== 'all') {
+        params.set('accepted', orderFilterAccepted);
+      }
+      if (orderFilterDate) {
+        params.set('date', orderFilterDate);
+      }
+      params.set('sort_by', orderSortBy);
+      params.set('sort_order', orderSortOrder);
+
+      const historyResponse = await fetch(`${API_BASE_URL}/orders/order_history?${params.toString()}`, {
+        headers: authHeaders(),
+      });
+
+      if (historyResponse.ok) {
+        data = await historyResponse.json();
+      } else if (!params.toString()) {
+        const fallbackResponse = await fetch(`${API_BASE_URL}/orders/get_order_by_user/${encodeURIComponent(userId)}`, {
+          headers: authHeaders(),
+        });
+        if (!fallbackResponse.ok) {
+          throw new Error(`Unable to load orders (${fallbackResponse.status})`);
+        }
+        data = await fallbackResponse.json();
+      }
+
+      const normalizedOrders = Array.isArray(data) ? data : [];
+      setPastOrders(normalizedOrders);
+      setOrders(normalizedOrders);
     } catch (err) {
       setProfileError(`Unable to load order history. ${err.message}`);
       setPastOrders([]);
+      setOrders([]);
+      setOrdersError(`Unable to load orders. ${err.message}`);
     } finally {
       setLoadingPastOrders(false);
+      setLoadingOrders(false);
     }
   };
 
@@ -1125,7 +1841,7 @@ function App() {
       setOrderSuccess(`Order ${orderData.order_id} created successfully! Status: ${orderData.status}`);
       await loadCart(auth.user_id);
       if (auth?.user_id) {
-        loadPastOrders(auth.user_id);
+        await loadPastOrders(auth.user_id);
       }
     } catch (err) {
       setOrderError(err.message);
@@ -1426,6 +2142,7 @@ function App() {
                 {!loadingStaffAssignments && staffAssignments.length === 0 && (
                   <p>No staff assignments found for your account.</p>
                 )}
+                {canManageRestaurant ? renderStaffAssignmentManager() : null}
                 {!loadingStaffAssignments && staffAssignments.length > 0 && (
                   <>
                     <div className="staff-assignment-list">
@@ -1438,71 +2155,7 @@ function App() {
                       ))}
                     </div>
 
-                    <div className="restaurant-order-management-card">
-                      <h4>Manage restaurant orders</h4>
-                      <label>
-                        Select restaurant
-                        <select
-                          value={selectedStaffRestaurantId}
-                          onChange={(event) => setSelectedStaffRestaurantId(event.target.value)}
-                        >
-                          {Array.from(new Set(staffAssignments.map((assignment) => String(assignment.restaurant_id)))).map((restaurantId) => (
-                            <option key={restaurantId} value={restaurantId}>
-                              {restaurantId}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-
-                      {orderActionMessage && <p className="success-text">{orderActionMessage}</p>}
-                      {orderActionError && <p className="error-text">{orderActionError}</p>}
-                      {loadingRestaurantOrders && <p>Loading restaurant orders...</p>}
-                      {restaurantOrderError && <p className="error-text">{restaurantOrderError}</p>}
-                      {!loadingRestaurantOrders && !restaurantOrderError && restaurantOrders.length === 0 && (
-                        <p>No orders found for this restaurant.</p>
-                      )}
-                      {!loadingRestaurantOrders && restaurantOrders.length > 0 && (
-                        <div className="order-history-list">
-                          {restaurantOrders.map((order) => (
-                            <article key={order.order_id} className="order-card">
-                              <p><strong>Order #</strong> {order.order_id}</p>
-                              <p><strong>Status:</strong> {order.status}</p>
-                              <p><strong>Placed:</strong> {new Date(order.created_date).toLocaleString()}</p>
-                              <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
-                              <p><strong>Customer:</strong> {order.customer_id}</p>
-                              <p><strong>Delivery address:</strong> {order.delivery_address || order.delivery_address_id}</p>
-                              {order.items && order.items.length > 0 && (
-                                <div className="order-items">
-                                  <h4>Items</h4>
-                                  <ul>
-                                    {order.items.map((item) => (
-                                      <li key={`${order.order_id}-${item.food_item_id}`}>
-                                        {item.quantity} x {item.food_item_id} @ ${formatMoney(item.price_per_item || item.price)}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                              {order.status !== 'COMPLETED' && (
-                                <div className="order-action-buttons">
-                                  {order.status === 'PENDING' && (
-                                    <button type="button" onClick={() => handleAcceptOrder(order.order_id)}>
-                                      Approve
-                                    </button>
-                                  )}
-                                  <button type="button" className="danger" onClick={() => handleCancelOrderRestaurant(order.order_id)}>
-                                    Cancel
-                                  </button>
-                                </div>
-                              )}
-                              {order.status === 'COMPLETED' && (
-                                <p>Order actions are not available for completed orders.</p>
-                              )}
-                            </article>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    {canManageRestaurant ? renderRestaurantOrderManager() : renderCourierOrderManager()}
                   </>
                 )}
               </section>
@@ -1519,7 +2172,7 @@ function App() {
                         <p><strong>Status:</strong> {order.status}</p>
                         <p><strong>Placed:</strong> {new Date(order.created_date).toLocaleString()}</p>
                         <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
-                        <p><strong>Restaurant:</strong> {order.restaurant_id}</p>
+                        <p><strong>Restaurant:</strong> {getRestaurantDisplayName(order, restaurants)}</p>
                         <p><strong>Delivery address:</strong> {order.delivery_address || order.delivery_address_id}</p>
                         {order.items && order.items.length > 0 && (
                           <div className="order-items">
@@ -1527,7 +2180,7 @@ function App() {
                             <ul>
                               {order.items.map((item) => (
                                 <li key={`${order.order_id}-${item.food_item_id}`}>
-                                  {item.quantity} x {item.food_item_id} @ ${formatMoney(item.price_per_item || item.price)}
+                                  {item.quantity} x {getFoodItemDisplayName(item, foodItems)} @ ${formatMoney(item.price_per_item || item.price)}
                                 </li>
                               ))}
                             </ul>
@@ -1861,6 +2514,68 @@ function App() {
         <section className="card">
           <h2>My Orders</h2>
           {!auth && <p>Log in to view and manage your orders.</p>}
+          {auth?.role === 'CUSTOMER' && (
+            <div className="form-grid">
+              <label>
+                Restaurant
+                <input
+                  type="text"
+                  value={orderFilterRestaurant}
+                  onChange={(event) => setOrderFilterRestaurant(event.target.value)}
+                  placeholder="Filter by restaurant"
+                />
+              </label>
+              <label>
+                Cuisine
+                <input
+                  type="text"
+                  value={orderFilterCuisine}
+                  onChange={(event) => setOrderFilterCuisine(event.target.value)}
+                  placeholder="Filter by cuisine"
+                />
+              </label>
+              <label>
+                Accepted
+                <select
+                  value={orderFilterAccepted}
+                  onChange={(event) => setOrderFilterAccepted(event.target.value)}
+                >
+                  <option value="all">All</option>
+                  <option value="true">Accepted only</option>
+                  <option value="false">Not accepted</option>
+                </select>
+              </label>
+              <label>
+                Date
+                <input
+                  type="date"
+                  value={orderFilterDate}
+                  onChange={(event) => setOrderFilterDate(event.target.value)}
+                />
+              </label>
+              <label>
+                Sort by
+                <select
+                  value={orderSortBy}
+                  onChange={(event) => setOrderSortBy(event.target.value)}
+                >
+                  <option value="date">Date</option>
+                  <option value="restaurant">Restaurant</option>
+                  <option value="cuisine">Cuisine</option>
+                </select>
+              </label>
+              <label>
+                Sort order
+                <select
+                  value={orderSortOrder}
+                  onChange={(event) => setOrderSortOrder(event.target.value)}
+                >
+                  <option value="desc">Newest first</option>
+                  <option value="asc">Oldest first</option>
+                </select>
+              </label>
+            </div>
+          )}
           {auth && loadingOrders && <p>Loading orders...</p>}
           {auth && ordersError && <p className="error-text">{ordersError}</p>}
           {auth && !loadingOrders && orders.length === 0 && (
@@ -1883,7 +2598,7 @@ function App() {
                       {isOrderFavorite(order.order_id) ? 'Unfavorite' : 'Favorite'}
                     </button>
                   </div>
-                  <p><strong>Restaurant:</strong> {order.restaurant_id}</p>
+                  <p><strong>Restaurant:</strong> {getRestaurantDisplayName(order, restaurants)}</p>
                   <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
                   <p><strong>Created:</strong> {new Date(order.created_date).toLocaleString()}</p>
                   <div className="order-items">
@@ -1891,7 +2606,7 @@ function App() {
                     <ul>
                       {order.items.map((item, index) => (
                         <li key={index}>
-                          {item.food_item_name} x{item.quantity} - ${formatMoney(item.price_per_item * item.quantity)}
+                          {getFoodItemDisplayName(item, foodItems)} x{item.quantity} - ${formatMoney(item.price_per_item * item.quantity)}
                         </li>
                       ))}
                     </ul>
@@ -1919,41 +2634,113 @@ function App() {
           )}
         </section>
 
-        {auth && auth.role === 'STAFF' && (
+        {auth && auth.role === 'STAFF' && staffAccessibleRestaurants.length === 0 && (
+          <section className="card">
+            <h2>Create Your Restaurant</h2>
+            <p>Create a restaurant first to unlock inventory and food item management for your staff account.</p>
+            {restaurantCreateError && <p className="error-text">{restaurantCreateError}</p>}
+            {restaurantCreateMessage && <p className="success-text">{restaurantCreateMessage}</p>}
+            <form className="food-form" onSubmit={handleCreateRestaurant}>
+              <div className="form-grid">
+                <label>
+                  Restaurant name
+                  <input
+                    type="text"
+                    value={newRestaurantName}
+                    onChange={(event) => setNewRestaurantName(event.target.value)}
+                    required
+                  />
+                </label>
+                <label>
+                  Cuisine
+                  <input
+                    type="text"
+                    value={newRestaurantCuisine}
+                    onChange={(event) => setNewRestaurantCuisine(event.target.value)}
+                    required
+                  />
+                </label>
+                <label>
+                  Address
+                  <input
+                    type="text"
+                    value={newRestaurantAddress}
+                    onChange={(event) => setNewRestaurantAddress(event.target.value)}
+                    required
+                  />
+                </label>
+                <label>
+                  Open hour
+                  <input
+                    type="time"
+                    value={newRestaurantOpenHour}
+                    onChange={(event) => setNewRestaurantOpenHour(event.target.value)}
+                    required
+                  />
+                </label>
+                <label>
+                  Closed hour
+                  <input
+                    type="time"
+                    value={newRestaurantClosedHour}
+                    onChange={(event) => setNewRestaurantClosedHour(event.target.value)}
+                    required
+                  />
+                </label>
+              </div>
+              <div className="form-actions">
+                <button type="submit">Create Restaurant</button>
+              </div>
+            </form>
+          </section>
+        )}
+
+        {auth && auth.role === 'STAFF' && canManageRestaurant && staffAccessibleRestaurants.length > 0 && (
           <section className="card">
             <h2>Inventory Management</h2>
             {inventoryError && <p className="error-text">{inventoryError}</p>}
             <div className="inventory-grid">
-              {foodItems.map((item) => {
+              {managedInventoryItems.map((item) => {
                 const itemId = item.food_item_id ?? item.id;
                 const itemInventory = inventory[itemId];
+                const itemDraft = inventoryDrafts[itemId] ?? (itemInventory?.quantity != null ? String(itemInventory.quantity) : '');
                 return (
                   <article key={itemId} className="inventory-card">
                     <h3>{item.food_name ?? item.name ?? 'Unnamed item'}</h3>
                     <p><strong>Restaurant:</strong> {item.restaurant_id}</p>
                     <p><strong>Price:</strong> ${formatMoney(item.price)}</p>
+                    <p><strong>Saved Stock:</strong> {itemInventory?.quantity ?? 'Not loaded yet'}</p>
                     <div className="inventory-controls">
                       <label>
-                        Current Stock
+                        New Stock Value
                         <input
                           type="number"
                           min="0"
-                          value={itemInventory?.quantity ?? ''}
+                          value={itemDraft}
                           placeholder={itemInventory ? '' : 'Click Load Inventory first'}
                           onChange={(event) => {
-                            const newQuantity = Math.max(0, Number(event.target.value) || 0);
-                            handleUpdateInventory(itemId, newQuantity);
+                            const rawValue = event.target.value;
+                            if (rawValue === '') {
+                              setInventoryDrafts((prev) => ({ ...prev, [itemId]: '' }));
+                              return;
+                            }
+                            const newQuantity = Math.max(0, Number(rawValue) || 0);
+                            setInventoryDrafts((prev) => ({ ...prev, [itemId]: String(newQuantity) }));
                           }}
                         />
                       </label>
-                      {!itemInventory && (
-                        <button
-                          type="button"
-                          onClick={() => loadInventoryForFoodItem(itemId)}
-                        >
-                          Load Inventory
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (itemInventory == null && itemDraft === '') {
+                            loadInventoryForFoodItem(itemId);
+                            return;
+                          }
+                          handleUpdateInventory(itemId, Math.max(0, Number(itemDraft) || 0));
+                        }}
+                      >
+                        {itemInventory == null ? 'Load Inventory' : 'Update Inventory'}
+                      </button>
                     </div>
                   </article>
                 );
@@ -1962,7 +2749,7 @@ function App() {
           </section>
         )}
 
-        {auth && auth.role === 'STAFF' && (
+        {auth && auth.role === 'STAFF' && canManageRestaurant && staffAccessibleRestaurants.length > 0 && (
           <section className="card">
             <div className="food-management-header">
               <h2>Food Item Management</h2>
@@ -1998,7 +2785,7 @@ function App() {
                       required
                     >
                       <option value="">Select Restaurant</option>
-                      {restaurants.map((restaurant) => (
+                      {staffAccessibleRestaurants.map((restaurant) => (
                         <option key={restaurant.restaurant_id} value={restaurant.restaurant_id}>
                           {restaurant.restaurant_name}
                         </option>
@@ -2053,7 +2840,15 @@ function App() {
 
             {editingFoodItem && (
               <form className="food-form" onSubmit={handleUpdateFoodItem}>
-                <h3>Edit Food Item: {editingFoodItem.food_name}</h3>
+                <div className="form-header-actions">
+                  <h3>Edit Food Item: {editingFoodItem.food_name}</h3>
+                  <div className="form-actions">
+                    <button type="submit">Update Food Item</button>
+                    <button type="button" onClick={handleCancelEdit}>
+                      Cancel
+                    </button>
+                  </div>
+                </div>
                 <div className="form-grid">
                   <label>
                     Name
@@ -2076,16 +2871,6 @@ function App() {
                     />
                   </label>
                   <label>
-                    Inventory Quantity
-                    <input
-                      type="number"
-                      min="0"
-                      value={newFoodInventoryQuantity}
-                      onChange={(event) => setNewFoodInventoryQuantity(event.target.value)}
-                      required
-                    />
-                  </label>
-                  <label>
                     Course
                     <select
                       value={newFoodCourse}
@@ -2099,6 +2884,24 @@ function App() {
                     </select>
                   </label>
                 </div>
+                <label
+                  className="inventory-quantity-field"
+                  style={{ width: '140px', minWidth: '140px', maxWidth: '140px', overflow: 'hidden' }}
+                >
+                  Inventory Quantity
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    style={{ width: '140px', minWidth: '140px', maxWidth: '140px', boxSizing: 'border-box' }}
+                    value={newFoodInventoryQuantity}
+                    onChange={(event) => {
+                      const sanitizedValue = event.target.value.replace(/\D/g, '');
+                      setNewFoodInventoryQuantity(sanitizedValue);
+                    }}
+                    required
+                  />
+                </label>
                 <label>
                   Description
                   <textarea
@@ -2119,11 +2922,11 @@ function App() {
 
             <div className="food-management-grid">
               {loadingFoodManagement && <p>Loading food items...</p>}
-              {!loadingFoodManagement && foodItemsManagement.length === 0 && (
+              {!loadingFoodManagement && managedFoodItems.length === 0 && (
                 <p>No food items found.</p>
               )}
-              {!loadingFoodManagement && foodItemsManagement.length > 0 && (
-                foodItemsManagement.map((item) => (
+              {!loadingFoodManagement && managedFoodItems.length > 0 && (
+                managedFoodItems.map((item) => (
                   <article key={item.food_item_id} className="food-management-card">
                     <div className="food-info">
                       <h3>{item.food_name}</h3>
@@ -2148,6 +2951,27 @@ function App() {
                 ))
               )}
             </div>
+          </section>
+        )}
+
+        {auth && auth.role === 'STAFF' && canManageRestaurant && ownerRestaurant && (
+          <section className="card">
+            <h2>Staff Assignment Management</h2>
+            {renderStaffAssignmentManager()}
+          </section>
+        )}
+
+        {auth && auth.role === 'STAFF' && canManageRestaurant && selectedStaffRestaurantId && (
+          <section className="card">
+            <h2>Restaurant Order Management</h2>
+            {renderRestaurantOrderManager()}
+          </section>
+        )}
+
+        {auth && auth.role === 'STAFF' && isCourierOnly && (
+          <section className="card">
+            <h2>Courier Delivery Management</h2>
+            {renderCourierOrderManager()}
           </section>
         )}
 
