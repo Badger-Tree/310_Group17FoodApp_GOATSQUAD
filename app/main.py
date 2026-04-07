@@ -19,36 +19,18 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 origins = [
-<<<<<<< HEAD
     "http://localhost:5173",  # your Vite frontend
     "http://localhost:3000",  # optional, if you run CRA
-=======
-    "http://localhost:5173",
     "http://127.0.0.1:5173",
->>>>>>> feature/setup-front-end
 ]
 
 app.add_middleware(
     CORSMiddleware,
-<<<<<<< HEAD
     allow_origins=origins,  # allow requests from these origins
     allow_credentials=True,
     allow_methods=["*"],     # allow GET, POST, etc.
     allow_headers=["*"],     # allow headers
 )
-
-# -------------------------
-# Health & root endpoints
-# -------------------------
-
-=======
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-)
-
->>>>>>> feature/setup-front-end
 @app.get("/health")
 def health():
     """checks if server is alive and returns ok status"""
