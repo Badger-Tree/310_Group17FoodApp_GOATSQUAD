@@ -5,5 +5,7 @@ a1a68d08-99cd-4cf8-9cd4-571551e062f3,staff@example.com,Owner,string,string,STAFF
 0a4a70ed-8dec-455d-8d56-7ba90d6b4a56,manager@example.com,Mr,Manager,string,STAFF,2026-03-26T03:57:05.530238+00:00
 212d65de-5699-4916-b0f5-11f6c5a6606e,courier@example.com,courier,String,string,STAFF,2026-03-26T03:57:27.919565+00:00
 38cd98f6-9729-45d3-8d3e-c2eeb1f5cd27,newcourier@example.com,courier,String,string,STAFF,2026-03-26T04:19:13.373256+00:00
+9f3d2b9a-6b41-4b2d-9a7e-1c8f4f0e2a11,test1@example.com,Tesh,test1,12345,CUSTOMER,2026-04-05T15:10:00+00:00
+2c7e8d14-91b0-4f9d-8a24-6e3b7d5c4f22,test2@example.com,Tesh,test2,12345,CUSTOMER,2026-04-05T15:12:00+00:00
 aee7383f-b838-47b4-823e-7d0daf72e6ac,r@example.com,string,string,string,CUSTOMER,2026-04-04T21:31:34.946277+00:00
 d459d184-4671-4367-b324-6b0dda1bf5aa,use@example.com,string,string,string,STAFF,2026-04-04T21:38:17.807188+00:00
