@@ -98,6 +98,7 @@ def test_get_order_by_order_id_service_order_not_found(mocker):
 def mock_delivery_response():
     return 
     
+   
 def test_get_orders_by_restaurant_service_success(mocker):
     """tests that get_orders_by_restaurant_service() will successfully get an order given valid restaurant id"""
     mock_orders= [{
@@ -139,7 +140,7 @@ def test_get_orders_by_restaurant_service_not_found(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": 789,
+                    "restaurant_id": "789",
                     "cart_id": "cart101",
                     "delivery_id": "delivery",
                     "status": "PENDING",
@@ -150,7 +151,7 @@ def test_get_orders_by_restaurant_service_not_found(mocker):
 
     mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
 
-    result = get_orders_by_restaurant_service("666")
+    result = get_orders_by_restaurant_service("text")
     assert result == []
     
 def test_get_orders_by_userid_service_success(mocker):
