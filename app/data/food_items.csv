@@ -1,6 +1,7 @@
 food_item_id,restaurant_id,food_name,price,description,course
-1,1,Poutine,15.50,Melted creamy cheese with fries and gravy,Main
-2,2,Miso Soup,5.99,Traditional tasty soybean broth,Starter
-3,103,Pizza,10.00,Fresh cheesy mozzarella and basil,Dessert
-1,2,string,1.1,string,string
-5,115,string,1.1,string,string
+1,103,Pizza,10.00,Fresh mozzarella and basil,Main
+2,103,Burger,12.50,Grilled beef patty with toppings,Main
+3,103,Ice Cream,6.00,Vanilla ice cream scoop,Dessert
+4,101,Poutine,15.50,Fries with gravy and cheese curds,Main
+5,102,Miso Soup,5.99,Soybean broth with tofu,Starter
+6,101,Salad,8.50,Fresh garden vegetables,Starter

@@ -13,6 +13,7 @@ from app.routers.staff_assignment_router import router as staff_assignment_route
 from app.routers.track_items_router import router as track_items_router
 from app.routers.review import router as review_router
 from app.routers.favorite_router import router as favorite_router
+from app.routers.track_food_items_router import router as track_food_items_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -57,4 +58,5 @@ app.include_router(staff_assignment_router)
 app.include_router(track_items_router)
 app.include_router(review_router)
 app.include_router(favorite_router)
+app.include_router(track_food_items_router)
 
