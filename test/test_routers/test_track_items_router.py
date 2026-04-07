@@ -7,7 +7,7 @@ client = TestClient(app)
 
 mock_restaurant_stats_list = [
     {
-        "restaurant_id": "Burger Barn",
+        "restaurant_name": "Burger Barn",
         "order_count": 1
     }, 
     
@@ -15,7 +15,7 @@ mock_restaurant_stats_list = [
 
 def test_get_stats_for_restaurant_valid(mocker):
     """tests the GET /restaurant/stats return the correct information if there are stats to show"""
-    mocker.patch("app.routers.track_items_router",return_value=mock_restaurant_stats_list)
+    mocker.patch("app.routers.track_items_router.get_stats_on_restaurants", return_value=mock_restaurant_stats_list)
     response = client.get("/stat/restaurant/stats")
 
     assert response.status_code == 200

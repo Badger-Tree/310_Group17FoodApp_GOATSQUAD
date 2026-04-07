@@ -13,6 +13,7 @@ from app.schemas.cart_item_schema import CartItemResponse
 from app.schemas.cart_schema import CartResponse
 from app.services.cart_service import get_cart_by_customer
 from app.services.order_service import accept_order_service, build_order, build_order_items, calculate_total, cancel_order_customer_service, get_order_by_order_id_service, get_order_status_by_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service,cancel_order_restaurant_service, handle_payment, save_order, save_order_items, validate_restaurant_from_cart, process_order_service, set_order_status_service, validate_address, validate_cart
+from app.services.order_service import get_order_history_service
 
 mock_address_response = AddressResponse(address_id= "7",
             user_id= "cust456",
@@ -1042,3 +1043,215 @@ def test_accept_order_service_accepted(mocker):
     with pytest.raises(HTTPException) as testException: accept_order_service("order1")
     assert testException.value.status_code ==404
 
+#Testing for order history
+def test_get_order_history_service_default_success(mocker):
+    """Tests that get_order_history_service() successfully returns a list of OrderHistoryResponse objects with valid input and default parameters"""
+    
+    mock_orders = [
+        {
+            "order_id": "1",
+            "customer_id": "1",
+            "restaurant_id": 100,
+            "cart_id": "cart1",
+            "delivery_id": "delivery1",
+            "status": "COMPLETED",
+            "total_amount": 20.0,
+            "created_date": datetime(2024, 1, 1, tzinfo=timezone.utc),
+            "delivery_address_id": "addr1"
+        },
+        {
+            "order_id": "2",
+            "customer_id": "2",
+            "restaurant_id": 101,
+            "cart_id": "cart2",
+            "delivery_id": "delivery2",
+            "status": "CANCELED",
+            "total_amount": 15.0,
+            "created_date": datetime(2024, 1, 2, tzinfo=timezone.utc),
+            "delivery_address_id": "addr2"
+        },
+        {
+            "order_id": "3",
+            "customer_id": "1",
+            "restaurant_id": 102,
+            "cart_id": "cart3",
+            "delivery_id": "delivery3",
+            "status": "PENDING",
+            "total_amount": 30.0,
+            "created_date": datetime(2024, 1, 3, tzinfo=timezone.utc),
+            "delivery_address_id": "addr3"
+        }
+    ]
+
+    mock_order_items = [
+        {
+            "order_item_id": "item1",
+            "order_id": "1",
+            "food_item_id": 10,
+            "quantity": 2,
+            "price_per_item": 10.0
+        },
+        {
+            "order_item_id": "item2",
+            "order_id": "2",
+            "food_item_id": 11,
+            "quantity": 1,
+            "price_per_item": 15.0
+        },
+        {
+            "order_item_id": "item3",
+            "order_id": "3",
+            "food_item_id": 12,
+            "quantity": 3,
+            "price_per_item": 10.0
+        }
+    ]
+
+    mock_restaurants = [
+        {
+            "restaurant_id": 100,
+            "restaurant_name": "Mario's Pizzeria",
+            "cuisine": "Italian",
+        },
+        {
+            "restaurant_id": 101,
+            "restaurant_name": "Sakura Sushi",
+            "cuisine": "Japanese"
+        },
+        {
+            "restaurant_id": 102,
+            "restaurant_name": "Tesh test restaurant",
+            "cuisine": "Test"
+        }
+    ]
+
+    mocker.patch("app.services.order_service.load_orders", return_value=mock_orders)
+    mocker.patch("app.services.order_service.load_order_items", return_value=mock_order_items)
+    mocker.patch("app.services.order_service.load_restaurants", return_value=mock_restaurants)
+
+    result = get_order_history_service("1")
+
+    assert len(result) == 2
+
+    assert result[0].order_id == "3"
+    assert result[0].restaurant_name == "Tesh test restaurant"
+    assert result[0].items[0].food_item_id == 12
+
+    assert result[1].order_id == "1"
+    assert result[1].restaurant_name == "Mario's Pizzeria"
+    assert result[1].items[0].food_item_id == 10
+
+def test_get_order_history_service_filter_accepted_true(mocker):
+    """Tests that get_order_history_service() returns only accepted orders."""
+
+    mock_orders = [
+        {
+            "order_id": "1",
+            "customer_id": "1",
+            "restaurant_id": 100,
+            "cart_id": "cart1",
+            "delivery_id": "delivery1",
+            "status": "ACCEPTED",
+            "total_amount": 20.0,
+            "created_date": datetime(2024, 1, 1, tzinfo=timezone.utc),
+            "delivery_address_id": "addr1"
+        },
+        {
+            "order_id": "2",
+            "customer_id": "1",
+            "restaurant_id": 101,
+            "cart_id": "cart2",
+            "delivery_id": "delivery2",
+            "status": "PENDING",
+            "total_amount": 15.0,
+            "created_date": datetime(2024, 1, 2, tzinfo=timezone.utc),
+            "delivery_address_id": "addr2"
+        }
+    ]
+
+    mock_order_items = [
+        {
+            "order_item_id": "item1",
+            "order_id": "1",
+            "food_item_id": 10,
+            "quantity": 2,
+            "price_per_item": 10.0
+        },
+        {
+            "order_item_id": "item2",
+            "order_id": "2",
+            "food_item_id": 11,
+            "quantity": 1,
+            "price_per_item": 15.0
+        }
+    ]
+
+    mock_restaurants = [
+        {
+            "restaurant_id": 100,
+            "restaurant_name": "Mario's Pizzeria",
+            "cuisine": "Italian",
+        },
+        {
+            "restaurant_id": 101,
+            "restaurant_name": "Sakura Sushi",
+            "cuisine": "Japanese"
+        }
+    ]
+
+    mocker.patch("app.services.order_service.load_orders", return_value=mock_orders)
+    mocker.patch("app.services.order_service.load_order_items", return_value=mock_order_items)
+    mocker.patch("app.services.order_service.load_restaurants", return_value=mock_restaurants)
+
+    result = get_order_history_service("1", accepted=True)
+
+    assert len(result) == 1
+    assert result[0].order_id == "1"
+    assert result[0].status == OrderStatus.ACCEPTED
+    assert result[0].restaurant_name == "Mario's Pizzeria"
+    assert result[0].items[0].food_item_id == 10
+
+def test_get_order_history_service_invalid_sort_order(mocker):
+    """Tests that get_order_history_service() raises an HTTPException for an invalid sort order."""
+
+    mock_orders = [
+        {
+            "order_id": "1",
+            "customer_id": "1",
+            "restaurant_id": 100,
+            "cart_id": "cart1",
+            "delivery_id": "delivery1",
+            "status": "ACCEPTED",
+            "total_amount": 20.0,
+            "created_date": datetime(2024, 1, 1, tzinfo=timezone.utc),
+            "delivery_address_id": "addr1"
+        }
+    ]
+
+    mock_order_items = [
+        {
+            "order_item_id": "item1",
+            "order_id": "1",
+            "food_item_id": 10,
+            "quantity": 2,
+            "price_per_item": 10.0
+        }
+    ]
+
+    mock_restaurants = [
+        {
+            "restaurant_id": 100,
+            "restaurant_name": "Mario's Pizzeria",
+            "cuisine": "Italian",
+        }
+    ]
+
+    mocker.patch("app.services.order_service.load_orders", return_value=mock_orders)
+    mocker.patch("app.services.order_service.load_order_items", return_value=mock_order_items)
+    mocker.patch("app.services.order_service.load_restaurants", return_value=mock_restaurants)
+
+    with pytest.raises(HTTPException) as exc_info:
+        get_order_history_service("1", sort_order="wrong")
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Invalid sort order. Must be 'asc' or 'desc'."
