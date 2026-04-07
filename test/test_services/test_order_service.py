@@ -103,7 +103,7 @@ def test_get_orders_by_restaurant_service_success(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": 789,
+                    "restaurant_id": "789",
                     "cart_id": "cart101",
                     "delivery_id": "delivery",
                     "status": "PENDING",
@@ -139,7 +139,7 @@ def test_get_orders_by_restaurant_service_not_found(mocker):
     mock_orders= [{
                     "order_id": "order123",
                     "customer_id": "cust456",
-                    "restaurant_id": 789,
+                    "restaurant_id": "789",
                     "cart_id": "cart101",
                     "delivery_id": "delivery",
                     "status": "PENDING",
