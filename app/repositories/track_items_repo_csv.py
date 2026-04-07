@@ -2,7 +2,7 @@ from pathlib import Path
 import csv, os
 from typing import List, Dict, Any
 
-DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "cartItems.csv"
+DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "track_items.csv"
 
 def load_all() -> List[Dict[str, Any]]:
     """load all() function loads items from CSV and convert fields to int"""
@@ -23,15 +23,9 @@ def load_all() -> List[Dict[str, Any]]:
    
 def save_all(items: List[Dict[str, Any]]) -> None:
     """save_all() function takes a list of item dictionaries and writes them to the CSV file"""
-    if not isinstance(items, list):
-        raise ValueError("Data should be a list")
-    
     tmp = DATA_PATH.with_suffix(".tmp")
 
-    fields = [                                     
-    "restaurant_name",   
-    "order_count"              
-    ]
+    fields = ["restaurant_name", "order_count"]
     
     with tmp.open("w", encoding="utf-8") as f:
         writer=csv.DictWriter(f, fieldnames=fields)

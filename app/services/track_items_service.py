@@ -28,9 +28,9 @@ def get_stats(data, key):
             raise HTTPException(status_code=400, detail=f"restaurant id {restaurant_id} does not exist")
         
         result.append({"restaurant_name": restaurant_name, "order_count": count})
+        save_restaurant_items(result)
 
     return result
-
 
 
 def get_stats_on_restaurants():
@@ -42,7 +42,7 @@ def get_stats_on_restaurants():
         for item in items:
             if item["restaurant_name"] == stat["restaurant_name"]:
                 item["order_count"] = stat["order_count"]
-    save_restaurant_items(items)
+    items.append(items)
 
     return restaurant_stats
 
