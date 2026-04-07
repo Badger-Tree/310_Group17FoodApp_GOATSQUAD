@@ -1,9 +1,13 @@
+from typing import List
+
 from app.repositories.staff_assignment_repo import load_all, save_all
 from app.repositories.users_repo_csv import load_all as load_users
 from app.repositories.restaurants_repo_csv import load_all as load_restaurants
 
 from typing import Dict, Any
 from fastapi import HTTPException
+
+from app.schemas.StaffAssignment import StaffAssignmentResponse
 
 
 #For when a user creates a restaurant, they will get "OWNER" as their assignment.
@@ -172,3 +176,19 @@ def remove_staff_assignment(current_user, staff_id: str) -> Dict[str, Any]:
     save_all(staff)
     
     return assignment_to_remove
+
+def get_staff_assignment_service(user_id: str) -> List[StaffAssignmentResponse]:
+    staff_assignments = load_all()
+    assignments = []
+    for staff in staff_assignments:
+        if staff["staff_id"] == user_id:
+            assignments.append(staff)
+    return assignments
+
+def get_staff_assignment_restaurant_service(restaurant_id: int) -> List[StaffAssignmentResponse]:
+    staff_assignments = load_all()
+    assignments = []
+    for assignment in staff_assignments:
+        if int(assignment["restaurant_id"]) == restaurant_id:
+            assignments.append(assignment)
+    return assignments
