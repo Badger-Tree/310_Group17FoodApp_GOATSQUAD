@@ -1,4 +1,5 @@
 from datetime import datetime
+from app.services.order_service import get_order_history_service
 import pytest
 
 from fastapi import HTTPException
@@ -261,3 +262,51 @@ def test_update_user_service_usernotfound(monkeypatch):
     payload = UserUpdate(first_name = "UpdatedJane", last_name = None, password = "UpdatedPassword")
     with pytest.raises(HTTPException, match = "User 77 not found") as testException: update_user_service("77", payload)
     assert testException.value.status_code ==404
+
+
+#Testing for order history
+
+def test_get_order_history_service_default_success(monkeypatch):
+    """Tests that get_order_history_service() successfully returns a list of OrderHistoryResponse objects with valid input and default parameters"""
+    def mock_load_orders():
+        return [{
+        "order_id": "1",
+        "customer_id": "1",
+        "restaurant_name": "Pizza Place",
+        "cuisine": "Italian",
+        "items": [{"name": "Margherita Pizza", "quantity": 1, "price": 10.0}],
+        "total": 10.0,
+        "accepted": True,
+        "created_date": "2026-02-20T12:34:56"
+        },
+        {
+        "order_id": "2",
+        "customer_id": "2",
+        "restaurant_name": "Burger King",
+        "cuisine": "American",
+        "items": [{"name": "Whopper", "quantity": 1, "price": 5.0}],
+        "total": 5.0,
+        "accepted": True,
+        "created_date": "2026-02-20T12:34:56"
+        },
+        {
+        "order_id": "3",
+        "customer_id": "1",
+        "restaurant_name": "Sushi Spot",
+        "cuisine": "Japanese",
+        "items": [{"name": "California Roll", "quantity": 1, "price": 8.0}],
+        "total": 8.0,
+        "accepted": False,
+        "created_date": "2026-02-20T12:34:56"
+        }
+        ]
+    
+    monkeypatch.setattr("app.repositories.orders_repo_csv.loadall", mock_load_orders)
+    result = get_order_history_service("1", None, None, None, None, "date", "desc")
+    assert len(result) == 1
+    assert result[0].order_id == "1"
+    assert result[0].customer_id == "1"
+    assert result[0].restaurant_name == "Pizza Place"
+    assert result[0].cuisine == "Italian"
+    assert result[0].items == [{"name": "Margherita Pizza", "quantity
+    
