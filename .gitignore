@@ -17,3 +17,6 @@ app/services/__pycache__/food_item_service.cpython-314.pyc
 app/services/__pycache__/user_service.cpython-314.pyc
 pycache/
 *.pyc
+admin-frontend/node_modules/@rollup/rollup-win32-x64-msvc/rollup.win32-x64-msvc.node
+.gitignore
+app/services/review_service.py
