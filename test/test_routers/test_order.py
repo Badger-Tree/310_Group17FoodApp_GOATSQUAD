@@ -147,6 +147,48 @@ def mock_delivery_response():
             delivery_id = "newdelivery",
             created_date = "2025-01-20T11:34:56")
     
+def test_get_orders_success_single_order(mock_load_order_items):
+    """tests that get_orders will return a list of orders if there is one submitted order"""
+    mock_load_orders = [{
+        "order_id": "order123",
+        "customer_id": "cust456",
+        "restaurant_id": "789",
+        "cart_id": "cart101",
+        "delivery_id": "345",
+        "status": "PENDING",
+        "total_amount": 26.66,
+        "created_date": datetime(2026, 2, 20, 12, 34, 56),
+        "delivery_address_id": "addr202"
+        }]
+    
+    with patch("app.services.order_service.load_orders", return_value = mock_load_orders),\
+    patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+        response = client.get("/orders/orders")
+        assert response.status_code == 200
+        response_data = response.json()
+        assert response_data[0]["order_id"] == "order123"
+        
+def test_get_orders_success_multiple_order(mock_load_orders,mock_load_order_items):
+    """tests that get_orders will return a list of orders if there is more than one submitted order"""
+    with patch("app.services.order_service.load_orders", return_value = mock_load_orders),\
+    patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+        response = client.get("/orders/orders")
+        assert response.status_code == 200
+        response_data = response.json()
+        assert response_data[0]["order_id"] == "order123"
+
+def test_get_orders_success_no_orders():
+    mock_load_orders = []
+    mock_load_order_items = []
+    """tests that get_orders will return an empty list if there are no submitted orders"""
+    with patch("app.services.order_service.load_orders", return_value = mock_load_orders),\
+    patch("app.services.order_service.load_order_items", return_value = mock_load_order_items):
+        response = client.get("/orders/orders")
+        assert response.status_code == 200
+        response_data = response.json()
+        assert response_data == []
+
+    
 def test_create_order_success(mock_customer_response, mock_load_orders,mock_load_order_items,mock_save_orders,mock_save_all_order_items,mock_cart,mock_address_response):
     """Tests that create_order will route valid input to process_order_service and return expected json with a 201 code """
     with patch("app.routers.order.get_user_from_session", return_value = mock_customer_response):

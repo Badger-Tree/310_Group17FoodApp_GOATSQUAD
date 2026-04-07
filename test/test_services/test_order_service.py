@@ -12,7 +12,7 @@ from app.schemas.OrderStatus import OrderStatus
 from app.schemas.cart_item_schema import CartItemResponse
 from app.schemas.cart_schema import CartResponse
 from app.services.cart_service import get_cart_by_customer
-from app.services.order_service import accept_order_service, build_order, build_order_items, calculate_total, cancel_order_customer_service, get_order_by_order_id_service, get_order_status_by_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service,cancel_order_restaurant_service, handle_payment, save_order, save_order_items, validate_restaurant_from_cart, process_order_service, set_order_status_service, validate_address, validate_cart
+from app.services.order_service import accept_order_service, build_order, build_order_items, calculate_total, cancel_order_customer_service, get_order_by_order_id_service, get_order_status_by_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service,cancel_order_restaurant_service, handle_payment, save_order, save_order_items, validate_restaurant_from_cart, process_order_service, set_order_status_service, validate_address, validate_cart,get_orders_service
 from app.services.order_service import get_order_history_service
 
 mock_address_response = AddressResponse(address_id= "7",
@@ -29,6 +29,94 @@ mock_delivery = DeliveryResponse(
     courier_id=None,
     created_date=datetime.now()
 )
+
+
+def test_get_orders_success_one_order(mocker):
+    """tests that get_orders_service will return a list of orders if one order exists"""
+    mock_orders= [{
+                    "order_id": "order123",
+                    "customer_id": "cust456",
+                    "restaurant_id": 789,
+                    "cart_id": "cart101",
+                    "delivery_id": "delivery",
+                    "status": "PENDING",
+                    "total_amount": 26.66,
+                    "created_date": "2026-02-20T12:34:56",
+                    "delivery_address_id": "addr202"
+    }]
+    mock_order_items = [{
+                    "food_item_id": 1,
+                    "quantity" : 1,
+                    "price_per_item" : "1.00",
+                    "order_item_id" : "1",
+                    "order_id" : "order123"
+                    },{
+                    "food_item_id": 2,
+                    "quantity" : 1,
+                    "price_per_item" : "1.00",
+                    "order_item_id" : "1",
+                    "order_id" : "order123"
+                    }]
+    mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
+    mocker.patch("app.services.order_service.load_order_items", return_value = mock_order_items)
+
+    result = get_orders_service()
+    assert len(result) == 1
+    assert result[0].order_id == "order123"
+
+def test_get_orders_success_multiple_orders(mocker):
+    """tests that get_orders_service will return a list of multiple orders if they exist"""
+    mock_orders= [{
+                    "order_id": "order123",
+                    "customer_id": "cust456",
+                    "restaurant_id": 789,
+                    "cart_id": "cart101",
+                    "delivery_id": "delivery",
+                    "status": "PENDING",
+                    "total_amount": 26.66,
+                    "created_date": "2026-02-20T12:34:56",
+                    "delivery_address_id": "addr202"
+                    },{"order_id": "order456",
+                    "customer_id": "cust456",
+                    "restaurant_id": 789,
+                    "cart_id": "cart101",
+                    "delivery_id": "delivery",
+                    "status": "PENDING",
+                    "total_amount": 26.66,
+                    "created_date": "2026-02-20T12:34:56",
+                    "delivery_address_id": "addr202"
+                    }]
+    mock_order_items = [{
+                    "food_item_id": 1,
+                    "quantity" : 1,
+                    "price_per_item" : "1.00",
+                    "order_item_id" : "1",
+                    "order_id" : "order123"
+                    },{
+                    "food_item_id": 1,
+                    "quantity" : 1,
+                    "price_per_item" : "1.00",
+                    "order_item_id" : "1",
+                    "order_id" : "order456"
+                    }]
+    mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
+    mocker.patch("app.services.order_service.load_order_items", return_value = mock_order_items)
+
+    result = get_orders_service()
+    assert len(result) == 2
+    assert result[0].order_id == "order123"
+    assert result[1].order_id == "order456"
+
+def test_get_orders_success_multiple_orders(mocker):
+    """tests that get_orders_service will return a list of multiple orders if they exist"""
+    mock_orders= []
+    mock_order_items = []
+    mocker.patch("app.services.order_service.load_orders", return_value = mock_orders)
+    mocker.patch("app.services.order_service.load_order_items", return_value = mock_order_items)
+
+    result = get_orders_service()
+    assert len(result) == 0
+    assert result == []
 
 def test_get_order_by_order_id_service_success(mocker):
     """tests that get_order_by_order_id_service() will successfully get an order given valid order id"""
@@ -66,6 +154,10 @@ def test_get_order_by_order_id_service_success(mocker):
     assert result.created_date == datetime.fromisoformat("2026-02-20T12:34:56")
     assert result.items[0].food_item_id ==1
     assert result.items[1].food_item_id ==2
+    
+    
+    
+
 
 def test_get_order_by_order_id_service_order_not_found(mocker):
     """tests that get_order_by_order_id_service() will return empty object if order id not found"""
