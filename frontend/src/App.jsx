@@ -705,14 +705,28 @@ function App() {
       // Update inventory quantity
       if (newFoodInventoryQuantity !== '') {
         try {
-          const inventoryResponse = await fetch(`${API_BASE_URL}/inventory/${editingFoodItem.food_item_id}`, {
+          // First try to update existing inventory
+          let inventoryResponse = await fetch(`${API_BASE_URL}/inventory/${encodeURIComponent(editingFoodItem.food_item_id)}`, {
             method: 'PATCH',
             headers: authHeaders(),
             body: JSON.stringify({ quantity: parseInt(newFoodInventoryQuantity) }),
           });
+
+          if (inventoryResponse.status === 404) {
+            // If inventory doesn't exist, create it
+            inventoryResponse = await fetch(`${API_BASE_URL}/inventory/`, {
+              method: 'POST',
+              headers: authHeaders(),
+              body: JSON.stringify({ food_item_id: editingFoodItem.food_item_id, quantity: parseInt(newFoodInventoryQuantity) }),
+            });
+          }
+
           if (inventoryResponse.ok) {
             const updatedInventory = await inventoryResponse.json();
             setInventory((prev) => ({ ...prev, [editingFoodItem.food_item_id]: updatedInventory }));
+          } else {
+            const body = await inventoryResponse.text();
+            console.warn(`Inventory update failed (${inventoryResponse.status}): ${body}`);
           }
         } catch (inventoryErr) {
           console.warn('Failed to update inventory:', inventoryErr);
