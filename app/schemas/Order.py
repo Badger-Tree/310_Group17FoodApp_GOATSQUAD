@@ -31,3 +31,10 @@ class OrderResponse(OrderBase):
         if isinstance(value, str):
             return OrderStatus(value)
         return value
+
+
+# Order history feature by Tesh   
+class OrderHistoryResponse(OrderResponse):
+    """Extension of base order class used to send historical information about an order."""
+    restaurant_name: str
+    cuisine: str

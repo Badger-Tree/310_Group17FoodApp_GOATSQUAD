@@ -130,3 +130,96 @@ def test_remove_staff_assignment_not_owner(mock_get_user_from_session, mock_remo
 
     assert response.status_code == 403
     assert response.json()["detail"] == "Only restaurant owners can remove staff assignments."
+
+
+#GET STAFF ASSIGNMENT TEST: SUCCESS
+@patch("app.routers.staff_assignment_router.get_staff_assignment_service")
+@patch("app.routers.staff_assignment_router.get_user_from_session")
+def test_get_staff_assignment_success(mock_get_user_from_session, mock_get_staff_assignment_service):
+    mock_get_user_from_session.return_value = Mock(id="2", role="STAFF")
+    mock_get_staff_assignment_service.return_value = [
+        {
+            "assignment_id": "1",
+            "restaurant_id": "1001",
+            "staff_id": "2",
+            "assignment": "COURIER"
+        },
+        {
+            "assignment_id": "2",
+            "restaurant_id": "1002",
+            "staff_id": "2",
+            "assignment": "CHEF"
+        }
+    ]
+
+    response = client.get("/staff-assignments/staff/2", headers={"token": "valid_token"})
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert response.json()[0]["staff_id"] == "2"
+    assert response.json()[0]["assignment"] == "COURIER"
+    assert response.json()[1]["assignment"] == "CHEF"
+
+#GET STAFF ASSIGNMENT TEST: FAILURE - NOT FOUND
+@patch("app.routers.staff_assignment_router.get_staff_assignment_service")
+@patch("app.routers.staff_assignment_router.get_user_from_session")
+def test_get_staff_assignment_not_found(mock_get_user_from_session, mock_get_staff_assignment_service):
+    mock_get_user_from_session.return_value = Mock(id="99", role="STAFF")
+    mock_get_staff_assignment_service.return_value = []
+
+    response = client.get("/staff-assignments/staff/99", headers={"token": "valid_token"})
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+#GET STAFF ASSIGNMENT BY RESTAURANT TEST: SUCCESS
+@patch("app.routers.staff_assignment_router.get_staff_assignment_restaurant_service")
+@patch("app.routers.staff_assignment_router.require_role_service")
+@patch("app.routers.staff_assignment_router.get_user_from_session")
+def test_get_staff_assignment_restaurant_success(
+    mock_get_user_from_session,
+    mock_require_role_service,
+    mock_get_staff_assignment_restaurant_service,
+):
+    mock_get_user_from_session.return_value = Mock(id="2", role="STAFF")
+    mock_get_staff_assignment_restaurant_service.return_value = [
+        {
+            "assignment_id": "1",
+            "restaurant_id": "1001",
+            "staff_id": "2",
+            "assignment": "COURIER"
+        },
+        {
+            "assignment_id": "2",
+            "restaurant_id": "1001",
+            "staff_id": "3",
+            "assignment": "CHEF"
+        }
+    ]
+
+    response = client.get("/staff-assignments/restaurant/1001", headers={"token": "valid_token"})
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert response.json()[0]["restaurant_id"] == "1001"
+    assert response.json()[1]["staff_id"] == "3"
+    mock_require_role_service.assert_called_once()
+
+#GET STAFF ASSIGNMENT BY RESTAURANT TEST: FAILURE - NOT FOUND
+@patch("app.routers.staff_assignment_router.get_staff_assignment_restaurant_service")
+@patch("app.routers.staff_assignment_router.require_role_service")
+@patch("app.routers.staff_assignment_router.get_user_from_session")
+def test_get_staff_assignment_restaurant_not_found(
+    mock_get_user_from_session,
+    mock_require_role_service,
+    mock_get_staff_assignment_restaurant_service,
+):
+    mock_get_user_from_session.return_value = Mock(id="2", role="STAFF")
+    mock_get_staff_assignment_restaurant_service.return_value = []
+
+    response = client.get("/staff-assignments/restaurant/9999", headers={"token": "valid_token"})
+
+    assert response.status_code == 200
+    assert response.json() == []
+    mock_require_role_service.assert_called_once()

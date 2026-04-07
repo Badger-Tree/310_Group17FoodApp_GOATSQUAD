@@ -1,5 +1,5 @@
 from unittest.mock import patch, Mock
-from app.services.staff_assignment_service import assign_staff, update_staff_assignment, remove_staff_assignment
+from app.services.staff_assignment_service import assign_staff, update_staff_assignment, remove_staff_assignment, get_staff_assignment_service, get_staff_assignment_restaurant_service
 import pytest
 from fastapi import HTTPException
 
@@ -175,3 +175,111 @@ def test_remove_staff_assignment_no_assignment(mock_load_users, mock_load_restau
 
     assert exc_info.value.status_code == 404
     assert exc_info.value.detail == "Assignment not found."
+
+
+#GET STAFF ASSIGNMENT BY USER ID - SUCCESS
+@patch("app.services.staff_assignment_service.load_all")
+def test_get_staff_assignment_by_user_id_success(mock_load_all):
+    mock_load_all.return_value = [
+        {
+            "assignment_id": "1",
+            "restaurant_id": "1001",
+            "staff_id": "2",
+            "assignment": "COURIER"
+        },
+        {
+            "assignment_id": "2",
+            "restaurant_id": "1002",
+            "staff_id": "2",
+            "assignment": "CHEF"
+        },
+        {
+            "assignment_id": "3",
+            "restaurant_id": "1003",
+            "staff_id": "5",
+            "assignment": "CASHIER"
+        }
+    ]
+
+    result = get_staff_assignment_service("2")
+
+    result = get_staff_assignment_service("2")
+
+    assert len(result) == 2
+    assert result[0]["staff_id"] == "2"
+    assert result[0]["assignment"] == "COURIER"
+    assert result[1]["staff_id"] == "2"
+    assert result[1]["assignment"] == "CHEF"
+
+#GET STAFF ASSIGNMENT BY USER ID - FAILURE 
+@patch("app.services.staff_assignment_service.load_all")
+def test_get_staff_assignment_service_not_found(mock_load_all):
+    mock_load_all.return_value = [
+        {
+            "assignment_id": "1",
+            "restaurant_id": "1001",
+            "staff_id": "2",
+            "assignment": "COURIER"
+        }
+    ]
+
+    result = get_staff_assignment_service("99")
+
+    assert result == []
+
+#GET STAFF ASSIGNMENT BY RESTAURANT ID - SUCCESS 
+@patch("app.services.staff_assignment_service.load_all")
+def test_get_staff_assignment_restaurant_service_success(mock_load_all):
+    mock_load_all.return_value = [
+        {
+            "assignment_id": "1",
+            "restaurant_id": "1001",
+            "staff_id": "2",
+            "assignment": "COURIER"
+        },
+        {
+            "assignment_id": "2",
+            "restaurant_id": "1001",
+            "staff_id": "3",
+            "assignment": "CHEF"
+        },
+        {
+            "assignment_id": "3",
+            "restaurant_id": "1002",
+            "staff_id": "4",
+            "assignment": "CASHIER"
+        }
+    ]
+
+    result = get_staff_assignment_restaurant_service(1001)
+
+    assert len(result) == 2
+    assert result[0]["restaurant_id"] == "1001"
+    assert result[0]["staff_id"] == "2"
+    assert result[0]["assignment"] == "COURIER"
+
+    assert result[1]["restaurant_id"] == "1001"
+    assert result[1]["staff_id"] == "3"
+    assert result[1]["assignment"] == "CHEF"
+
+#GET STAFF ASSIGNMENT BY RESTAURANT ID - FAILURE
+@patch("app.services.staff_assignment_service.load_all")
+def test_get_staff_assignment_restaurant_service_not_found(mock_load_all):
+    mock_load_all.return_value = [
+        {
+            "assignment_id": "1",
+            "restaurant_id": "1001",
+            "staff_id": "2",
+            "assignment": "COURIER"
+        },
+        {
+            "assignment_id": "2",
+            "restaurant_id": "1002",
+            "staff_id": "3",
+            "assignment": "CHEF"
+        }
+    ]
+
+    result = get_staff_assignment_restaurant_service(9999)
+
+    assert result == []

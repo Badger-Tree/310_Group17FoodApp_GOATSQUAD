@@ -1,8 +1,10 @@
+from datetime import date
+
 from fastapi import APIRouter, HTTPException, Header, status
-from app.schemas.Order import OrderCreate, OrderResponse
+from app.schemas.Order import OrderCreate, OrderHistoryResponse, OrderResponse
 from app.schemas.Role import UserRole
 from app.schemas.Token import Token
-from app.services.order_service import cancel_order_customer_service, cancel_order_restaurant_service,accept_order_service, get_order_by_order_id_service, get_order_status_by_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service, process_order_service
+from app.services.order_service import cancel_order_customer_service, cancel_order_restaurant_service,accept_order_service, get_order_by_order_id_service, get_order_history_service, get_order_status_by_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service, process_order_service
 from typing import List
 from enum import Enum
 from app.schemas.Order import OrderResponse
@@ -88,3 +90,29 @@ def accept_order(order_id:str,token: str = Header(...)):
     require_role_service(current_user, UserRole.STAFF)
     # TODO: check if user_id from session is in get_staff_by_restaurant
     return accept_order_service(order_id)
+
+@router.get("/order_history", response_model = List[OrderHistoryResponse], status_code=status.HTTP_200_OK)
+def get_order_history(
+    token: str = Header(...),
+    restaurant: str | None = None,
+    cuisine: str | None = None,
+    accepted: bool | None = None,
+    date: date | None = None,
+    sort_by: str = "date",
+    sort_order: str = "desc"):
+    """Returns a list of orders associated with a user. 
+    Input: user id from session, optional query parameters: restaurant name (string), cuisine (string), accepted (boolean), date (date), sort_by string ("date", "restaurant_name", "cuisine"), sort_order string ("asc" or "desc")
+    Output: List of OrderResponse objects
+    """
+    session = Token(token=token)
+    current_user = get_user_from_session(session)
+    require_role_service(current_user, UserRole.CUSTOMER)
+    return get_order_history_service(
+        current_user.id,
+        restaurant,
+        cuisine,
+        accepted,
+        sort_by,
+        sort_order,
+        date
+    )

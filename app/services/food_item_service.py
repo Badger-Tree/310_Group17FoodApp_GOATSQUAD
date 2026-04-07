@@ -1,7 +1,9 @@
 from ..schemas.inventory import InventoryCreate
 from ..schemas.food_item import FoodItemCreate, FoodItemUpdate
 from ..repositories.food_item_repo import load_all, save_all
+from ..repositories.restaurants_repo_csv import load_all as load_restaurants
 from ..services import inventory_service
+from fastapi import HTTPException
 
 def list_food_items():
     """list_food_items() retrieves all food items and returns as a list of dictionaries."""
@@ -10,6 +12,16 @@ def list_food_items():
 def create_food_item(payload: FoodItemCreate):
     """create_food_item() takes a FoodItemCreate object, generates a new unique ID and initializes inventory to default quantity of 0, saves it to the CSV file, and returns the created item as a dictionary."""
     items = load_all()
+
+    restaurant_data = load_restaurants()
+    exists = False
+    for r in restaurant_data:
+        if r["restaurant_id"] == payload.restaurant_id:
+            exists = True
+            break
+
+    if not exists:
+        raise HTTPException(status_code=404, detail="Restaurant not found")
 
     new_id = max([item["food_item_id"] for item in items], default=0) + 1
 
