@@ -22,3 +22,6 @@ admin-frontend/node_modules/@rollup/rollup-win32-x64-msvc/rollup.win32-x64-msvc.
 app/services/review_service.py
 admin-frontend/node_modules/@rollup/rollup-win32-x64-msvc/rollup.win32-x64-msvc.node
 admin-frontend/node_modules/@esbuild/win32-x64/esbuild.exe
+admin-frontend/node_modules/@esbuild/win32-x64/esbuild.exe
+.gitignore
+app/services/review_service.py
