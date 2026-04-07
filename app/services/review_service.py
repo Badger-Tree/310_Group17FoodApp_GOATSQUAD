@@ -12,15 +12,15 @@ def did_customer_order(customer_id:str, restaurant_id: int) -> bool:
     """checks if customer has placed an order with the restaurant they are reviewing"""
     customer_orders = get_orders_by_userid_service(customer_id)
     for order in customer_orders:
-        if order["restaurant_id"] == restaurant_id:
+        if order.restaurant_id == restaurant_id:
             return True
     return False
     
-def has_customer_reviewed(customer_id, restaurant_id) -> bool:
+def has_customer_reviewed(customer_id:str, restaurant_id: int) -> bool:
     """checks if customer has already reviewed the restaurant they are reviewing"""
     reviews = load_reviews()
     for review in reviews:
-        if review["customer_id"] == customer_id and review["restaurant_id"] == restaurant_id:
+        if review["customer_id"] == customer_id and str(review["restaurant_id"]) == str(restaurant_id):
             return True
     return False
     
@@ -58,7 +58,7 @@ def get_review_by_restaurant_service(restaurant_id: int) -> List[ReviewResponse]
     reviews = load_reviews()
     restaurant_reviews = []
     for review in reviews:
-        if restaurant_id == review["restaurant_id"]:
+        if restaurant_id == int(review["restaurant_id"]):
             restaurant_reviews.append(ReviewResponse(**review))
     if restaurant_reviews:
         return restaurant_reviews
