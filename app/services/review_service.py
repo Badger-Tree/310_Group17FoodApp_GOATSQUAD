@@ -16,7 +16,7 @@ def did_customer_order(customer_id:str, restaurant_id: int) -> bool:
             return True
     return False
     
-def has_customer_reviewed(customer_id, restaurant_id) -> bool:
+def has_customer_reviewed(customer_id:str, restaurant_id: int) -> bool:
     """checks if customer has already reviewed the restaurant they are reviewing"""
     reviews = load_reviews()
     for review in reviews:
