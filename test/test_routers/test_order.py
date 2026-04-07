@@ -62,7 +62,7 @@ def mock_load_orders():
     return [{
         "order_id": "order123",
         "customer_id": "cust456",
-        "restaurant_id": 789,
+        "restaurant_id": "789",
         "cart_id": "cart101",
         "delivery_id": "345",
         "status": "PENDING",
@@ -72,7 +72,7 @@ def mock_load_orders():
         },{
         "order_id": "order456",
         "customer_id": "cust789",
-        "restaurant_id": 789,
+        "restaurant_id": "789",
         "cart_id": "cart101",
         "delivery_id": "345",
         "status": "COMPLETED",
@@ -83,7 +83,7 @@ def mock_load_orders():
         {
         "order_id": "order789",
         "customer_id": "cust456",
-        "restaurant_id": 789,
+        "restaurant_id": "789",
         "cart_id": "cart101",
         "delivery_id": "345",
         "status": "COMPLETED",
