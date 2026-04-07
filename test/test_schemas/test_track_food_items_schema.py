@@ -41,10 +41,12 @@ def test_track_food_item_response_valid():
     """Tests TrackFoodResponse with valid data returns what its supposed to"""
     data = { 
         "food_item_id": 1,
+        "food_name": "name",
         "order_count": 3
     }
 
     schema = TrackFoodResponse(**data)
 
     assert schema.food_item_id == 1
+    assert schema.food_name == "name"
     assert schema.order_count == 3

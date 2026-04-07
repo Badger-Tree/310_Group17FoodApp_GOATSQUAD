@@ -12,6 +12,7 @@ def test_save_and_load_repository_track_food_itemd_repo():
     try:
         item_obj = TrackFoodResponse(
             food_item_id= 3, 
+            food_name = "name",
             order_count = 1
             )
     
@@ -22,6 +23,7 @@ def test_save_and_load_repository_track_food_itemd_repo():
 
         assert len(loaded_items) > 0
         assert loaded_items[0]["food_item_id"] == 3
+        assert loaded_items[0]["food_name"] == "name"
         assert loaded_items[0]["order_count"] == 1
 
     finally:

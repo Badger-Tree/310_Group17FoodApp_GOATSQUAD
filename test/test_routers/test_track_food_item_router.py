@@ -6,6 +6,7 @@ client = TestClient(app)
 mock_food_item_stats_list = [
     {
         "food_item_id": 1,
+        "food_name": "name",
         "order_count": 1
     }, 
     
@@ -18,6 +19,7 @@ def test_get_stats_for_food_item_valid(mocker):
 
     assert response.status_code == 200
     assert response.json()[0]["food_item_id"] == 1
+    assert response.json()[0]["food_name"] == "name"
     assert response.json()[0]["order_count"] == 1
 
 

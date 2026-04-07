@@ -21,11 +21,8 @@ def get_stats(data, key):
         restaurant_name = None
         for r in restaurant_data:
             if r["restaurant_id"] == restaurant_id:
-                restaurant_name = r["restaurant_name"]
+                restaurant_name = r["restaurant_name"] or "Unknown"
                 break
-
-        if restaurant_name is None:
-            raise HTTPException(status_code=400, detail=f"restaurant id {restaurant_id} does not exist")
         
         result.append({"restaurant_name": restaurant_name, "order_count": count})
         save_restaurant_items(result)
@@ -45,9 +42,3 @@ def get_stats_on_restaurants():
     items.append(items)
 
     return restaurant_stats
-
-
-def get_stats_on_items(restaurant_id=None):
-    items = load_order_items()
-    food_stats = get_stats(items, "food_item_id")
-    return food_stats
