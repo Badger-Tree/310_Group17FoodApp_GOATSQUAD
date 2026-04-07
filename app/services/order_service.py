@@ -248,7 +248,7 @@ def get_orders_by_restaurant_service(restaurantid:int)-> List[OrderResponse]:
     
     order_responses = []
     for order in order_data:
-        if order.get("restaurant_id") == restaurantid:
+        if order.get("restaurant_id") == str(restaurantid):
             items_responses = []
             for item in order_item_data:
                 if item.get("order_id") == order.get("order_id"):
@@ -467,6 +467,3 @@ def filter_order_history_by_accepted(orders, accepted):
         elif not accepted and order.status != OrderStatus.ACCEPTED:
             accepted_orders.append(order)
     return accepted_orders
-
-
-
