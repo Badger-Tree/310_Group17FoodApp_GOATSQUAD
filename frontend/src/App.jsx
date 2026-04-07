@@ -57,6 +57,7 @@ function App() {
   const [newFoodPrice, setNewFoodPrice] = useState('');
   const [newFoodDescription, setNewFoodDescription] = useState('');
   const [newFoodCourse, setNewFoodCourse] = useState('');
+  const [newFoodInventoryQuantity, setNewFoodInventoryQuantity] = useState('');
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
   const selectedRestaurant = restaurants.find((restaurant) => String(restaurant.restaurant_id) === String(selectedRestaurantId)) || null;
   const restaurantFoodItems = selectedRestaurant
@@ -482,12 +483,30 @@ function App() {
         )
       );
 
+      // Update inventory quantity
+      if (newFoodInventoryQuantity !== '') {
+        try {
+          const inventoryResponse = await fetch(`${API_BASE_URL}/inventory/${editingFoodItem.food_item_id}`, {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: JSON.stringify({ quantity: parseInt(newFoodInventoryQuantity) }),
+          });
+          if (inventoryResponse.ok) {
+            const updatedInventory = await inventoryResponse.json();
+            setInventory((prev) => ({ ...prev, [editingFoodItem.food_item_id]: updatedInventory }));
+          }
+        } catch (inventoryErr) {
+          console.warn('Failed to update inventory:', inventoryErr);
+        }
+      }
+
       // Reset form
       setEditingFoodItem(null);
       setNewFoodName('');
       setNewFoodPrice('');
       setNewFoodDescription('');
       setNewFoodCourse('');
+      setNewFoodInventoryQuantity('');
     } catch (err) {
       setFoodManagementError(err.message);
     }
@@ -526,12 +545,28 @@ function App() {
     }
   };
 
-  const handleEditFoodItem = (foodItem) => {
+  const handleEditFoodItem = async (foodItem) => {
     setEditingFoodItem(foodItem);
     setNewFoodName(foodItem.food_name);
     setNewFoodPrice(foodItem.price.toString());
     setNewFoodDescription(foodItem.description);
     setNewFoodCourse(foodItem.course);
+
+    // Load inventory quantity for this food item
+    try {
+      const response = await fetch(`${API_BASE_URL}/inventory/${foodItem.food_item_id}`, {
+        headers: authHeaders(),
+      });
+      if (response.ok) {
+        const inventoryData = await response.json();
+        setNewFoodInventoryQuantity(inventoryData.quantity.toString());
+      } else {
+        setNewFoodInventoryQuantity('0');
+      }
+    } catch (err) {
+      console.warn('Failed to load inventory for editing:', err);
+      setNewFoodInventoryQuantity('0');
+    }
   };
 
   const handleCancelEdit = () => {
@@ -540,6 +575,7 @@ function App() {
     setNewFoodPrice('');
     setNewFoodDescription('');
     setNewFoodCourse('');
+    setNewFoodInventoryQuantity('');
   };
 
   const handleSelectRestaurant = (restaurantId) => {
@@ -1430,6 +1466,16 @@ function App() {
                       min="0"
                       value={newFoodPrice}
                       onChange={(event) => setNewFoodPrice(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Inventory Quantity
+                    <input
+                      type="number"
+                      min="0"
+                      value={newFoodInventoryQuantity}
+                      onChange={(event) => setNewFoodInventoryQuantity(event.target.value)}
                       required
                     />
                   </label>
