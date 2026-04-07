@@ -101,7 +101,7 @@ def get_order_history(
     sort_by: str = "date",
     sort_order: str = "desc"):
     """Returns a list of orders associated with a user. 
-    Input: user id from session, optional query parameters: restaurant name (string), cuisine (string), accepted (boolean), date (date), sort_by string ("date", "restaurant_name", "cuisine"), sort_order string ("asc" or "desc")
+    Input: user id from session, optional query parameters: restaurant name (string), cuisine (string), accepted (boolean), date (date), sort_by string ("date", "restaurant", "cuisine"), sort_order string ("asc" or "desc")
     Output: List of OrderResponse objects
     """
     session = Token(token=token)
