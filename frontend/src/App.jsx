@@ -67,13 +67,10 @@ function App() {
       return null;
     }
     const saved = localStorage.getItem(AUTH_STORAGE_KEY);
-    const parsed = saved ? JSON.parse(saved) : null;
-    console.log('Initial auth state:', parsed);
-    return parsed;
+    return saved ? JSON.parse(saved) : null;
   });
 
   useEffect(() => {
-    console.log('Auth state in useEffect:', auth);
     const loadRestaurants = async () => {
       setLoadingRestaurants(true);
       setRestaurantError('');
@@ -327,11 +324,21 @@ function App() {
 
     setInventoryError('');
     try {
-      const response = await fetch(`${API_BASE_URL}/inventory/${encodeURIComponent(foodItemId)}`, {
+      // First try to update existing inventory
+      let response = await fetch(`${API_BASE_URL}/inventory/${encodeURIComponent(foodItemId)}`, {
         method: 'PATCH',
         headers: authHeaders(),
         body: JSON.stringify({ quantity: newQuantity }),
       });
+
+      if (response.status === 404) {
+        // If inventory doesn't exist, create it
+        response = await fetch(`${API_BASE_URL}/inventory/`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ food_item_id: foodItemId, quantity: newQuantity }),
+        });
+      }
 
       if (!response.ok) {
         const body = await response.text();
@@ -1270,10 +1277,7 @@ function App() {
           )}
         </section>
 
-        {(() => {
-          console.log('Checking STAFF role:', auth?.role);
-          return auth && auth.role === 'STAFF';
-        })() && (
+        {auth && auth.role === 'STAFF' && (
           <section className="card">
             <h2>Inventory Management</h2>
             {inventoryError && <p className="error-text">{inventoryError}</p>}
@@ -1292,12 +1296,11 @@ function App() {
                         <input
                           type="number"
                           min="0"
-                          value={itemInventory?.quantity ?? 0}
+                          value={itemInventory?.quantity ?? ''}
+                          placeholder={itemInventory ? '' : 'Click Load Inventory first'}
                           onChange={(event) => {
                             const newQuantity = Math.max(0, Number(event.target.value) || 0);
-                            if (itemInventory) {
-                              handleUpdateInventory(itemId, newQuantity);
-                            }
+                            handleUpdateInventory(itemId, newQuantity);
                           }}
                         />
                       </label>
