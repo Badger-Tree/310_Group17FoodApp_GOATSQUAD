@@ -129,3 +129,7 @@ notification_id,recipient_user_id,notification_type,message,status
 128,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Order 07231523-6bd9-4754-9c11-23fb5f73831f placed! We'll let you know when it's ready.,pending
 129,104,order,New order received: 07231523-6bd9-4754-9c11-23fb5f73831f. Please begin preparation.,pending
 130,05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,order,Your order 07231523-6bd9-4754-9c11-23fb5f73831f has been approved by the restaurant. We'll let you know when it's ready!,pending
+131,4a4f1fa8-be9a-4d9a-b387-b343a81f4a31,order,Your order d6df9fd0-6152-45c9-b2ca-7d28014cd767 has been approved by the restaurant. We'll let you know when it's ready!,pending
+132,4a4f1fa8-be9a-4d9a-b387-b343a81f4a31,payment,A refund has been issued for your canceled order d6df9fd0-6152-45c9-b2ca-7d28014cd767. It may take a few business days to reflect in your account.,pending
+133,4a4f1fa8-be9a-4d9a-b387-b343a81f4a31,order,"Unfortunately, your order d6df9fd0-6152-45c9-b2ca-7d28014cd767 was canceled by the restaurant.",failed
+134,4a4f1fa8-be9a-4d9a-b387-b343a81f4a31,order,Your order b3b7ebd6-76b0-438f-a1ba-26b4313b375f has been approved by the restaurant. We'll let you know when it's ready!,pending
