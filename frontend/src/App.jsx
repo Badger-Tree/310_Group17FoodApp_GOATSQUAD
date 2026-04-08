@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const AUTH_STORAGE_KEY = 'goat-food-auth';
@@ -166,6 +167,9 @@ function App() {
   const [newFoodDescription, setNewFoodDescription] = useState('');
   const [newFoodCourse, setNewFoodCourse] = useState('');
   const [newFoodInventoryQuantity, setNewFoodInventoryQuantity] = useState('');
+  const [foodStats, setFoodStats] = useState([]);
+  const [loadingFoodStats, setLoadingFoodStats] = useState(true);
+  const [foodStatsError, setFoodStatsError] = useState("");
   const [newRestaurantName, setNewRestaurantName] = useState('');
   const [newRestaurantCuisine, setNewRestaurantCuisine] = useState('');
   const [newRestaurantAddress, setNewRestaurantAddress] = useState('');
@@ -189,9 +193,13 @@ function App() {
   const [courierOrderError, setCourierOrderError] = useState('');
   const [orderActionMessage, setOrderActionMessage] = useState('');
   const [orderActionError, setOrderActionError] = useState('');
+  const [loadingMostOrdered, setLoadingMostOrdered] = useState(false);
+  const [mostOrderedError, setMostOrderedError] = useState(null);
+  const [mostOrdered, setMostOrdered] = useState([]);
   const [restaurantStaffAssignments, setRestaurantStaffAssignments] = useState([]);
   const [loadingRestaurantStaffAssignments, setLoadingRestaurantStaffAssignments] = useState(false);
   const [restaurantStaffAssignmentError, setRestaurantStaffAssignmentError] = useState('');
+  const [restaurantId, setRestaurantId] = useState(null);
   const [staffAssignmentMessage, setStaffAssignmentMessage] = useState('');
   const [staffAssignmentFormEmail, setStaffAssignmentFormEmail] = useState('');
   const [staffAssignmentFormRole, setStaffAssignmentFormRole] = useState('MANAGER');
@@ -348,6 +356,59 @@ function App() {
     loadRestaurants();
     loadFoodItems();
   }, []);
+
+  useEffect(() => {
+  const fetchMostOrdered = async () => {
+    try {
+      const response = await axios.get(
+        "http://127.0.0.1:8000/stat/restaurant/stats"
+      );
+
+      setMostOrdered(response.data);
+
+      const validRestaurants = response.data.filter(
+        (r) =>
+          typeof r.restaurant_name === "string" &&
+          r.restaurant_name.trim() !== ""
+      );
+
+      if (validRestaurants.length > 0) {
+        setRestaurantId(validRestaurants[0].restaurant_id);
+      }
+
+      setLoadingMostOrdered(false);
+    } catch (err) {
+      console.error(err);
+      setMostOrderedError("Failed to load most ordered restaurants");
+      setLoadingMostOrdered(false);
+    }
+  };
+
+  if (auth) {
+    fetchMostOrdered();
+  }
+}, [auth]);
+
+useEffect(() => {
+  const fetchFoodStats = async () => {
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:8000/food_stat/food_items/${restaurantId}/stats`
+      );
+
+      setFoodStats(response.data);
+      setLoadingFoodStats(false);
+    } catch (err) {
+      console.error(err);
+      setFoodStatsError("Failed to load food stats");
+      setLoadingFoodStats(false);
+    }
+  };
+
+  if (auth && restaurantId) {
+    fetchFoodStats();
+  }
+}, [auth, restaurantId]);
 
   useEffect(() => {
     if (!auth) {
@@ -2895,8 +2956,86 @@ function App() {
                 </div>
               )}
             </section>
-          </>
+
+            <section className="card">
+                <h2>Most Ordered</h2>
+
+            {!auth && <p>Log in to view most ordered restaurants.</p>}
+            {auth && loadingMostOrdered && <p>Loading most ordered...</p>}
+            {auth && mostOrderedError && (
+            <p className="error-text">{mostOrderedError}</p>
+            )}
+            {auth && !loadingMostOrdered && mostOrdered.length === 0 && (
+          <p>No restaurant stats available.</p>
+            )}
+            {auth && !loadingMostOrdered && mostOrdered.length > 0 && (
+          <div className="favorite-orders-list">
+          {mostOrdered
+          .filter(
+          (stat) =>
+            typeof stat.restaurant_name === "string" &&
+            stat.restaurant_name.trim() !== ""
+        )
+        .map((stat, index) => (
+          <article key={index} className="favorite-order-card">
+            <div className="order-header">
+              <h3>{stat.restaurant_name}</h3>
+            </div>
+
+            <p>
+              <strong>Orders:</strong> {stat.order_count}
+            </p>
+            </article>
+            ))}
+          </div>
         )}
+          </section>
+
+      <section className="card">
+  <h2>Most Ordered Food Items</h2>
+
+  {!auth && <p>Log in to view food stats.</p>}
+
+  {auth && loadingFoodStats && <p>Loading food stats...</p>}
+
+  {auth && foodStatsError && (
+    <p className="error-text">{foodStatsError}</p>
+  )}
+
+  {auth && !loadingFoodStats && foodStats.length === 0 && (
+    <p>No food stats available.</p>
+  )}
+
+  {auth && !loadingFoodStats && foodStats.length > 0 && (
+    <div className="favorite-orders-list">
+      {foodStats
+        .filter(
+          (stat) =>
+            typeof stat.food_name === "string" &&
+            stat.food_name.trim() !== ""
+        )
+        .map((stat, index) => (
+          <article key={index} className="favorite-order-card">
+            <div className="order-header">
+              <h3>{stat.food_name}</h3>
+            </div>
+
+            <p>
+              <strong>Food ID:</strong> {stat.food_item_id}
+            </p>
+
+            <p>
+              <strong>Orders:</strong> {stat.order_count}
+            </p>
+          </article>
+        ))}
+    </div>
+  )}
+</section>
+
+         
+          </>
+      
       </main>
     </div>
   );
