@@ -2,9 +2,12 @@ import uuid
 from datetime import datetime, timezone
 from app.repositories.deliveries_repo_csv import load_all, save_all
 from app.repositories.orders_repo import load_all as load_orders
+from app.repositories.order_items_repo import load_all as load_order_items
 from app.repositories.staff_assignment_repo import load_all as load_staff_assignments
 from app.schemas.Delivery import DeliveryResponse
 from app.schemas.OrderStatus import OrderStatus
+from app.schemas.Order import OrderResponse
+from app.schemas.OrderItem import OrderItemResponse
 # from app.services.order_service import set_order_status_service
 from fastapi import HTTPException
 
@@ -71,6 +74,32 @@ def assign_delivery_to_courier(delivery_id: str, courier_id: str) -> DeliveryRes
 
     save_all(deliveries)
     return DeliveryResponse(**target_delivery)
+
+def get_orders_assigned_to_courier(courier_id: str) -> list[OrderResponse]:
+    """Returns orders whose delivery has been assigned to the given courier."""
+    deliveries = load_all()
+    orders = load_orders()
+    order_items = load_order_items()
+
+    courier_delivery_ids = {
+        delivery["delivery_id"]: delivery
+        for delivery in deliveries
+        if delivery.get("courier_id") == courier_id
+    }
+
+    assigned_orders = []
+    for order in orders:
+        if order.get("delivery_id") not in courier_delivery_ids:
+            continue
+
+        items_response = []
+        for item in order_items:
+            if item.get("order_id") == order.get("order_id"):
+                items_response.append(OrderItemResponse(**item))
+
+        assigned_orders.append(OrderResponse(**order, items=items_response))
+
+    return assigned_orders
 
 #SET DELIVERY AS PICKED UP
 def pickup_delivery(delivery_id: str):
