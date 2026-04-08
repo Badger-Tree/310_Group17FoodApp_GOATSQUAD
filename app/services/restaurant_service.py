@@ -20,6 +20,10 @@ from app.schemas.Role import UserRole
 def create_restaurant_service(payload: RestaurantCreate, current_user_id: str) -> RestaurantResponse:
     restaurants = load_restaurants()
 
+    for r in restaurants:
+        if r["owner_id"] == str(current_user_id):
+            raise HTTPException(status_code = 400, detail = "Owner already has a restaurant")
+
     #Auto-increment the restaurant id
     if restaurants:
         new_id = max(int(r["restaurant_id"]) for r in restaurants) + 1
