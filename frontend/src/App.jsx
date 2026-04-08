@@ -217,7 +217,7 @@ function App() {
   const currentAssignmentRoles = Array.from(new Set(staffAssignments.map((assignment) => assignment.assignment)));
   const canManageRestaurant = currentAssignmentRoles.includes('OWNER') || currentAssignmentRoles.includes('MANAGER');
   const isCourierOnly = currentAssignmentRoles.includes('COURIER') && !canManageRestaurant;
-  const [showProfilePage, setShowProfilePage] = useState(false);
+  // Removed showProfilePage state, profile always shown inline now
   // Reviews state
   const [restaurantReviews, setRestaurantReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
@@ -256,7 +256,12 @@ function App() {
           setRestaurantReviews(Array.isArray(data) ? data : []);
         })
         .catch((err) => {
-          setReviewError(`Unable to load reviews. ${err.message}`);
+          // If 404, show a friendly message
+          if (err.message && err.message.includes('404')) {
+            setReviewError('no reviews yet');
+          } else {
+            setReviewError(`Unable to load reviews. ${err.message}`);
+          }
           setRestaurantReviews([]);
         })
         .finally(() => {
@@ -1494,13 +1499,7 @@ function App() {
     setSelectedRestaurantId(null);
   };
 
-  const handleOpenProfile = () => {
-    setShowProfilePage(true);
-  };
-
-  const handleCloseProfile = () => {
-    setShowProfilePage(false);
-  };
+  // Removed handleOpenProfile and handleCloseProfile
 
   const loadUserProfile = async (userId) => {
     if (!userId) return;
@@ -1749,7 +1748,7 @@ function App() {
     } catch (err) {
       console.warn(err);
     } finally {
-      setShowProfilePage(false);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
       setAuth(null);
     }
   };
@@ -1844,7 +1843,12 @@ function App() {
         await loadPastOrders(auth.user_id);
       }
     } catch (err) {
-      setOrderError(err.message);
+      // Custom message for payment not processed
+      if (typeof err.message === 'string' && err.message.includes('payment not processed order')) {
+        setOrderError('Payment failed, try again');
+      } else {
+        setOrderError(err.message);
+      }
     }
   };
 
@@ -1861,6 +1865,7 @@ function App() {
       return;
     }
     setCartError('');
+    setOrderSuccess(''); // Clear order success message when cart is updated
     try {
       const response = await fetch(`${API_BASE_URL}/cart/food_item/add`, {
         method: 'POST',
@@ -1996,7 +2001,6 @@ function App() {
               </p>
               <p>Token expires: {new Date(auth.expires).toLocaleString()}</p>
               <div className="auth-actions-row">
-                <button type="button" onClick={handleOpenProfile}>Profile</button>
                 <button type="button" onClick={handleLogout}>Logout</button>
               </div>
             </div>
@@ -2086,13 +2090,11 @@ function App() {
           )}
         </section>
 
-        {showProfilePage ? (
+        {/* Profile section always visible when logged in */}
+        {auth && (
           <section className="card profile-card">
             <div className="profile-header-row">
               <h2>My Profile</h2>
-              <button type="button" className="secondary" onClick={handleCloseProfile}>
-                Back to home
-              </button>
             </div>
             {loadingProfile && <p>Loading profile...</p>}
             {profileError && <p className="error-text">{profileError}</p>}
@@ -2133,155 +2135,8 @@ function App() {
                 {profileMessage && <p className="success-text">{profileMessage}</p>}
               </form>
             )}
-
-            {auth?.role === 'STAFF' ? (
-              <section className="staff-assignments-card">
-                <h3>Staff assignments</h3>
-                {loadingStaffAssignments && <p>Loading staff assignments...</p>}
-                {staffAssignmentError && <p className="error-text">{staffAssignmentError}</p>}
-                {!loadingStaffAssignments && staffAssignments.length === 0 && (
-                  <p>No staff assignments found for your account.</p>
-                )}
-                {canManageRestaurant ? renderStaffAssignmentManager() : null}
-                {!loadingStaffAssignments && staffAssignments.length > 0 && (
-                  <>
-                    <div className="staff-assignment-list">
-                      {staffAssignments.map((assignment) => (
-                        <article key={assignment.assignment_id} className="assignment-card">
-                          <p><strong>Assignment ID:</strong> {assignment.assignment_id}</p>
-                          <p><strong>Restaurant:</strong> {assignment.restaurant_id}</p>
-                          <p><strong>Role:</strong> {assignment.assignment}</p>
-                        </article>
-                      ))}
-                    </div>
-
-                    {canManageRestaurant ? renderRestaurantOrderManager() : renderCourierOrderManager()}
-                  </>
-                )}
-              </section>
-            ) : (
-              <section className="order-history-card">
-                <h3>Past orders</h3>
-                {loadingOrders && <p>Loading past orders...</p>}
-                {!loadingPastOrders && pastOrders.length === 0 && <p>No past orders found.</p>}
-                {!loadingPastOrders && pastOrders.length > 0 && (
-                  <div className="order-history-list">
-                    {pastOrders.map((order) => (
-                      <article key={order.order_id} className="order-card">
-                        <p><strong>Order #</strong> {order.order_id}</p>
-                        <p><strong>Status:</strong> {order.status}</p>
-                        <p><strong>Placed:</strong> {new Date(order.created_date).toLocaleString()}</p>
-                        <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
-                        <p><strong>Restaurant:</strong> {getRestaurantDisplayName(order, restaurants)}</p>
-                        <p><strong>Delivery address:</strong> {order.delivery_address || order.delivery_address_id}</p>
-                        {order.items && order.items.length > 0 && (
-                          <div className="order-items">
-                            <h4>Items</h4>
-                            <ul>
-                              {order.items.map((item) => (
-                                <li key={`${order.order_id}-${item.food_item_id}`}>
-                                  {item.quantity} x {getFoodItemDisplayName(item, foodItems)} @ ${formatMoney(item.price_per_item || item.price)}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {/* Cancel button for PENDING orders */}
-                        {order.status === 'PENDING' && (
-                          <button
-                            type="button"
-                            className="danger"
-                            style={{ marginTop: '0.5em' }}
-                            onClick={async () => {
-                              if (!auth?.token) return;
-                              setOrderError('');
-                              setOrderSuccess('');
-                              try {
-                                const response = await fetch(`${API_BASE_URL}/orders/cancel_order_customer/${encodeURIComponent(order.order_id)}`, {
-                                  method: 'PUT',
-                                  headers: { token: auth.token },
-                                });
-                                if (!response.ok) {
-                                  const body = await response.text();
-                                  throw new Error(`Cancel failed (${response.status}) ${body}`);
-                                }
-                                setOrderSuccess(`Order ${order.order_id} canceled successfully.`);
-                                // Refresh orders
-                                loadPastOrders(auth.user_id);
-                              } catch (err) {
-                                setOrderError(err.message);
-                              }
-                            }}
-                          >
-                            Cancel Order
-                          </button>
-                        )}
-                        {/* Review form for COMPLETED orders, only if user hasn't already reviewed this restaurant */}
-                        {order.status === 'COMPLETED' && (() => {
-                          // Check if user has already reviewed this restaurant
-                          const alreadyReviewed = restaurantReviews.some(
-                            (review) => (review.user_id === auth?.user_id || review.reviewer_id === auth?.user_id) && String(review.restaurant_id) === String(order.restaurant_id)
-                          );
-                          if (alreadyReviewed) {
-                            return <p style={{ marginTop: '0.5em', color: '#888' }}>You have already reviewed this restaurant.</p>;
-                          }
-                          return (
-                            <div style={{ marginTop: '0.5em' }}>
-                              {!(reviewForms[order.order_id]?.open) ? (
-                                <button type="button" onClick={() => handleOpenReviewForm(order.order_id)}>
-                                  Leave a Review
-                                </button>
-                              ) : (
-                                <form
-                                  onSubmit={e => {
-                                    e.preventDefault();
-                                    handleSubmitReview(order);
-                                  }}
-                                  style={{ marginTop: '0.5em', border: '1px solid #ccc', padding: '0.5em', borderRadius: '4px' }}
-                                >
-                                  <label>
-                                    Rating:
-                                    <select
-                                      value={reviewForms[order.order_id]?.rating || 5}
-                                      onChange={e => handleReviewInputChange(order.order_id, 'rating', e.target.value)}
-                                      required
-                                    >
-                                      {[5,4,3,2,1,0].map(val => (
-                                        <option key={val} value={val}>{val}</option>
-                                      ))}
-                                    </select>
-                                  </label>
-                                  <label style={{ display: 'block', marginTop: '0.5em' }}>
-                                    Review:
-                                    <textarea
-                                      value={reviewForms[order.order_id]?.review || ''}
-                                      onChange={e => handleReviewInputChange(order.order_id, 'review', e.target.value)}
-                                      minLength={1}
-                                      required
-                                      rows={2}
-                                      style={{ width: '100%' }}
-                                    />
-                                  </label>
-                                  <div style={{ marginTop: '0.5em' }}>
-                                    <button type="submit" disabled={reviewForms[order.order_id]?.submitting}>Submit Review</button>
-                                    <button type="button" className="secondary" style={{ marginLeft: '0.5em' }} onClick={() => handleCloseReviewForm(order.order_id)}>
-                                      Cancel
-                                    </button>
-                                  </div>
-                                  {reviewForms[order.order_id]?.error && <p className="error-text">{reviewForms[order.order_id].error}</p>}
-                                </form>
-                              )}
-                            </div>
-                          );
-                        })()}
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </section>
-            )}
           </section>
-        ) : (
+        )}
           <>
             <section className="card grid-card">
               <div>
@@ -2307,7 +2162,7 @@ function App() {
                         {restaurantReviews.map((review) => (
                           <li key={review.review_id} className="review-item">
                             <strong>{review.reviewer_name || review.user_id || 'Anonymous'}:</strong> {review.rating ? `⭐${review.rating}` : ''}<br />
-                            <span>{review.comment || review.review_text || ''}</span>
+                            <span>{review.review || review.comment || review.review_text || ''}</span>
                           </li>
                         ))}
                       </ul>
