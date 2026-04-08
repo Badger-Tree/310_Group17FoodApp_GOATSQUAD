@@ -1879,6 +1879,11 @@ function App() {
       });
       if (!response.ok) {
         const body = await response.text();
+        // If staff user and cart not found (404), show custom message
+        if (response.status === 404 && auth?.role === 'STAFF') {
+          setCartError('Only customers can add items to cart.');
+          return;
+        }
         throw new Error(`Failed to add item (${response.status}) ${body}`);
       }
       const updatedCart = await response.json();
