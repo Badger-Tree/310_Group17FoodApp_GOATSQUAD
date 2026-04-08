@@ -31,10 +31,6 @@ function isAuthMissingUserError(error) {
   return typeof error?.message === 'string' && /404/.test(error.message);
 }
 
-function handleViewMostOrdered() { 
-  
-}
-
 
 function App() {
   // --- Review form state and handlers for completed orders ---
@@ -2939,7 +2935,6 @@ function App() {
 
          
           </>
-        )}
       </main>
     </div>
   );
