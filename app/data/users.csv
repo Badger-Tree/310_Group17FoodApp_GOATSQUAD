@@ -1,16 +1,6 @@
 id,email,first_name,last_name,password,role,created_date
 6724b24d-7388-45e1-a5d6-ab0bca59626b,user@example.com,NewFirst,NewLast,string,CUSTOMER,2026-03-26T03:56:12.065854+00:00
-558faba1-02ab-4545-9e5d-80d9b934681f,user1@example.com,string,string,string,CUSTOMER,2026-03-26T03:56:18.958572+00:00
 a1a68d08-99cd-4cf8-9cd4-571551e062f3,staff@example.com,Owner,string,string,STAFF,2026-03-26T03:56:47.317798+00:00
 0a4a70ed-8dec-455d-8d56-7ba90d6b4a56,manager@example.com,Mr,Manager,string,STAFF,2026-03-26T03:57:05.530238+00:00
 212d65de-5699-4916-b0f5-11f6c5a6606e,courier@example.com,courier,String,string,STAFF,2026-03-26T03:57:27.919565+00:00
-38cd98f6-9729-45d3-8d3e-c2eeb1f5cd27,newcourier@example.com,courier,String,string,STAFF,2026-03-26T04:19:13.373256+00:00
-dc38faab-322d-4677-95c4-5507ccd16e10,pippin@example.com,New,User,string,CUSTOMER,2026-04-06T21:10:35.481789+00:00
-5410db0d-a7c2-4f30-bea2-d120750ff48d,new_staff@example.com,New,Staff,string,STAFF,2026-04-06T21:11:28.808695+00:00
-05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,test1@gmail.com,test,test,string,CUSTOMER,2026-04-07T20:53:24.306852+00:00
-6eb043eb-839b-4071-88d6-b5d0c0094d13,test2@gmail.com,test,test,string,STAFF,2026-04-07T21:27:26.317041+00:00
-e5943ba1-550c-4fd3-a769-cc869f2e5bf4,test3@gmail.com,test courier,test,string,STAFF,2026-04-07T22:11:16.604688+00:00
-329e8436-db19-487e-a720-f3268a3e4ff6,owner@gmail.com,Boss,BossBoss,string,STAFF,2026-04-08T10:43:59.938312+00:00
-429da41c-3c26-4044-a61e-1b84d57fb3f5,courier@gmail.com,Biker,Bikes,string,STAFF,2026-04-08T10:48:03.050393+00:00
-f5731baa-fec6-42f5-83f1-ad4ae890cf1b,manager@gmail.com,Manager,Manager,string,STAFF,2026-04-08T10:58:18.356137+00:00
-    
+7bd6b2ca-16f2-4026-bfca-61a014396751,newuser@example.com,string,string,string,CUSTOMER,2026-04-08T20:31:49.513535+00:00
