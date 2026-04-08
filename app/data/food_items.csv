@@ -6,3 +6,4 @@ food_item_id,restaurant_id,food_name,price,description,course
 5,102,Miso Soup,5.99,Soybean broth with tofu,Starter
 6,101,Salad,8.50,Fresh garden vegetables,Starter
 7,789,FOOD TEST,5.0,yummy,Main
+8,105,Boss Burgers,10,Good,Main

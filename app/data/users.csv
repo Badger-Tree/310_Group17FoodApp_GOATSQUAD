@@ -5,9 +5,12 @@ a1a68d08-99cd-4cf8-9cd4-571551e062f3,staff@example.com,Owner,string,string,STAFF
 0a4a70ed-8dec-455d-8d56-7ba90d6b4a56,manager@example.com,Mr,Manager,string,STAFF,2026-03-26T03:57:05.530238+00:00
 212d65de-5699-4916-b0f5-11f6c5a6606e,courier@example.com,courier,String,string,STAFF,2026-03-26T03:57:27.919565+00:00
 38cd98f6-9729-45d3-8d3e-c2eeb1f5cd27,newcourier@example.com,courier,String,string,STAFF,2026-03-26T04:19:13.373256+00:00
-9f3d2b9a-6b41-4b2d-9a7e-1c8f4f0e2a11,test1@example.com,Tesh,test1,12345,CUSTOMER,2026-04-05T15:10:00+00:00
-2c7e8d14-91b0-4f9d-8a24-6e3b7d5c4f22,test2@example.com,Tesh,test2,12345,CUSTOMER,2026-04-05T15:12:00+00:00
-aee7383f-b838-47b4-823e-7d0daf72e6ac,r@example.com,string,string,string,CUSTOMER,2026-04-04T21:31:34.946277+00:00
-d459d184-4671-4367-b324-6b0dda1bf5aa,use@example.com,string,string,string,STAFF,2026-04-04T21:38:17.807188+00:00
-5efcdb50-63f9-4fe6-a87a-9df0be41f886,u@example.com,string,string,string,CUSTOMER,2026-04-07T16:57:26.416781+00:00
-c06f4dab-2460-4e31-8429-54e70443e61c,owner@gmail.com,boss,bosser,string,STAFF,2026-04-08T10:23:54.727644+00:00
+dc38faab-322d-4677-95c4-5507ccd16e10,pippin@example.com,New,User,string,CUSTOMER,2026-04-06T21:10:35.481789+00:00
+5410db0d-a7c2-4f30-bea2-d120750ff48d,new_staff@example.com,New,Staff,string,STAFF,2026-04-06T21:11:28.808695+00:00
+05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,test1@gmail.com,test,test,string,CUSTOMER,2026-04-07T20:53:24.306852+00:00
+6eb043eb-839b-4071-88d6-b5d0c0094d13,test2@gmail.com,test,test,string,STAFF,2026-04-07T21:27:26.317041+00:00
+e5943ba1-550c-4fd3-a769-cc869f2e5bf4,test3@gmail.com,test courier,test,string,STAFF,2026-04-07T22:11:16.604688+00:00
+329e8436-db19-487e-a720-f3268a3e4ff6,owner@gmail.com,Boss,BossBoss,string,STAFF,2026-04-08T10:43:59.938312+00:00
+429da41c-3c26-4044-a61e-1b84d57fb3f5,courier@gmail.com,Biker,Bikes,string,STAFF,2026-04-08T10:48:03.050393+00:00
+f5731baa-fec6-42f5-83f1-ad4ae890cf1b,manager@gmail.com,Manager,Manager,string,STAFF,2026-04-08T10:58:18.356137+00:00
+    

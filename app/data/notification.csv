@@ -61,3 +61,7 @@ notification_id,recipient_user_id,notification_type,message,status
 60,6724b24d-7388-45e1-a5d6-ab0bca59626b,order,Your order bb0200f0-e3b4-4eb2-9abc-ef84a49bd6c9 has been approved by the restaurant. We'll let you know when it's ready!,pending
 61,6724b24d-7388-45e1-a5d6-ab0bca59626b,payment,A refund has been issued for your canceled order bb0200f0-e3b4-4eb2-9abc-ef84a49bd6c9. It may take a few business days to reflect in your account.,pending
 62,6724b24d-7388-45e1-a5d6-ab0bca59626b,order,"Unfortunately, your order bb0200f0-e3b4-4eb2-9abc-ef84a49bd6c9 was canceled by the restaurant.",failed
+63,0718856e-dcaa-4838-ab13-e391ba426f12,payment,Payment for order 2fa00fa2-9d92-4375-9b24-3bcabe678b6a was successful. The restaurant is preparing your meal!,pending
+64,0718856e-dcaa-4838-ab13-e391ba426f12,order,Order 2fa00fa2-9d92-4375-9b24-3bcabe678b6a placed! We'll let you know when it's ready.,pending
+65,105,order,New order received: 2fa00fa2-9d92-4375-9b24-3bcabe678b6a. Please begin preparation.,pending
+66,0718856e-dcaa-4838-ab13-e391ba426f12,order,Your order 2fa00fa2-9d92-4375-9b24-3bcabe678b6a has been approved by the restaurant. We'll let you know when it's ready!,pending
