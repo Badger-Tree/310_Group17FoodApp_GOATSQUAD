@@ -1,0 +1,20 @@
+.statsTable {
+  display: flex;
+  justify-content: center; 
+  align-items: center;     
+  height: 30vh;            
+}
+
+.statsT {
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  width: 50%;            
+  text-align: center;
+  margin-top: 200px;
+}
+
+.statsT th, .statsT td {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+}
+

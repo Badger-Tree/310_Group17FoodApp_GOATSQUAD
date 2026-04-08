@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from 'react';
+import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 const AUTH_STORAGE_KEY = 'goat-food-auth';
@@ -29,6 +30,11 @@ function getFoodItemDisplayName(item, foodItems) {
 function isAuthMissingUserError(error) {
   return typeof error?.message === 'string' && /404/.test(error.message);
 }
+
+function handleViewMostOrdered() { 
+  
+}
+
 
 function App() {
   // --- Review form state and handlers for completed orders ---
@@ -131,6 +137,9 @@ function App() {
   const [orderSuccess, setOrderSuccess] = useState('');
   const [favorites, setFavorites] = useState([]);
   const [loadingFavorites, setLoadingFavorites] = useState(false);
+  const [mostOrdered, setMostOrdered] = useState([]);
+  const [loadingMostOrdered, setLoadingMostOrdered] = useState(true);
+  const [mostOrderedError, setMostOrderedError] = useState("");
   const [favoritesError, setFavoritesError] = useState('');
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -335,6 +344,24 @@ function App() {
     loadRestaurants();
     loadFoodItems();
   }, []);
+
+  useEffect(() => {
+  const fetchMostOrdered = async () => {
+    try {
+      const response = await axios.get("http://127.0.0.1:8000/stat/restaurant/stats");
+      setMostOrdered(response.data);
+      setLoadingMostOrdered(false);
+    } catch (err) {
+      console.error(err);
+      setMostOrderedError("Failed to load most ordered restaurants");
+      setLoadingMostOrdered(false);
+    }
+  };
+
+  if (auth) {
+    fetchMostOrdered();
+  }
+}, [auth]);
 
   useEffect(() => {
     if (!auth) {
@@ -2875,6 +2902,42 @@ function App() {
                 </div>
               )}
             </section>
+
+            <section className="card">
+                <h2>Most Ordered</h2>
+
+            {!auth && <p>Log in to view most ordered restaurants.</p>}
+            {auth && loadingMostOrdered && <p>Loading most ordered...</p>}
+            {auth && mostOrderedError && (
+            <p className="error-text">{mostOrderedError}</p>
+            )}
+            {auth && !loadingMostOrdered && mostOrdered.length === 0 && (
+          <p>No restaurant stats available.</p>
+            )}
+            {auth && !loadingMostOrdered && mostOrdered.length > 0 && (
+          <div className="favorite-orders-list">
+          {mostOrdered
+          .filter(
+          (stat) =>
+            typeof stat.restaurant_name === "string" &&
+            stat.restaurant_name.trim() !== ""
+        )
+        .map((stat, index) => (
+          <article key={index} className="favorite-order-card">
+            <div className="order-header">
+              <h3>{stat.restaurant_name}</h3>
+            </div>
+
+            <p>
+              <strong>Orders:</strong> {stat.order_count}
+            </p>
+            </article>
+            ))}
+          </div>
+        )}
+          </section>
+
+         
           </>
         )}
       </main>
