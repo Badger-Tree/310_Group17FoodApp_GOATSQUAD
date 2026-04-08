@@ -256,7 +256,12 @@ function App() {
           setRestaurantReviews(Array.isArray(data) ? data : []);
         })
         .catch((err) => {
-          setReviewError(`Unable to load reviews. ${err.message}`);
+          // If 404, show a friendly message
+          if (err.message && err.message.includes('404')) {
+            setReviewError('no reviews yet');
+          } else {
+            setReviewError(`Unable to load reviews. ${err.message}`);
+          }
           setRestaurantReviews([]);
         })
         .finally(() => {
@@ -2157,7 +2162,7 @@ function App() {
                         {restaurantReviews.map((review) => (
                           <li key={review.review_id} className="review-item">
                             <strong>{review.reviewer_name || review.user_id || 'Anonymous'}:</strong> {review.rating ? `⭐${review.rating}` : ''}<br />
-                            <span>{review.comment || review.review_text || ''}</span>
+                            <span>{review.review || review.comment || review.review_text || ''}</span>
                           </li>
                         ))}
                       </ul>
