@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from pydantic import PositiveInt
+from typing import Optional
 
 
 class TrackRestaurantBase(BaseModel):
@@ -7,6 +8,6 @@ class TrackRestaurantBase(BaseModel):
     order_count: PositiveInt
 
 class TrackRestaurantResponse(BaseModel): 
-    restaurant_name: str
+    restaurant_name: Optional[str]
     order_count: PositiveInt
 

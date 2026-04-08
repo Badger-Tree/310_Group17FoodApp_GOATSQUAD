@@ -51,3 +51,13 @@ notification_id,recipient_user_id,notification_type,message,status
 50,4a4f1fa8-be9a-4d9a-b387-b343a81f4a31,order,Your order b3b7ebd6-76b0-438f-a1ba-26b4313b375f has been approved by the restaurant. We'll let you know when it's ready!,pending
 51,4a4f1fa8-be9a-4d9a-b387-b343a81f4a31,payment,A refund has been issued for your canceled order 639b09aa-02c2-4bdf-9410-2927d6888c72. It may take a few business days to reflect in your account.,pending
 52,4a4f1fa8-be9a-4d9a-b387-b343a81f4a31,order,"Unfortunately, your order 639b09aa-02c2-4bdf-9410-2927d6888c72 was canceled by the restaurant.",failed
+53,6724b24d-7388-45e1-a5d6-ab0bca59626b,payment,Payment for order cd46ff06-a330-4afc-94fd-927fdf6f786c was successful. The restaurant is preparing your meal!,pending
+54,6724b24d-7388-45e1-a5d6-ab0bca59626b,order,Order cd46ff06-a330-4afc-94fd-927fdf6f786c placed! We'll let you know when it's ready.,pending
+55,103,order,New order received: cd46ff06-a330-4afc-94fd-927fdf6f786c. Please begin preparation.,pending
+56,6724b24d-7388-45e1-a5d6-ab0bca59626b,payment,Payment for order 32f7f063-6c6f-4b09-b0c7-449c97d5c771 failed. Please update your payment information and try again.,failed
+57,6724b24d-7388-45e1-a5d6-ab0bca59626b,payment,Payment for order bb0200f0-e3b4-4eb2-9abc-ef84a49bd6c9 was successful. The restaurant is preparing your meal!,pending
+58,6724b24d-7388-45e1-a5d6-ab0bca59626b,order,Order bb0200f0-e3b4-4eb2-9abc-ef84a49bd6c9 placed! We'll let you know when it's ready.,pending
+59,101,order,New order received: bb0200f0-e3b4-4eb2-9abc-ef84a49bd6c9. Please begin preparation.,pending
+60,6724b24d-7388-45e1-a5d6-ab0bca59626b,order,Your order bb0200f0-e3b4-4eb2-9abc-ef84a49bd6c9 has been approved by the restaurant. We'll let you know when it's ready!,pending
+61,6724b24d-7388-45e1-a5d6-ab0bca59626b,payment,A refund has been issued for your canceled order bb0200f0-e3b4-4eb2-9abc-ef84a49bd6c9. It may take a few business days to reflect in your account.,pending
+62,6724b24d-7388-45e1-a5d6-ab0bca59626b,order,"Unfortunately, your order bb0200f0-e3b4-4eb2-9abc-ef84a49bd6c9 was canceled by the restaurant.",failed

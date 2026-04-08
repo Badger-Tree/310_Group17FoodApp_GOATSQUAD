@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Header, status
 from app.schemas.Order import OrderCreate, OrderHistoryResponse, OrderResponse
 from app.schemas.Role import UserRole
 from app.schemas.Token import Token
-from app.services.order_service import cancel_order_customer_service, cancel_order_restaurant_service,accept_order_service, get_order_by_order_id_service, get_order_history_service, get_order_status_by_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service, process_order_service
+from app.services.order_service import cancel_order_customer_service, cancel_order_restaurant_service,accept_order_service, get_order_by_order_id_service, get_order_history_service, get_order_status_by_id_service, get_orders_by_restaurant_service, get_orders_by_userid_service, get_orders_service, process_order_service
 from typing import List
 from enum import Enum
 from app.schemas.Order import OrderResponse
@@ -21,6 +21,11 @@ def create_order(address_id:str,token: str = Header(...)):
     current_user = get_user_from_session(session)
     require_role_service(current_user,UserRole.CUSTOMER)
     return process_order_service(current_user.id,address_id)
+
+@router.get("/orders", response_model=List[OrderResponse], status_code=status.HTTP_200_OK)
+def get_orders():
+    """returns a list of all orders"""
+    return get_orders_service()
 
 @router.get("/get_order_by_id/{orderid}", response_model=OrderResponse, status_code=status.HTTP_200_OK)
 def get_order_by_id(orderid: str):

@@ -130,9 +130,9 @@ def test_add_to_cart_valid(mocker):
     first = result.cart_items[0]
     assert first.food_item_id == 2
     assert first.quantity == 3
-    assert first.price_per_item == 5.99
-    assert first.subtotal == 17.97
-    assert result.total == 17.97
+    assert first.price_per_item == 12.5
+    assert first.subtotal == 37.5
+    assert result.total == 37.5
 
 
 def test_add_to_cart_no_food_item(mocker): 
@@ -369,9 +369,9 @@ def test_update_cart_valid(mocker):
             {
                 "cart_item_id": "01KM8SQ4JB61NVWKSM2AVSFN3C",
                 "food_item_id": 2,
-                "quantity": 3,
-                "price_per_item": 5.99,
-                "subtotal": 17.97
+                "quantity": 4,
+                "price_per_item": 12.5,
+                "subtotal": 50.0
             },
 
              {
@@ -382,7 +382,7 @@ def test_update_cart_valid(mocker):
                 "subtotal": 15.5
             }
         ],
-        "total": 33.47
+        "total": 65.5
     }
 ]
     mock_user = MockUser(id="2")
@@ -400,12 +400,12 @@ def test_update_cart_valid(mocker):
     assert first.cart_item_id == "01KM8SQ4JB61NVWKSM2AVSFN3C"
     assert first.food_item_id == 2
     assert first.quantity == 4
-    assert first.price_per_item == 5.99
-    assert first.subtotal == 23.96
-    assert first.subtotal == 23.96
+    assert first.price_per_item == 12.5
+    assert first.subtotal == 50.0
+    assert first.subtotal == 50.0
     first = result["cart_items"][1]
     assert first.cart_item_id == "61NVWKSM2AVSFDFKSLAJA"
-    assert result["total"] == 39.46
+    assert result["total"] == 65.5
 
 
 class MockUser:
