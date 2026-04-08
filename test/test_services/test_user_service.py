@@ -1,11 +1,60 @@
 from datetime import datetime
 from app.services.order_service import get_order_history_service
 import pytest
-
 from fastapi import HTTPException
 from app.schemas.Role import UserRole
 from app.schemas.User import CustomerCreate, UserUpdate
-from app.services.user_service import get_user_by_id_service, get_user_by_email_service, register_user_service, update_user_service
+from app.services.user_service import get_user_by_id_service, get_user_by_email_service, get_users_service, register_user_service, update_user_service
+
+def test_get_users_service_success_one_user(monkeypatch):
+    """tests that get_users_service will return a list of all registed users, if a single user exists"""
+    def mock_load_users():
+        return [{
+        "id": "1",
+        "email": "pippin@example.com",
+        "first_name": "peregrin",
+        "last_name": "took",
+        "password": "password",
+        "role": "CUSTOMER",
+        "created_date": "2026-02-20T12:34:56"
+        }]
+    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+    result = get_users_service()
+    assert len(result) ==1
+    assert result[0]["id"] == "1"
+
+def test_get_users_service_multiple_users(monkeypatch):
+    """tests that get_users_service will return a list of all registed users, if multiple users exist"""
+    def mock_load_users():
+        return [{
+        "id": "1",
+        "email": "pippin@example.com",
+        "first_name": "peregrin",
+        "last_name": "took",
+        "password": "password",
+        "role": "CUSTOMER",
+        "created_date": "2026-02-20T12:34:56"
+        },{
+        "id": "2",
+        "email": "pippin@example.com",
+        "first_name": "peregrin",
+        "last_name": "took",
+        "password": "password",
+        "role": "CUSTOMER",
+        "created_date": "2026-02-20T12:34:56"
+        }]
+    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+    result = get_users_service()
+    assert len(result) ==2
+    assert result[1]["id"] == "2"
+
+def test_get_users_service_success_no_users(monkeypatch):
+    """tests that get_users_service will return a list of all registed users, if multiple users exist"""
+    def mock_load_users():
+        return []
+    monkeypatch.setattr("app.services.user_service.load_users", mock_load_users)
+    result = get_users_service()
+    assert len(result) ==0
 
 def test_get_user_by_id_service_success(monkeypatch):
     """tests that get_user_by_id_service() will successfully return a UserResponse given valid input"""

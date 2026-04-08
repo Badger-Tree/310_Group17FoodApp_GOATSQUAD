@@ -3,10 +3,15 @@ from typing import List
 from app.schemas.User import CustomerCreate, UserResponse, StaffCreate, UserUpdate
 from app.schemas.Role import UserRole
 from app.services.session_manager_service import get_user_from_session
-from app.services.user_service import  get_user_by_id_service, get_user_by_email_service, register_user_service, update_user_service
+from app.services.user_service import  get_user_by_id_service, get_user_by_email_service, register_user_service, update_user_service,get_users_service
 from app.schemas.Token import Token
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+@router.get("/users", response_model=List[UserResponse])
+def get_users():
+    """returns a list of all registered users or empty list, intended for admin interface"""
+    return get_users_service()
 
 @router.get("/{userid}", response_model=UserResponse)
 def get_user_by_id(userid: str):

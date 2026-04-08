@@ -130,6 +130,18 @@ def process_order_service(customer_id: str, address_id:str) -> OrderResponse:
     notify_order_placed(new_order_response.customer_id, new_order_response.restaurant_id, new_order_response.order_id)
     return new_order_response
 
+def get_orders_service()->List[OrderResponse]:
+    """returns a list of all orders in system or an empty list"""
+    order_data = load_orders()
+    order_item_data = load_order_items()
+    orders = []
+    for order in order_data:
+        items_response = []
+        for item in order_item_data:
+            if item["order_id"] == order["order_id"]:
+                items_response.append(OrderItemResponse(**item))
+        orders.append(OrderResponse(**order, items=items_response))
+    return orders
 
 def get_order_by_order_id_service(orderid:str)-> OrderResponse | None:
     """Method gets a single OrderResponse object. Takes in an order id (str)"""
