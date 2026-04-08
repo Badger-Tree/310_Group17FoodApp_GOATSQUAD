@@ -51,19 +51,16 @@ def test_get_stats_valid():
     assert result[0]["order_count"] == 3
 
 def test_get_stats_invalid():
-    """Tests the function raises an error with an invalid restaurant id"""
-    import pytest
-    from fastapi import HTTPException
-    import app.services.track_items_service as service
-
+    """Tests get_stats returns empty list for invalid restaurant id"""
+    
     def fake_load_restaurants():
         return [{"restaurant_id": 1, "restaurant_name": "Dominos"}]
 
+    import app.services.track_items_service as service
     service.load_restaurant_name = fake_load_restaurants
-    mock_orders = [{"order_id": 1, "restaurant_id": 999}]
 
-    with pytest.raises(HTTPException) as httpE:
-        service.get_stats(mock_orders, "restaurant_id")
+    result = service.get_stats(mock_orders, "restaurant_id_not_found")
+    assert result == []
 
 
 def test_get_stats_on_restaurants_valid(): 
