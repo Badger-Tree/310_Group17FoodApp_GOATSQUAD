@@ -1,6 +1,5 @@
 id,email,first_name,last_name,password,role,created_date
-6724b24d-7388-45e1-a5d6-ab0bca59626b,user@example.com,NewFirst,NewLast,string,CUSTOMER,2026-03-26T03:56:12.065854+00:00
-a1a68d08-99cd-4cf8-9cd4-571551e062f3,staff@example.com,Owner,string,string,STAFF,2026-03-26T03:56:47.317798+00:00
-0a4a70ed-8dec-455d-8d56-7ba90d6b4a56,manager@example.com,Mr,Manager,string,STAFF,2026-03-26T03:57:05.530238+00:00
-212d65de-5699-4916-b0f5-11f6c5a6606e,courier@example.com,courier,String,string,STAFF,2026-03-26T03:57:27.919565+00:00
-7bd6b2ca-16f2-4026-bfca-61a014396751,newuser@example.com,string,string,string,CUSTOMER,2026-04-08T20:31:49.513535+00:00
+11d419f6-714a-445c-b75d-7488d450d472,user@example.com,User,Customer,string,CUSTOMER,2026-04-08T21:52:19.426669+00:00
+82538433-ccb9-4616-a02d-a4c55b227e8f,owner@example.com,Staff,Owner,string,STAFF,2026-04-08T21:52:37.847288+00:00
+54a70391-95e0-4e42-a2c1-558e1984c141,manager@example.com,Mr.,Manager,string,STAFF,2026-04-08T21:53:13.486297+00:00
+9f9fbb75-3346-4fa2-805a-3055fab6a89d,courier@example.com,Driver,Driver,string,STAFF,2026-04-08T21:53:31.931811+00:00
