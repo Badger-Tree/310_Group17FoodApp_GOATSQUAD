@@ -42,7 +42,7 @@ Docker compose up –build
 6. Access the application:
 Front end: http://localhost:5173
 Back end: http://localhost:8000
-Admin: http://localhost:NOTCONFIGUREDYET
+Admin: http://localhost:3001
 
 7. Stop application
 Run the following:

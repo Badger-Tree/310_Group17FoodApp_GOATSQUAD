@@ -31,7 +31,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3001"],  # or ["*"] for all origins (less secure)
+    allow_origins=["http://localhost:5173", "http://localhost:3001"],  # Add all frontend origins you use
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
