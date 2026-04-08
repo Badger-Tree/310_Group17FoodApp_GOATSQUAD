@@ -1838,7 +1838,12 @@ function App() {
         await loadPastOrders(auth.user_id);
       }
     } catch (err) {
-      setOrderError(err.message);
+      // Custom message for payment not processed
+      if (typeof err.message === 'string' && err.message.includes('payment not processed order')) {
+        setOrderError('Payment failed, try again');
+      } else {
+        setOrderError(err.message);
+      }
     }
   };
 
@@ -1855,6 +1860,7 @@ function App() {
       return;
     }
     setCartError('');
+    setOrderSuccess(''); // Clear order success message when cart is updated
     try {
       const response = await fetch(`${API_BASE_URL}/cart/food_item/add`, {
         method: 'POST',
