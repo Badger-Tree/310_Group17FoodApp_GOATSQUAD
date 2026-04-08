@@ -10,3 +10,4 @@ a1a68d08-99cd-4cf8-9cd4-571551e062f3,staff@example.com,Owner,string,string,STAFF
 aee7383f-b838-47b4-823e-7d0daf72e6ac,r@example.com,string,string,string,CUSTOMER,2026-04-04T21:31:34.946277+00:00
 d459d184-4671-4367-b324-6b0dda1bf5aa,use@example.com,string,string,string,STAFF,2026-04-04T21:38:17.807188+00:00
 5efcdb50-63f9-4fe6-a87a-9df0be41f886,u@example.com,string,string,string,CUSTOMER,2026-04-07T16:57:26.416781+00:00
+c06f4dab-2460-4e31-8429-54e70443e61c,owner@gmail.com,boss,bosser,string,STAFF,2026-04-08T10:23:54.727644+00:00
