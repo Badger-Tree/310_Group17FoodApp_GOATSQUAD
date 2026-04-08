@@ -1,6 +1,2 @@
 restaurant_id,owner_id,restaurant_name,cuisine,address,open_hour,closed_hour,restaurant_status
-101,5a1a68d08-99cd-4cf8-9cd4-571551e062f3,Mario's Pizza,Italian,123 Main St.,09:00,21:00,active
-102,5a1a68d08-99cd-4cf8-9cd4-571551e062f3,Sakura Sushi,Japanese,456 Side St.,11:00,22:00,active
-103,5a1a68d08-99cd-4cf8-9cd4-571551e062f3,Taco Loco,Mexican,789 Top St.,10:00,20:00,active
-104,6eb043eb-839b-4071-88d6-b5d0c0094d13,test front end create,test,test,09:00,21:00,active
-105,329e8436-db19-487e-a720-f3268a3e4ff6,Boss restaurant,Boss,Boss St.,09:00,21:00,active
+1,82538433-ccb9-4616-a02d-a4c55b227e8f,Mario's Pizza,Italian,123 Fake St,09:00,21:00,active

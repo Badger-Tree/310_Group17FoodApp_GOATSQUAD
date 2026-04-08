@@ -1,13 +1,14 @@
 
 import { useEffect, useState } from 'react';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const AUTH_STORAGE_KEY = 'goat-food-auth';
 
 function formatMoney(value) {
   const number = Number(value);
   return Number.isNaN(number) ? '-' : number.toFixed(2);
 }
+
 
 function getRestaurantDisplayName(order, restaurants) {
   return (
@@ -31,74 +32,83 @@ function isAuthMissingUserError(error) {
 }
 
 function App() {
-  // --- Review form state and handlers for completed orders ---
-  const [reviewForms, setReviewForms] = useState({});
-  const handleOpenReviewForm = (orderId) => {
-    setReviewForms((prev) => ({
-      ...prev,
-      [orderId]: { open: true, rating: 5, review: '', submitting: false, error: '' },
-    }));
-  };
-  const handleCloseReviewForm = (orderId) => {
-    setReviewForms((prev) => ({
-      ...prev,
-      [orderId]: { ...prev[orderId], open: false },
-    }));
-  };
-  const handleReviewInputChange = (orderId, field, value) => {
-    setReviewForms((prev) => ({
-      ...prev,
-      [orderId]: { ...prev[orderId], [field]: value },
-    }));
-  };
-  const handleSubmitReview = async (order) => {
-    const { rating, review } = reviewForms[order.order_id] || {};
-    setReviewForms((prev) => ({
-      ...prev,
-      [order.order_id]: { ...prev[order.order_id], submitting: true, error: '' },
-    }));
-    try {
-      const payload = {
-        restaurant_id: order.restaurant_id,
-        rating: Number(rating),
-        review: review,
-      };
-      const response = await fetch(`${API_BASE_URL}/reviews/create_review/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          token: auth.token,
-        },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        const body = await response.text();
-        throw new Error(`Review failed (${response.status}) ${body}`);
-      }
-      setReviewForms((prev) => ({ ...prev, [order.order_id]: { ...prev[order.order_id], open: false, submitting: false } }));
-      setOrderSuccess('Review submitted!');
-      if (selectedRestaurantId && String(selectedRestaurantId) === String(order.restaurant_id)) {
-        setLoadingReviews(true);
-        setReviewError('');
-        fetch(`${API_BASE_URL}/reviews/get_review_by_restaurant/${encodeURIComponent(order.restaurant_id)}`)
-          .then((response) => {
-            if (!response.ok) throw new Error(`Unable to load reviews (${response.status})`);
-            return response.json();
-          })
-          .then((data) => {
-            setRestaurantReviews(Array.isArray(data) ? data : []);
-          })
-          .catch((err) => {
-            setReviewError(`Unable to load reviews. ${err.message}`);
-            setRestaurantReviews([]);
-          })
-          .finally(() => {
-            setLoadingReviews(false);
+      // Submit review handler
+      const handleSubmitReview = async (order) => {
+        const { rating, review } = reviewForms[order.order_id] || {};
+        setReviewForms((prev) => ({
+          ...prev,
+          [order.order_id]: { ...prev[order.order_id], submitting: true, error: '' },
+        }));
+        try {
+          const payload = {
+            restaurant_id: order.restaurant_id,
+            rating: Number(rating),
+            review: review,
+          };
+          const response = await fetch(`${API_BASE_URL}/reviews/create_review/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              token: auth.token,
+            },
+            body: JSON.stringify(payload),
           });
-      }
-    } catch (err) {
-      setReviewForms((prev) => ({ ...prev, [order.order_id]: { ...prev[order.order_id], submitting: false, error: err.message } }));
-    }
+          if (!response.ok) {
+            const body = await response.text();
+            throw new Error(`Review failed (${response.status}) ${body}`);
+          }
+          setReviewForms((prev) => ({ ...prev, [order.order_id]: { ...prev[order.order_id], open: false, submitting: false } }));
+          setOrderSuccess('Review submitted!');
+          if (selectedRestaurantId && String(selectedRestaurantId) === String(order.restaurant_id)) {
+            setLoadingReviews(true);
+            setReviewError('');
+            fetch(`${API_BASE_URL}/reviews/get_review_by_restaurant/${encodeURIComponent(order.restaurant_id)}`)
+              .then((response) => {
+                if (!response.ok) throw new Error(`Unable to load reviews (${response.status})`);
+                return response.json();
+              })
+              .then((data) => {
+                setRestaurantReviews(Array.isArray(data) ? data : []);
+              })
+              .catch((err) => {
+                setReviewError(`Unable to load reviews. ${err.message}`);
+                setRestaurantReviews([]);
+              })
+              .finally(() => {
+                setLoadingReviews(false);
+              });
+          }
+        } catch (err) {
+          setReviewForms((prev) => ({ ...prev, [order.order_id]: { ...prev[order.order_id], submitting: false, error: err.message } }));
+        }
+      };
+    // Review form handlers
+    const handleOpenReviewForm = (orderId) => {
+      setReviewForms((prev) => ({
+        ...prev,
+        [orderId]: { open: true, rating: 5, review: '', submitting: false, error: '' },
+      }));
+    };
+
+    const handleCloseReviewForm = (orderId) => {
+      setReviewForms((prev) => ({
+        ...prev,
+        [orderId]: { ...prev[orderId], open: false },
+      }));
+    };
+
+    const handleReviewInputChange = (orderId, field, value) => {
+      setReviewForms((prev) => ({
+        ...prev,
+        [orderId]: { ...prev[orderId], [field]: value },
+      }));
+    };
+  // State for review forms
+  const [reviewForms, setReviewForms] = useState({});
+  // Helper to check if an order can be reviewed (must be after auth is defined)
+  const canReviewOrder = (order) => {
+    // Only allow review if order is completed and user is a customer
+    return auth?.role === 'CUSTOMER' && order.status === 'COMPLETED';
   };
   const [restaurants, setRestaurants] = useState([]);
   const [foodItems, setFoodItems] = useState([]);
@@ -1879,6 +1889,11 @@ function App() {
       });
       if (!response.ok) {
         const body = await response.text();
+        // If staff user and cart not found (404), show custom message
+        if (response.status === 404 && auth?.role === 'STAFF') {
+          setCartError('Only customers can add items to cart.');
+          return;
+        }
         throw new Error(`Failed to add item (${response.status}) ${body}`);
       }
       const updatedCart = await response.json();
@@ -2439,52 +2454,61 @@ function App() {
             <p>You have no orders yet. Add items to your cart and submit an order to get started.</p>
           )}
           {auth && !loadingOrders && orders.length > 0 && (
-            <div className="orders-list">
-              {orders.map((order) => (
+            <div className="order-history-list">
+              {pastOrders.map((order) => (
                 <article key={order.order_id} className="order-card">
-                  <div className="order-header">
-                    <h3>Order #{order.order_id}</h3>
-                    <span className={`order-status status-${order.status.toLowerCase()}`}>
-                      {order.status}
-                    </span>
-                    <button
-                      type="button"
-                      className={`favorite-button ${isOrderFavorite(order.order_id) ? 'favorited' : ''}`}
-                      onClick={() => handleToggleOrderFavorite(order.order_id, isOrderFavorite(order.order_id))}
-                    >
-                      {isOrderFavorite(order.order_id) ? 'Unfavorite' : 'Favorite'}
-                    </button>
-                  </div>
-                  <p><strong>Restaurant:</strong> {getRestaurantDisplayName(order, restaurants)}</p>
+                  <p><strong>Order #</strong> {order.order_id}</p>
+                  <p><strong>Status:</strong> {order.status}</p>
+                  <p><strong>Placed:</strong> {new Date(order.created_date).toLocaleString()}</p>
                   <p><strong>Total:</strong> ${formatMoney(order.total_amount)}</p>
-                  <p><strong>Created:</strong> {new Date(order.created_date).toLocaleString()}</p>
+                  <p><strong>Restaurant:</strong> {getRestaurantDisplayName(order, restaurants)}</p>
                   <div className="order-items">
-                    <h4>Items:</h4>
+                    <h4>Items</h4>
                     <ul>
-                      {order.items.map((item, index) => (
-                        <li key={index}>
-                          {getFoodItemDisplayName(item, foodItems)} x{item.quantity} - ${formatMoney(item.price_per_item * item.quantity)}
+                      {order.items && order.items.map((item) => (
+                        <li key={`${order.order_id}-${item.food_item_id}`}>
+                          {item.quantity} x {getFoodItemDisplayName(item, foodItems)} @ ${formatMoney(item.price_per_item || item.price)}
                         </li>
                       ))}
                     </ul>
                   </div>
-                  <div className="order-actions">
-                    {(order.status === 'PENDING' || order.status === 'ACCEPTED') && auth.role === 'CUSTOMER' && (
-                      <button type="button" className="danger" onClick={() => handleCancelOrderCustomer(order.order_id)}>
-                        Cancel Order
-                      </button>
-                    )}
-                    {order.status === 'PENDING' && auth.role === 'STAFF' && (
-                      <>
-                        <button type="button" onClick={() => handleAcceptOrderHistory(order.order_id)}>
-                          Accept Order
+                  {/* Add review button and form for completed orders */}
+                  {canReviewOrder(order) && (
+                    <div className="review-section">
+                      {!reviewForms[order.order_id]?.open ? (
+                        <button type="button" onClick={() => handleOpenReviewForm(order.order_id)}>
+                          Leave a Review
                         </button>
-                        <button type="button" className="danger" onClick={() => handleCancelOrderStaffHistory(order.order_id)}>
-                          Cancel Order
-                        </button>
-                      </>
-                    )}
-                  </div>
+                      ) : (
+                        <form className="review-form" onSubmit={(e) => { e.preventDefault(); handleSubmitReview(order); }}>
+                          <label>
+                            Rating:
+                            <select
+                              value={reviewForms[order.order_id]?.rating || 5}
+                              onChange={(e) => handleReviewInputChange(order.order_id, 'rating', e.target.value)}
+                            >
+                              {[5, 4, 3, 2, 1].map((val) => (
+                                <option key={val} value={val}>{val}</option>
+                              ))}
+                            </select>
+                          </label>
+                          <label>
+                            Review:
+                            <textarea
+                              value={reviewForms[order.order_id]?.review || ''}
+                              onChange={(e) => handleReviewInputChange(order.order_id, 'review', e.target.value)}
+                              required
+                            />
+                          </label>
+                          <button type="submit" disabled={reviewForms[order.order_id]?.submitting}>Submit Review</button>
+                          <button type="button" onClick={() => handleCloseReviewForm(order.order_id)}>Cancel</button>
+                          {reviewForms[order.order_id]?.error && (
+                            <p className="error-text">{reviewForms[order.order_id].error}</p>
+                          )}
+                        </form>
+                      )}
+                    </div>
+                  )}
                 </article>
               ))}
             </div>
