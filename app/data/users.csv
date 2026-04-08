@@ -10,3 +10,8 @@ dc38faab-322d-4677-95c4-5507ccd16e10,pippin@example.com,New,User,string,CUSTOMER
 05c6bc3d-07bf-44b4-a5d9-279a7f7c9302,test1@gmail.com,test,test,string,CUSTOMER,2026-04-07T20:53:24.306852+00:00
 6eb043eb-839b-4071-88d6-b5d0c0094d13,test2@gmail.com,test,test,string,STAFF,2026-04-07T21:27:26.317041+00:00
 e5943ba1-550c-4fd3-a769-cc869f2e5bf4,test3@gmail.com,test courier,test,string,STAFF,2026-04-07T22:11:16.604688+00:00
+329e8436-db19-487e-a720-f3268a3e4ff6,owner@gmail.com,Boss,BossBoss,string,STAFF,2026-04-08T10:43:59.938312+00:00
+429da41c-3c26-4044-a61e-1b84d57fb3f5,courier@gmail.com,Biker,Bikes,string,STAFF,2026-04-08T10:48:03.050393+00:00
+f5731baa-fec6-42f5-83f1-ad4ae890cf1b,manager@gmail.com,Manager,Manager,string,STAFF,2026-04-08T10:58:18.356137+00:00
+e4b9ece0-4ffb-4b7e-9cfc-ce5182e6c8ef,customer@gmail.com,Gus,gus,string,CUSTOMER,2026-04-08T11:00:58.978300+00:00
+0718856e-dcaa-4838-ab13-e391ba426f12,customer2@gmail.com,Gus,gus,string,CUSTOMER,2026-04-08T11:03:38.210014+00:00

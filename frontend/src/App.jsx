@@ -205,6 +205,9 @@ function App() {
   )
     ? String(selectedStaffRestaurantId)
     : (staffAccessibleRestaurants[0] ? String(staffAccessibleRestaurants[0].restaurant_id) : '');
+  const activeStaffRestaurant = staffAccessibleRestaurants.find(
+    (restaurant) => String(restaurant.restaurant_id) === activeStaffRestaurantId
+  ) || null;
   const managedInventoryItems = activeStaffRestaurantId
     ? foodItems.filter((item) => String(item.restaurant_id) === activeStaffRestaurantId)
     : [];
@@ -492,6 +495,17 @@ function App() {
       setRestaurantCourierAssignments([]);
     }
   }, [selectedStaffRestaurantId, auth]);
+
+  useEffect(() => {
+    if (auth?.role !== 'STAFF') {
+      return;
+    }
+    if (!activeStaffRestaurantId) {
+      setNewFoodRestaurantId('');
+      return;
+    }
+    setNewFoodRestaurantId(activeStaffRestaurantId);
+  }, [auth?.role, activeStaffRestaurantId]);
 
   useEffect(() => {
     if (auth?.role === 'STAFF' && isCourierOnly) {
@@ -1030,7 +1044,6 @@ function App() {
               >
                 <option value="MANAGER">MANAGER</option>
                 <option value="COURIER">COURIER</option>
-                <option value="OWNER">OWNER</option>
               </select>
             </label>
           </div>
@@ -1061,7 +1074,6 @@ function App() {
                       >
                         <option value="MANAGER">MANAGER</option>
                         <option value="COURIER">COURIER</option>
-                        <option value="OWNER">OWNER</option>
                       </select>
                     </label>
                     <button
@@ -1084,19 +1096,9 @@ function App() {
   const renderRestaurantOrderManager = () => (
     <div className="restaurant-order-management-card">
       <h4>Incoming Restaurant Orders</h4>
-      <label>
-        Select restaurant
-        <select
-          value={selectedStaffRestaurantId}
-          onChange={(event) => setSelectedStaffRestaurantId(event.target.value)}
-        >
-          {Array.from(new Set(staffAssignments.map((assignment) => String(assignment.restaurant_id)))).map((restaurantId) => (
-            <option key={restaurantId} value={restaurantId}>
-              {restaurantId}
-            </option>
-          ))}
-        </select>
-      </label>
+      {activeStaffRestaurant && (
+        <p><strong>Restaurant:</strong> {activeStaffRestaurant.restaurant_name} ({activeStaffRestaurant.restaurant_id})</p>
+      )}
 
       {orderActionMessage && <p className="success-text">{orderActionMessage}</p>}
       {orderActionError && <p className="error-text">{orderActionError}</p>}
@@ -2779,18 +2781,12 @@ function App() {
                   </label>
                   <label>
                     Restaurant ID
-                    <select
-                      value={newFoodRestaurantId}
-                      onChange={(event) => setNewFoodRestaurantId(event.target.value)}
+                    <input
+                      type="text"
+                      value={activeStaffRestaurant ? `${activeStaffRestaurant.restaurant_name} (${activeStaffRestaurant.restaurant_id})` : ''}
+                      readOnly
                       required
-                    >
-                      <option value="">Select Restaurant</option>
-                      {staffAccessibleRestaurants.map((restaurant) => (
-                        <option key={restaurant.restaurant_id} value={restaurant.restaurant_id}>
-                          {restaurant.restaurant_name}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </label>
                   <label>
                     Price
