@@ -58,7 +58,18 @@ mock_customer_create = {
         "last_name": "brandybuck",
         "password" : "password"
         }
-        
+
+def test_get_users_success_one_user():
+    with patch("app.repositories.users_repo_csv.load_all", mock_load_users):
+        response = client.get("/users/users")
+        assert response.status_code == 200
+
+def test_get_users_success_no_users():
+    mock_load_users = []
+    with patch("app.repositories.users_repo_csv.load_all", mock_load_users):
+        response = client.get("/users/users")
+        assert response.status_code == 200
+
 def test_get_user_by_id_success():
     """tests that the get_user_by_id will return a UserResponse if a user is found"""
     with patch("app.repositories.users_repo_csv.load_all", mock_load_users):
