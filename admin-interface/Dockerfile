@@ -3,9 +3,10 @@
 FROM node:20-alpine
 WORKDIR /app
 COPY package*.json ./
+ENV NODE_ENV=development
 RUN npm install
 COPY . .
-RUN npm run build
+RUN npx vite build
 # Use a simple static server for production
 RUN npm install -g serve
 EXPOSE 3001
