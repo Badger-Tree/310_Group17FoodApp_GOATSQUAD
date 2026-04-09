@@ -1644,8 +1644,10 @@ useEffect(() => {
       }
 
       const normalizedOrders = Array.isArray(data) ? data : [];
-      setPastOrders(normalizedOrders);
-      setOrders(normalizedOrders);
+      // Only show orders belonging to the current user
+      const userOrders = normalizedOrders.filter(order => String(order.customer_id) === String(userId));
+      setPastOrders(userOrders);
+      setOrders(userOrders);
     } catch (err) {
       setProfileError(`Unable to load order history. ${err.message}`);
       setPastOrders([]);
