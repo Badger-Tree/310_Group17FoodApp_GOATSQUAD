@@ -3,3 +3,6 @@ id,email,first_name,last_name,password,role,created_date
 82538433-ccb9-4616-a02d-a4c55b227e8f,owner@example.com,Staff,Owner,string,STAFF,2026-04-08T21:52:37.847288+00:00
 54a70391-95e0-4e42-a2c1-558e1984c141,manager@example.com,Mr.,Manager,string,STAFF,2026-04-08T21:53:13.486297+00:00
 9f9fbb75-3346-4fa2-805a-3055fab6a89d,courier@example.com,Driver,Driver,string,STAFF,2026-04-08T21:53:31.931811+00:00
+a8fa0224-0ca6-4803-b6b7-5a79befcb884,user1@example.com,New,User,string,CUSTOMER,2026-04-09T00:50:41.759055+00:00
+522930d8-679c-4749-b7ff-c9e4e87769a1,staff1@example.com,Staff,Staff,string,STAFF,2026-04-09T00:51:01.078735+00:00
+6eea4f02-1655-477c-88e7-a7ac13c80d92,1user@example.com,New,Staff,string,CUSTOMER,2026-04-09T00:58:35.108021+00:00

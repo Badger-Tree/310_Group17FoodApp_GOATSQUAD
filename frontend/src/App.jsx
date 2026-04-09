@@ -1210,7 +1210,7 @@ useEffect(() => {
                     </ul>
                   </div>
                 )}
-                {order.status === 'PENDING' && (
+                {order.status === 'PENDING' && canManageRestaurant && (
                   <div className="order-action-buttons">
                     <button type="button" onClick={() => handleAcceptOrder(order.order_id)}>
                       Accept Order
@@ -2403,6 +2403,13 @@ useEffect(() => {
                       {isRestaurantFavorite(restaurant.restaurant_id) ? 'Unfavorite' : 'Add favorite'}
                     </button>
                   </div>
+                  {auth?.role === 'CUSTOMER' && order.status === 'PENDING' && (
+                    <div className="order-action-buttons">
+                      <button type="button" className="danger" onClick={() => handleCancelOrderCustomer(order.order_id)}>
+                        Cancel Order
+                      </button>
+                    </div>
+                  )}
                 </article>
               ))}
             </div>
