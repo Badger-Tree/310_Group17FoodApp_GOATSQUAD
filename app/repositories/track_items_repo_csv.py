@@ -18,6 +18,8 @@ def load_all() -> List[Dict[str, Any]]:
             item["restaurant_name"] = str(item["restaurant_name"])
         if "order_count" in item:
             item["order_count"] = int(item["order_count"])
+        if "restaurant_id" in item:
+            item["restaurant_id"] = int(item["restaurant_id"])
     
     return items
    
@@ -25,7 +27,7 @@ def save_all(items: List[Dict[str, Any]]) -> None:
     """save_all() function takes a list of item dictionaries and writes them to the CSV file"""
     tmp = DATA_PATH.with_suffix(".tmp")
 
-    fields = ["restaurant_name", "order_count"]
+    fields = ["restaurant_id", "restaurant_name", "order_count"]
     
     with tmp.open("w", encoding="utf-8") as f:
         writer=csv.DictWriter(f, fieldnames=fields)

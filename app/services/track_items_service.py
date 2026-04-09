@@ -24,7 +24,7 @@ def get_stats(data, key):
                 restaurant_name = r["restaurant_name"] or "Unknown"
                 break
         
-        result.append({"restaurant_name": restaurant_name, "order_count": count})
+        result.append({"restaurant_id": restaurant_id, "restaurant_name": restaurant_name, "order_count": count})
         save_restaurant_items(result)
 
     return result
