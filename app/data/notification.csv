@@ -53,3 +53,15 @@ notification_id,recipient_user_id,notification_type,message,status
 52,11d419f6-714a-445c-b75d-7488d450d472,payment,A refund has been issued for your canceled order f8017f9c-103e-4f36-a392-869b9933e2ae. It may take a few business days to reflect in your account.,pending
 53,11d419f6-714a-445c-b75d-7488d450d472,order,"Unfortunately, your order f8017f9c-103e-4f36-a392-869b9933e2ae was canceled by the restaurant.",failed
 54,11d419f6-714a-445c-b75d-7488d450d472,order,Your order 3938c919-df45-4ea0-ac21-e1894046b45a has been approved by the restaurant. We'll let you know when it's ready!,pending
+55,11d419f6-714a-445c-b75d-7488d450d472,payment,Payment for order 5c568c9a-aec0-46c4-b092-1faf37752767 was successful. The restaurant is preparing your meal!,pending
+56,11d419f6-714a-445c-b75d-7488d450d472,order,Order 5c568c9a-aec0-46c4-b092-1faf37752767 placed! We'll let you know when it's ready.,pending
+57,1,order,New order received: 5c568c9a-aec0-46c4-b092-1faf37752767. Please begin preparation.,pending
+58,11d419f6-714a-445c-b75d-7488d450d472,payment,Payment for order f78e5060-ae04-43ce-83cb-6a974628803d was successful. The restaurant is preparing your meal!,pending
+59,11d419f6-714a-445c-b75d-7488d450d472,order,Order f78e5060-ae04-43ce-83cb-6a974628803d placed! We'll let you know when it's ready.,pending
+60,1,order,New order received: f78e5060-ae04-43ce-83cb-6a974628803d. Please begin preparation.,pending
+61,11d419f6-714a-445c-b75d-7488d450d472,order,Your order 5c568c9a-aec0-46c4-b092-1faf37752767 has been approved by the restaurant. We'll let you know when it's ready!,pending
+62,11d419f6-714a-445c-b75d-7488d450d472,payment,A refund has been issued for your canceled order 5c568c9a-aec0-46c4-b092-1faf37752767. It may take a few business days to reflect in your account.,pending
+63,11d419f6-714a-445c-b75d-7488d450d472,order,"Unfortunately, your order 5c568c9a-aec0-46c4-b092-1faf37752767 was canceled by the restaurant.",failed
+64,11d419f6-714a-445c-b75d-7488d450d472,order,Your order f78e5060-ae04-43ce-83cb-6a974628803d has been approved by the restaurant. We'll let you know when it's ready!,pending
+65,11d419f6-714a-445c-b75d-7488d450d472,payment,A refund has been issued for your canceled order f78e5060-ae04-43ce-83cb-6a974628803d. It may take a few business days to reflect in your account.,pending
+66,11d419f6-714a-445c-b75d-7488d450d472,order,"Unfortunately, your order f78e5060-ae04-43ce-83cb-6a974628803d was canceled by the restaurant.",failed

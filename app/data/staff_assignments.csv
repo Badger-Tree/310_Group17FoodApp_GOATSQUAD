@@ -2,3 +2,5 @@ assignment_id,restaurant_id,staff_id,assignment
 1,1,82538433-ccb9-4616-a02d-a4c55b227e8f,OWNER
 2,1,54a70391-95e0-4e42-a2c1-558e1984c141,MANAGER
 3,1,9f9fbb75-3346-4fa2-805a-3055fab6a89d,COURIER
+4,2,d7b3246a-9bab-4025-bb35-05e8e963a018,OWNER
+5,2,60092144-da78-4ae8-8f45-42d0afb41adf,COURIER
