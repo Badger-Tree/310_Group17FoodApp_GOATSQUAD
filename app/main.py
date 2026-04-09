@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.routers.cart_router import router as cart_router
 from .routers.food_item import router as food_router
 from app.routers.authentication import router as authentication_router
@@ -18,23 +19,26 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+
 origins = [
     "http://localhost:5173",  # your Vite frontend
+     "http://localhost:5174",
     "http://localhost:3000",  # optional, if you run CRA
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+    
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # allow requests from these origins
+    allow_origins=["*"],  # Or specify your frontend URL
     allow_credentials=True,
-    allow_methods=["*"],     # allow GET, POST, etc.
-    allow_headers=["*"],     # allow headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
 # -------------------------
 # Health & root endpoints
 # -------------------------
-
 @app.get("/health")
 def health():
     """checks if server is alive and returns ok status"""

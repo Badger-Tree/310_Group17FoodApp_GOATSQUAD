@@ -58,6 +58,7 @@ def test_get_cart_invalid():
 
 def test_cart_add_success(mocker):
     """Successfully adds a cart item to a cart with valid customer id, food item id, and quantity"""
+    mocker.patch("app.services.cart_service.get_food_by_id",return_value={"food_item_id": 2, "price": 10.0})
     mock_cart_create = {"food_item_id": 2, "quantity": 3}
     mock_user = MockUser(id="2")
     mock_cart = [{
@@ -103,7 +104,7 @@ def test_add_cart_wrong_customer(mocker):
             "quantity": cart_add.quantity,
             "subtotal": cart_add.quantity * price
     }
-
+    
     mocker.patch("app.routers.cart_router.get_user_from_session", return_value=mock_user)
     mocker.patch("app.services.cart_service.load_all_food_items", return_value= mock_food)
     mocker.patch("app.services.cart_service.load_all_carts", return_value=mock_cart)
@@ -472,6 +473,7 @@ def test_update_cart_item_success(mocker):
     mocker.patch("app.services.cart_service.load_all_carts", return_value=mock_cart)
     mocker.patch("app.services.cart_service.save_cart", return_value=None)
     mocker.patch("app.services.cart_item_service.delete_cart_item", side_effect=update_cart_item)
+    mocker.patch("app.services.cart_service.get_food_by_id",return_value={"food_item_id": 2, "price": 10.0})
 
     response = client.put(
         "/cart/food_item/update",
@@ -540,7 +542,9 @@ def test_update_wrong_cart_item_id(mocker):
     mocker.patch("app.services.cart_service.load_all_carts", return_value=mock_cart)
     mocker.patch("app.services.cart_service.save_cart", return_value=None)
     mocker.patch("app.services.cart_item_service.delete_cart_item", side_effect=update_cart_item)
-
+    mocker.patch("app.services.cart_service.get_food_by_id",return_value={"food_item_id": 2, "price": 10.0})
+  
+    
     response = client.put(
         "/cart/food_item/update",
         params={"cart_item_id": mock_cart_item_id},

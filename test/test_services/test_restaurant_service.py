@@ -457,9 +457,64 @@ def test_sort_restaurants_by_name_failure(monkeypatch):
     assert len(result) == 0
     assert result == []
 
+#TEST CREATE - FAILURE - OWNER CAN ONLY CREAET ONE RESTAURANT
+def test_create_restaurant_fails_multiple(monkeypatch):
+    test_restaurants = [
+        {
+            "restaurant_id": "1",
+            "owner_id": "5",
+            "restaurant_name": "already owned",
+            "cuisine": "Italian",
+            "address": "123 Main St",
+            "open_hour": "09:00",
+            "closed_hour": "21:00",
+            "restaurant_status": "active"
+        }
+    ]
+
+    test_users = [
+        {
+            "id": "5",
+            "email": "test@gmail.com",
+            "first_name": "Test",
+            "last_name": "User",
+            "password": "string",
+            "role": "STAFF",
+            "created_date": "2026-02-20T12:34:56"
+        }
+    ]
+
+    def test_load_restaurants():
+        return test_restaurants
+
+    def test_load_users():
+        return test_users
+
+    def test_save_restaurants(data):
+        test_restaurants[:] = data
+
+    monkeypatch.setattr(restaurant_service, "load_restaurants", test_load_restaurants)
+    monkeypatch.setattr(restaurant_service, "load_users", test_load_users)
+    monkeypatch.setattr(restaurant_service, "save_restaurants", test_save_restaurants)
+
+    payload = RestaurantCreate(
+        restaurant_name="New Restaurant",
+        cuisine="Test Cuisine",
+        address="456 Test St",
+        open_hour=time(9, 0),
+        closed_hour=time(21, 0)
+    )
+
+    with pytest.raises(HTTPException) as exc_info:
+        restaurant_service.create_restaurant_service(payload, "5")
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Owner already has a restaurant"
+    assert len(test_restaurants) == 1
 
 
-""" NOT YET UPDATED 
+
+""" Can be used for future updates
 
 
 

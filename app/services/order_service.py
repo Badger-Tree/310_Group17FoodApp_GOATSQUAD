@@ -440,7 +440,7 @@ def sort_order_history_by_restaurant(orders, sort_order):
 def filter_order_history_by_cuisine(orders, cuisine):
     cuisine_orders = []
     for order in orders:
-        if order.cuisine.lower().strip() == cuisine.lower().strip():
+        if cuisine.lower().strip() in order.cuisine.lower().strip():
             cuisine_orders.append(order)
     return cuisine_orders
 
