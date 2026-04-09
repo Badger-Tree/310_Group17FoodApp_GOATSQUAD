@@ -11,6 +11,7 @@ def test_save_and_load_repository_restaurant():
 
     try:
         item_obj = TrackRestaurantResponse(
+            restaurant_id = 1,
             restaurant_name= "Dominos", 
             order_count = 1
             )
@@ -21,6 +22,7 @@ def test_save_and_load_repository_restaurant():
         loaded_items = track_items_repo_csv.load_all()
 
         assert len(loaded_items) > 0
+        assert loaded_items[0]["restaurant_id"] == 1
         assert loaded_items[0]["restaurant_name"] == "Dominos"
         assert loaded_items[0]["order_count"] == 1
 

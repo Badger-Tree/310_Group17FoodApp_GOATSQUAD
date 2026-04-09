@@ -7,6 +7,7 @@ client = TestClient(app)
 
 mock_restaurant_stats_list = [
     {
+        "restaurant_id": 1,
         "restaurant_name": "Burger Barn",
         "order_count": 1
     }, 
