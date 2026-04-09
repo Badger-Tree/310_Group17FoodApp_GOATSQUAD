@@ -123,6 +123,7 @@ def test_add_to_cart_valid(mocker):
     """Tests that a cart item is added to a cart successfully."""
 
     mocker.patch("app.services.cart_service.load_all_carts", return_value = mock_data)
+    
     result = add_to_cart(customer_id, cart_data)
 
     assert result.customer_id == "2"
