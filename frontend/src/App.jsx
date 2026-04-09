@@ -2403,13 +2403,9 @@ useEffect(() => {
                       {isRestaurantFavorite(restaurant.restaurant_id) ? 'Unfavorite' : 'Add favorite'}
                     </button>
                   </div>
-                  {auth?.role === 'CUSTOMER' && order.status === 'PENDING' && (
-                    <div className="order-action-buttons">
-                      <button type="button" className="danger" onClick={() => handleCancelOrderCustomer(order.order_id)}>
-                        Cancel Order
-                      </button>
-                    </div>
-                  )}
+                  {/* Removed invalid Cancel Order button from restaurant card. This button should only appear in order history rendering where 'order' is defined. */}
+                  {/* Removed invalid Cancel Order button from restaurant card. This button should only appear in order history rendering where 'order' is defined. */}
+                  {/* Removed invalid Cancel Order button from restaurant card. This button should only appear in order history rendering where 'order' is defined. */}
                 </article>
               ))}
             </div>
